@@ -1,0 +1,11 @@
+colores usados notacion Tailwind - Hex:
+
+yellow-400 == FFD538 -> Amarillo brillante
+
+amber-800 == 7E4300 -> Marrón oscuro
+
+yellow-100 == FFF2C9 -> Crema claro
+
+Despues de Login se construye todo en app:
+ APP.jsx
+ 
