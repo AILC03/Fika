@@ -1,14 +1,16 @@
 import Banner from "../../Assets/Banner1.jpg";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
-import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  //Variables de estado para manejar los campos del formulario y el mensaje de error
+  const navigate = useNavigate();
+
+  // Variables de estado para manejar los campos del formulario y el mensaje de error
   const [showPassword, setShowPassword] = useState(false);
-  const [usr, setUsr] = useState("");
-  const [pwd, setPwd] = useState("");
-  const [error, setError] = useState("");
+  const [usr, setUsr] = useState(""); // Usuario
+  const [pwd, setPwd] = useState(""); // Contraseña
+  const [error, setError] = useState(""); // Mensaje de error
 
   // Función para manejar el envío del formulario
   const handleSubmit = async (e) => {
@@ -16,7 +18,7 @@ const Login = () => {
 
     // Validación de campos vacíos
     if (!usr || !pwd) {
-      setError("Te faltan campos por llenar :v");
+      setError("Por favor, completa todos los campos.");
       return;
     }
 
@@ -25,7 +27,7 @@ const Login = () => {
         "https://api-legisconnect-production.up.railway.app/users/auth",
         {
           method: "POST",
-          credentials: "include", // Asegura que las cookies se envíen y reciban
+          credentials: "include", // Para cookies
           headers: {
             "Content-Type": "application/json",
           },
@@ -39,18 +41,13 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        console.log("Respuesta:", data);
-
-        if (Cookies.get("token") == true) {
-          window.location.href = "/home";
-        }
+        console.log("Inicio de sesión exitoso.");
+        navigate("/home"); // Redirigir al home
       } else {
-        setError(
-          data.message || "Error en la validación, intenta de nuevo o.0"
-        );
+        setError(data.message || "Error en la validación, intenta de nuevo.");
       }
     } catch (err) {
-      setError("El servidor no responde x.x");
+      setError("El servidor no responde. Intenta más tarde.");
     }
   };
 
@@ -81,12 +78,12 @@ const Login = () => {
                 id="usr"
                 type="text"
                 className="w-full px-4 py-2 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-200"
-                placeholder="@miguelito.123"
+                placeholder="Ingresa tu usuario"
                 value={usr}
                 onChange={(e) => setUsr(e.target.value)}
               />
             </div>
-            <span className="text-gray-500">No olvides tu Usuario :O</span>
+            <span className="text-gray-500">No olvides tu usuario.</span>
 
             {/* Contraseña */}
             <div className="mb-1.5 mt-14 relative">
@@ -102,7 +99,6 @@ const Login = () => {
                   value={pwd}
                   onChange={(e) => setPwd(e.target.value)}
                 />
-
                 <button
                   type="button"
                   className="absolute inset-y-0 right-3 flex items-center text-gray-600"
@@ -116,7 +112,7 @@ const Login = () => {
                 </button>
               </div>
             </div>
-            <span className="text-gray-500">Verifica tu Contraseña ;)</span>
+            <span className="text-gray-500">Verifica tu contraseña.</span>
 
             {/* Mensaje de error */}
             {error && (
