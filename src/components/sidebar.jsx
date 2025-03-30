@@ -12,6 +12,7 @@ const Sidebar = () => {
     <div className="flex h-screen">
       {/* Sidebar */}
       <div className="w-32 bg-amber-900 text-white p-4 space-y-2">
+        <div>logo de fica</div>
         {routes.map((route) => (
           <Link
             key={route.path}
@@ -21,6 +22,7 @@ const Sidebar = () => {
             {route.label}
           </Link>
         ))}
+        <div>account</div>
       </div>
 
       {/* Contenido dinámico de las rutas */}

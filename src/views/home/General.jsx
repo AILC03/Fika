@@ -1,22 +1,57 @@
+import Calendar from "../../components/calendar";
+
 const General = () => {
   return (
     <div className="h-screen flex">
-      {/* Contenido principal con margen igual al ancho del menú */}
-      <main className="flex-grow">
-        <h1 className="text-2xl font-bold">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequatur
-          ipsa consectetur non, explicabo ab illum numquam, asperiores
-          repellendus placeat architecto labore vero nobis dicta quas libero
-          repellat debitis, id corporis.
-        </h1>
-        <p>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Optio
-          voluptatum ab ipsam rem et molestiae corporis minima. Quibusdam, illo
-          doloribus, quia eius veniam nam eligendi, quisquam nulla iusto debitis
-          nemo?
-        </p>
+      {/* Contenido principal */}
+      <main className="flex-grow flex">
+        {/* Columna izquierda */}
+        <div className="flex flex-col w-4/6 m-5">
+          <div id="Calendario" className="flex-grow mb-5 bg-yellow-100">
+            <Calendar />
+          </div>
+          <div id="cantidades" className="bg-yellow-200 p-4">
+            Cantidades
+            <span>
+              Lorem ipsum dolor, sit amet consectetur adipisicing elit.
+              Molestias sint numquam iusto voluptatum omnis blanditiis, nihil
+              optio repudiandae laborum, ducimus obcaecati sed temporibus
+              aperiam eaque quisquam distinctio. Eum, porro praesentium?
+            </span>
+            <span>
+              Lorem ipsum dolor, sit amet consectetur adipisicing elit.
+              Molestias sint numquam iusto voluptatum omnis blanditiis, nihil
+              optio repudiandae laborum, ducimus obcaecati sed temporibus
+              aperiam eaque quisquam distinctio. Eum, porro praesentium?
+            </span>
+            <span>
+              Lorem ipsum dolor, sit amet consectetur adipisicing elit.
+              Molestias sint numquam iusto voluptatum omnis blanditiis, nihil
+              optio repudiandae laborum, ducimus obcaecati sed temporibus
+              aperiam eaque quisquam distinctio. Eum, porro praesentium?
+            </span>
+            <span>
+              Lorem ipsum dolor, sit amet consectetur adipisicing elit.
+              Molestias sint numquam iusto voluptatum omnis blanditiis, nihil
+              optio repudiandae laborum, ducimus obcaecati sed temporibus
+              aperiam eaque quisquam distinctio. Eum, porro praesentium?
+            </span>
+            <span>
+              Lorem ipsum dolor, sit amet consectetur adipisicing elit.
+              Molestias sint numquam iusto voluptatum omnis blanditiis, nihil
+              optio repudiandae laborum, ducimus obcaecati sed temporibus
+              aperiam eaque quisquam distinctio. Eum, porro praesentium?
+            </span>
+          </div>
+        </div>
+
+        {/* Columna derecha */}
+        <div id="eventos" className="flex-grow bg-gray-100 p-4">
+          Eventos
+        </div>
       </main>
     </div>
   );
 };
+
 export default General;
