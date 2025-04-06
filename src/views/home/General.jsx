@@ -1,5 +1,9 @@
+import React, { useState } from "react";
 import Calendar from "../../components/calendar";
 import Eventos from "../../components/Eventos";
+import PedidosTable from "../../components/tablapedidoshome"; // Importa el componente "Buscador"
+import { Search } from "lucide-react";
+
 const eventosData = [
   {
     fecha: "29 de marzo, 2025",
@@ -49,6 +53,12 @@ const eventosData = [
 ];
 
 const General = () => {
+  const [showBuscador, setShowBuscador] = useState(false); // Estado para controlar la visibilidad del buscador
+
+  const handleCloseBuscador = () => {
+    setShowBuscador(false); // Cierra el componente "Buscador"
+  };
+
   return (
     <div className="h-screen flex">
       {/* Contenido principal */}
@@ -69,8 +79,12 @@ const General = () => {
         {/* Columna derecha */}
         <div id="eventos" className="flex flex-col flex-grow p-4">
           {/* Encabezado fijo */}
-          <h2 className="text-3xl text-white bg-amber-800 p-4 rounded-sm font-bold mb-4">
+          <h2 className="flex items-center gap-2 text-3xl text-white bg-amber-800 p-4 rounded-sm font-bold mb-4">
             Eventos
+            <Search
+              className="w-6 h-6 ml-auto cursor-pointer"
+              onClick={() => setShowBuscador(true)} // Muestra el componente "Buscador" al hacer clic
+            />
           </h2>
 
           {/* Contenedor de eventos con scroll */}
@@ -79,6 +93,16 @@ const General = () => {
           </div>
         </div>
       </main>
+
+      {/* Componente "Buscador" */}
+      {showBuscador && (
+        <div className="fixed inset-0 flex items-center justify-center">
+          <div className=" p-6 rounded">
+            <PedidosTable onClose={handleCloseBuscador} />{" "}
+            {/* Pasa la función de cierre */}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
