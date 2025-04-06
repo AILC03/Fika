@@ -1,7 +1,3 @@
-¡Claro! Aquí tienes una versión mejorada y más estructurada de tu archivo `README.md`, con una redacción más clara, profesional y visualmente organizada:
-
----
-
 # 💻 Fika Frontend
 
 Este proyecto es una aplicación frontend desarrollada con **React**, **Vite** y **Tailwind CSS**. A continuación, encontrarás los pasos necesarios para instalar, ejecutar y contribuir al proyecto.
