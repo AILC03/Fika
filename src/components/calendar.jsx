@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date()); // Fecha actual
@@ -101,18 +102,18 @@ const Calendar = () => {
       <div className="flex justify-between items-center mb-4">
         <button
           onClick={handlePrevMonth}
-          className="text-amber-900 px-4 py-2 rounded border border-amber-800 hover:bg-yellow-400"
+          className="text-amber-900 px-2 py-2 rounded border border-amber-800 hover:bg-yellow-400 flex items-center"
         >
-          Anterior
+          <ChevronLeft className="w-5 h-5" /> {/* Flecha izquierda */}
         </button>
         <h2 className="text-xl font-bold">
           {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
         </h2>
         <button
           onClick={handleNextMonth}
-          className="text-amber-900 px-4 py-2 rounded border border-amber-800 hover:bg-yellow-400"
+          className="text-amber-900 px-2 py-2 rounded border border-amber-800 hover:bg-yellow-400 flex items-center"
         >
-          Siguiente
+          <ChevronRight className="w-5 h-5" /> {/* Flecha derecha */}
         </button>
       </div>
 
