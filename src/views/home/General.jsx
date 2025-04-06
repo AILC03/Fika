@@ -1,5 +1,5 @@
 import Calendar from "../../components/calendar";
-import Eventos from "../../components/registros";
+import Eventos from "../../components/Eventos";
 const eventosData = [
   {
     fecha: "29 de marzo, 2025",

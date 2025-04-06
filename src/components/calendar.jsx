@@ -45,6 +45,7 @@ const Calendar = () => {
     const daysInMonth = getDaysInMonth(year, month);
 
     const firstDayOfMonth = new Date(year, month, 1).getDay(); // Día de la semana del primer día del mes
+    const today = new Date(); // Fecha actual
     const days = [];
 
     // Agregar días vacíos al inicio del mes
@@ -58,11 +59,33 @@ const Calendar = () => {
 
     // Agregar días del mes
     for (let day = 1; day <= daysInMonth; day++) {
+      const isPastDay =
+        year < today.getFullYear() ||
+        (year === today.getFullYear() && month < today.getMonth()) ||
+        (year === today.getFullYear() &&
+          month === today.getMonth() &&
+          day < today.getDate());
+
+      const isToday =
+        year === today.getFullYear() &&
+        month === today.getMonth() &&
+        day === today.getDate();
+
       days.push(
         <div
           key={day}
-          className="text-inherit text-xs cursor-pointer p-2 bg-white hover:bg-yellow-400 rounded"
-          onClick={() => alert("Hola")} // Muestra el mensaje "Hola" al hacer clic
+          className={`text-xs cursor-pointer p-2 rounded ${
+            isToday
+              ? "bg-yellow-200 text-black hover:bg-yellow-400 font-bold" // Día actual resaltado
+              : isPastDay
+              ? "bg-gray-200 text-gray-400 cursor-not-allowed" // Días pasados
+              : "bg-white hover:bg-yellow-400 text-inherit" // Días futuros
+          }`}
+          onClick={() => {
+            if (!isPastDay) {
+              alert("Hola");
+            }
+          }}
         >
           {day}
         </div>
@@ -87,7 +110,7 @@ const Calendar = () => {
         </h2>
         <button
           onClick={handleNextMonth}
-          className=" text-amber-900 px-4 py-2 rounded border border-amber-800 hover:bg-yellow-400"
+          className="text-amber-900 px-4 py-2 rounded border border-amber-800 hover:bg-yellow-400"
         >
           Siguiente
         </button>
