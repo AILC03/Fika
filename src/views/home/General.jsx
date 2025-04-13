@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import Calendar from "../../components/calendar";
+import Calendar from "../../components/calendario";
 import Eventos from "../../components/Eventos";
-import PedidosTable from "../../components/tablapedidoshome"; // Importa el componente "Buscador"
+import PedidosTable from "../../components/tablapedidos"; // Importa el componente "Buscador"
 import { Search } from "lucide-react";
 
 const eventosData = [
@@ -88,7 +88,7 @@ const General = () => {
           </h2>
 
           {/* Contenedor de eventos con scroll */}
-          <div className="flex-grow overflow-y-auto">
+          <div className="flex-grow shadow-xl overflow-y-auto">
             <Eventos eventos={eventosData} />
           </div>
         </div>

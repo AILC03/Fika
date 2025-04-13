@@ -1,60 +1,71 @@
 import { useEffect, useState } from "react";
-import { X } from "lucide-react";
 
-const getPedidos = async () => {
-  return [
-    {
-      celular: "664-123-4567",
-      email: "A@usuario.123",
-      nombre: "Juan Gonzales",
-      fechaRecoleccion: "12 - 03 - 2025",
-    },
-    {
-      celular: "664-555-1234",
-      email: "A@usuario.123",
-      nombre: "Ernesto Peña",
-      fechaRecoleccion: "12 - 03 - 2025",
-    },
-    {
-      celular: "664-987-6543",
-      email: "A@usuario.123",
-      nombre: "Juan Aguirre",
-      fechaRecoleccion: "12 - 03 - 2025",
-    },
-    {
-      celular: "664-789-0123",
-      email: "A@usuario.123",
-      nombre: "Matilda Lopez",
-      fechaRecoleccion: "12 - 03 - 2025",
-    },
-    {
-      celular: "664-234-5678",
-      email: "A@usuario.123",
-      nombre: "David Benavides",
-      fechaRecoleccion: "12 - 03 - 2025",
-    },
-    {
-      celular: "664-876-5432",
-      email: "A@usuario.123",
-      nombre: "Omar Salcedo",
-      fechaRecoleccion: "12 - 03 - 2025",
-    },
-    {
-      celular: "664-345-6789",
-      email: "A@usuario.123",
-      nombre: "Santiago Lugo",
-      fechaRecoleccion: "12 - 03 - 2025",
-    },
-  ];
+const getPedidosFromAPI = async () => {
+  // Simulación de una respuesta de API (esto puede ser reemplazado con fetch)
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve([
+        {
+          celular: "6641234567",
+          email: "A@usuario.123",
+          nombre: "Juan Gonzales",
+          fechaRecoleccion: "12 - 03 - 2025",
+          ejemplo: "ejemplo",
+        },
+        {
+          celular: "6645551234",
+          email: "A@usuario.123",
+          nombre: "Ernesto Peña",
+          fechaRecoleccion: "12 - 03 - 2025",
+          ejemplo: "ejemplo",
+        },
+        {
+          celular: "6649876543",
+          email: "A@usuario.123",
+          nombre: "Juan Aguirre",
+          fechaRecoleccion: "12 - 03 - 2025",
+          ejemplo: "ejemplo",
+        },
+        {
+          celular: "6647890123",
+          email: "A@usuario.123",
+          nombre: "Matilda Lopez",
+          fechaRecoleccion: "12 - 03 - 2025",
+          ejemplo: "ejemplo",
+        },
+        {
+          celular: "6642345678",
+          email: "A@usuario.123",
+          nombre: "David Benavides",
+          fechaRecoleccion: "12 - 03 - 2025",
+          ejemplo: "ejemplo",
+        },
+        {
+          celular: "6648765432",
+          email: "A@usuario.123",
+          nombre: "Omar Salcedo",
+          fechaRecoleccion: "12 - 03 - 2025",
+          ejemplo: "ejemplo",
+        },
+        {
+          celular: "6643456789",
+          email: "A@usuario.123",
+          nombre: "Santiago Lugo",
+          fechaRecoleccion: "12 - 03 - 2025",
+          ejemplo: "ejemplo",
+        },
+      ]);
+    }, 500);
+  });
 };
 
-export default function PedidosTable({ onClose }) {
+export default function MapApi() {
   const [pedidos, setPedidos] = useState([]);
   const [busqueda, setBusqueda] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
-      const datos = await getPedidos();
+      const datos = await getPedidosFromAPI();
       setPedidos(datos);
     };
     fetchData();
@@ -67,7 +78,7 @@ export default function PedidosTable({ onClose }) {
   );
 
   return (
-    <div className="p-4 w-full bg-yellow-100 rounded-lg shadow-md border border-yellow-950 shadow-lg">
+    <div className="p-4 bg-orange-100 shadow-amber-900 rounded-lg shadow-xl w-full max-w-5xl mx-auto">
       {/* Encabezado */}
       <div className="flex items-center justify-between mb-4">
         <input
@@ -75,7 +86,7 @@ export default function PedidosTable({ onClose }) {
           placeholder="Buscar por correo o celular"
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
-          className="px-2 py-2 border rounded-md w-1/2"
+          className="px-2 py-2 border bg-white rounded-md w-1/2"
         />
         <button className="px-4 py-1 ml-28 bg-amber-900 text-white rounded-md hover:bg-amber-600">
           Buscar
@@ -87,22 +98,14 @@ export default function PedidosTable({ onClose }) {
             <option>Celular</option>
           </select>
         </div>
-        <button
-          onClick={onClose} // Llama a la función para cerrar el componente
-          className="p-2 ml-12 bg-red-500 text-white rounded-lg hover:bg-red-600"
-        >
-          <X className="w-4 h-4" />
-        </button>
       </div>
 
       {/* Tabla */}
-      <div className="overflow-x-auto border rounded-md">
+      <div className="overflow-x-auto shadow-lg shadow-amber-900 rounded-md">
         <table className="min-w-full table-auto text-sm bg-yellow-50 rounded-lg">
           <thead className="bg-yellow-200">
             <tr>
-              <th className="p-2 text-left">
-                <input type="checkbox" />
-              </th>
+              <th className="p-2 text-left" />
               <th className="p-2 text-left">Nombre</th>
               <th className="p-2 text-left">Correo</th>
               <th className="p-2 text-left">Celular</th>

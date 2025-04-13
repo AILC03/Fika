@@ -8,10 +8,10 @@ const Eventos = ({ eventos }) => {
           eventos.map((evento, index) => (
             <div
               key={index}
-              className="flex items-center bg-white shadow-md rounded-lg p-4"
+              className="flex items-center bg-white shadow-xl rounded-xl p-10"
             >
               {/* Ícono o logo */}
-              <div className="w-12 h-12 flex items-center justify-center bg-blue-500 text-white rounded-full mr-4">
+              <div className="w-16 h-16 flex items-center justify-center bg-amber-200 text-white rounded-full mr-4">
                 {evento.icono}
               </div>
 
