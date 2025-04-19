@@ -78,7 +78,8 @@ export default function MapApi() {
   );
 
   return (
-    <div className="p-4 bg-orange-100 shadow-amber-900 rounded-lg shadow-xl w-full max-w-5xl mx-auto">
+    <div className="p-4 bg-orange-100 shadow-amber-900 rounded-lg shadow-xl w-full max-w-[100rem] mx-auto">
+    <h2 className="text-2xl font-bold mb-6 text-amber-900">Tabla Clientes</h2>  
       {/* Encabezado */}
       <div className="flex items-center justify-between mb-4">
         <input

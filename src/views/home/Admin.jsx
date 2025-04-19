@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import MapApi from "../../components/tablaAdmon";
 import ConfirmModal from "../../components/alerta";
 import NavigationMenu from "../../components/navigateMenu";
 
@@ -15,7 +14,7 @@ const General = () => {
     <div className="h-screen  m-10 flex">
       {/* Contenido principal con margen igual al ancho del menú */}
       <main className="flex-grow">
-        <MapApi />
+        
         <div className="p-10">
           <NavigationMenu />
           <button

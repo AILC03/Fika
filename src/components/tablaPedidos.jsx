@@ -8,52 +8,45 @@ const getPedidos = async () => {
       email: "A@usuario.123",
       nombre: "Juan Gonzales",
       fechaRecoleccion: "12 - 03 - 2025",
+      productos: [
+        {
+          categoria: "Clasico",
+          sabor: "Chocolate",
+          tamano: '8"',
+          escritura: "Feliz cumple",
+        },
+        {
+          categoria: "Deluxe",
+          sabor: "Pasion",
+          tamano: '6"',
+          Fresa: "si",
+          Platano: "si",
+          nutella: "si",
+          nuez: "si",
+          fresasChocolate: "si",
+        },
+      ],
     },
     {
       celular: "6645551234",
       email: "A@usuario.123",
       nombre: "Ernesto Peña",
       fechaRecoleccion: "12 - 03 - 2025",
-    },
-    {
-      celular: "6649876543",
-      email: "A@usuario.123",
-      nombre: "Juan Aguirre",
-      fechaRecoleccion: "12 - 03 - 2025",
-    },
-    {
-      celular: "6647890123",
-      email: "A@usuario.123",
-      nombre: "Matilda Lopez",
-      fechaRecoleccion: "12 - 03 - 2025",
-    },
-    {
-      celular: "6642345678",
-      email: "A@usuario.123",
-      nombre: "David Benavides",
-      fechaRecoleccion: "12 - 03 - 2025",
-    },
-    {
-      celular: "6648765432",
-      email: "A@usuario.123",
-      nombre: "Omar Salcedo",
-      fechaRecoleccion: "12 - 03 - 2025",
-    },
-    {
-      celular: "6643456789",
-      email: "A@usuario.123",
-      nombre: "Santiago Lugo",
-      fechaRecoleccion: "12 - 03 - 2025",
+      productos: [
+        {
+          categoria: "Tradicional",
+          sabor: "3 leches",
+          tamano: '12"',
+        },
+      ],
     },
   ];
 };
 
-export default function PedidosTable({ onClose }) {
+export default function PedidosTable() {
   const [pedidos, setPedidos] = useState([]);
   const [busqueda, setBusqueda] = useState("");
-  const [isDragging, setIsDragging] = useState(false);
-  const [position, setPosition] = useState({ x: 100, y: 100 }); // Posición inicial
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [pedidoSeleccionado, setPedidoSeleccionado] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -69,119 +62,99 @@ export default function PedidosTable({ onClose }) {
       p.celular.includes(busqueda)
   );
 
-  const handleMouseDown = (e) => {
-    setIsDragging(true);
-    setOffset({
-      x: e.clientX - position.x,
-      y: e.clientY - position.y,
-    });
-  };
-
-  const handleMouseMove = (e) => {
-    if (isDragging) {
-      setPosition({
-        x: e.clientX - offset.x,
-        y: e.clientY - offset.y,
-      });
-    }
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
   return (
-    <div
-      className="fixed z-50"
-      style={{
-        top: `${position.y}px`,
-        left: `${position.x}px`,
-        width: "fit-content",
-      }}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-    >
-      <div
-        className="p-4 w-full bg-orange-100 shadow-amber-900 rounded-lg shadow-xl cursor-move"
-        onMouseDown={handleMouseDown}
-      >
-        {/* Encabezado */}
-        <div className="flex items-center justify-between mb-4">
-          <input
-            type="text"
-            placeholder="Buscar por correo o celular"
-            value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
-            className="px-2 py-2 border bg-white rounded-md w-1/2"
-          />
-          <button className="px-4 py-1 ml-28 bg-amber-900 text-white rounded-md hover:bg-amber-600">
-            Buscar
-          </button>
-          <div className="relative">
-            <select className="px-2 py-2 ml-28 w-32 border rounded-md bg-white">
-              <option>Filtro</option>
-              <option>Correo</option>
-              <option>Celular</option>
-            </select>
-          </div>
-          <button
-            onClick={onClose} // Llama a la función para cerrar el componente
-            className="p-2 ml-12 bg-red-500 text-white rounded-lg hover:bg-red-600"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
+    <div className="p-4 bg-orange-100 shadow-amber-900 rounded-lg shadow-xl w-full max-w-[100rem] mx-auto">
+      <h2 className="text-2xl font-bold mb-6 text-amber-900">Pedidos</h2>
 
-        {/* Tabla */}
-        <div className="overflow-x-auto shadow-lg shadow-amber-900 rounded-md">
-          <table className="min-w-full table-auto text-sm bg-yellow-50 rounded-lg">
-            <thead className="bg-yellow-200">
-              <tr>
-                <th className="p-2 text-left"/>
-                <th className="p-2 text-left">Nombre</th>
-                <th className="p-2 text-left">Correo</th>
-                <th className="p-2 text-left">Celular</th>
-                <th className="p-2 text-left">Fecha</th>
-                <th className="p-2 text-left">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pedidosFiltrados.length ? (
-                pedidosFiltrados.map((pedido, index) => (
-                  <tr
-                    key={index}
-                    className={`border-b ${
-                      index % 2 === 0 ? "bg-yellow-100" : "bg-yellow-50"
-                    }`}
-                  >
-                    <td className="p-2">
-                      <input type="checkbox" />
-                    </td>
-                    <td className="p-2">{pedido.nombre}</td>
-                    <td className="p-2 lowercase">{pedido.email}</td>
-                    <td className="p-2">{pedido.celular}</td>
-                    <td className="p-2">{pedido.fechaRecoleccion}</td>
-                    <td className="p-2 flex space-x-2">
-                      <button className="text-red-500 hover:underline">
-                        🗑
-                      </button>
-                      <button className="text-blue-500 hover:underline">
-                        ✏️
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={6} className="text-center py-6 text-gray-500">
-                    No hay resultados.
+      <div className="flex items-center justify-between mb-4">
+        <input
+          type="text"
+          placeholder="Buscar por correo o celular"
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          className="px-2 py-2 border bg-white rounded-md w-1/2"
+        />
+      </div>
+
+      <div className="overflow-x-auto shadow-lg shadow-amber-900 rounded-md">
+        <table className="min-w-full table-auto text-sm bg-yellow-50 rounded-lg">
+          <thead className="bg-yellow-200">
+            <tr>
+              <th className="p-2 text-left" />
+              <th className="p-2 text-left">Nombre</th>
+              <th className="p-2 text-left">Correo</th>
+              <th className="p-2 text-left">Celular</th>
+              <th className="p-2 text-left">Fecha</th>
+              <th className="p-2 text-left">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {pedidosFiltrados.length ? (
+              pedidosFiltrados.map((pedido, index) => (
+                <tr
+                  key={index}
+                  className={`border-b ${
+                    index % 2 === 0 ? "bg-yellow-100" : "bg-yellow-50"
+                  }`}
+                >
+                  <td className="p-2">
+                    <input type="checkbox" />
+                  </td>
+                  <td className="p-2">{pedido.nombre}</td>
+                  <td className="p-2 lowercase">{pedido.email}</td>
+                  <td className="p-2">{pedido.celular}</td>
+                  <td className="p-2">{pedido.fechaRecoleccion}</td>
+                  <td className="p-2 flex space-x-2">
+                    <button
+                      onClick={() => setPedidoSeleccionado(pedido)}
+                      className="text-green-700 hover:underline"
+                    >
+                      Ver productos
+                    </button>
+                    <button className="text-red-500 hover:underline">🗑</button>
+                    <button className="text-blue-500 hover:underline">✏️</button>
                   </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={6} className="text-center py-6 text-gray-500">
+                  No hay resultados.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
+
+      {/* Modal emergente de productos */}
+      {pedidoSeleccionado && (
+        <div className="absolute top-10 right-10 z-50 bg-amber-50 border-2 border-amber-300 shadow-amber-800 shadow-xl rounded-xl p-6 w-[26rem] max-h-[32rem] overflow-y-auto">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-bold text-amber-900">
+              Productos de {pedidoSeleccionado.nombre}</h3>
+            <button
+              onClick={() => setPedidoSeleccionado(null)}
+              className="text-red-500 hover:text-red-700"
+            >
+              <X />
+            </button>
+          </div>
+          <ul className="space-y-4">
+            {pedidoSeleccionado.productos.map((producto, idx) => (
+              <li key={idx} className="bg-yellow-100 border border-yellow-300 p-3 rounded-md shadow-md">
+                <h4 className="font-bold text-lg text-amber-800 mb-2">Pastel {idx + 1}</h4>
+                {Object.entries(producto).map(([clave, valor], i) => (
+                  <div key={i}>
+                    <span className="font-semibold capitalize text-amber-900">{clave}:</span>{" "}
+                    <span className="text-gray-800">{valor}</span>
+                  </div>
+                ))}
+              </li>
+            ))}
+          </ul>
+        </div>
+)}
     </div>
   );
 }

@@ -1,33 +1,33 @@
 import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { view } from "framer-motion/client";
+import MapApi from "./tablaAdmonClientes"; // Ajusta la ruta si está en una carpeta diferente
+import Pasteles from "./listaProductos";
+import PedidosTable from "./tablaPedidos";
 
 const navItems = [
   {
-    label: "Inicio",
-    view: "inicio",
+    label: "Pedidos",
+    view: "Pedidos",
   },
   {
-    label: "Servicios",
-    submenu: [
-      { label: "Diseño Web", view: "diseno" },
-      { label: "Desarrollo", view: "desarrollo" },
-      { label: "SEO", view: "seo" },
-    ],
+    label: "Productos",
+    view: "Productos"
   },
   {
-    label: "Acerca de",
-    view: "acerca",
+    label: "Clientes",
+    view: "Clientes",
   },
   {
-    label: "Contacto",
-    view: "contacto",
+    label: "Usuarios",
+    view: "Usuarios",
   },
 ];
 
 export default function NavigationMenu() {
   const [openIndex, setOpenIndex] = useState(null);
-  const [currentView, setCurrentView] = useState("inicio");
+  const [currentView, setCurrentView] = useState("Pedidos"); 
 
   const handleClick = (view) => {
     setCurrentView(view);
@@ -56,7 +56,11 @@ export default function NavigationMenu() {
               ) : (
                 <button
                   onClick={() => handleClick(item.view)}
-                  className="text-gray-800 hover:text-amber-700 font-medium"
+                  className={`font-medium px-3 py-1 rounded-md transition-colors ${
+                    currentView === item.view
+                      ? "bg-amber-100 text-amber-800"
+                      : "hover:bg-amber-100 text-gray-800"
+                  }`}                  
                 >
                   {item.label}
                 </button>
@@ -100,12 +104,18 @@ export default function NavigationMenu() {
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3 }}
           >
-            <h2 className="text-xl font-bold capitalize text-gray-800">
-              Vista: {currentView}
-            </h2>
-            <p className="text-gray-600 mt-2">
-              Este es el contenido de la vista <strong>{currentView}</strong>.
-            </p>
+            {currentView === "Clientes" && (
+              <MapApi />
+            )}
+            {currentView === "Usuarios" && (
+              <MapApi />
+            )}
+            {currentView === "Productos" &&(
+              <Pasteles />
+            )}
+            {currentView === "Pedidos" &&(
+              <PedidosTable />
+            )}
           </motion.div>
         </AnimatePresence>
       </div>
