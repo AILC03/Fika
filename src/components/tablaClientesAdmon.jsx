@@ -1,79 +1,12 @@
 import { useEffect, useState } from "react";
-import { Edit, Trash2 } from "lucide-react"; // Importa los iconos necesarios
-import ConfirmModal from "./alerta"; // Importa el componente de alerta
+import { Edit, Trash2 } from "lucide-react";
+import ConfirmModal from "./alerta";
 
-const getPedidosFromAPI = async () => {
-  // Simulación de una respuesta de API (esto puede ser reemplazado con fetch)
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve([
-        {
-          celular: "6641234567",
-          email: "A@usuario.123",
-          nombre: "Juan Gonzales",
-          fechaRecoleccion: "12 - 03 - 2025",
-          ejemplo: "ejemplo",
-        },
-        {
-          celular: "6645551234",
-          email: "A@usuario.123",
-          nombre: "Ernesto Peña",
-          fechaRecoleccion: "12 - 03 - 2025",
-          ejemplo: "ejemplo",
-        },
-        {
-          celular: "6649876543",
-          email: "A@usuario.123",
-          nombre: "Juan Aguirre",
-          fechaRecoleccion: "12 - 03 - 2025",
-          ejemplo: "ejemplo",
-        },
-        {
-          celular: "6647890123",
-          email: "A@usuario.123",
-          nombre: "Matilda Lopez",
-          fechaRecoleccion: "12 - 03 - 2025",
-          ejemplo: "ejemplo",
-        },
-        {
-          celular: "6642345678",
-          email: "A@usuario.123",
-          nombre: "David Benavides",
-          fechaRecoleccion: "12 - 03 - 2025",
-          ejemplo: "ejemplo",
-        },
-        {
-          celular: "6648765432",
-          email: "A@usuario.123",
-          nombre: "Omar Salcedo",
-          fechaRecoleccion: "12 - 03 - 2025",
-          ejemplo: "ejemplo",
-        },
-        {
-          celular: "6643456789",
-          email: "A@usuario.123",
-          nombre: "Santiago Lugo",
-          fechaRecoleccion: "12 - 03 - 2025",
-          ejemplo: "ejemplo",
-        },
-      ]);
-    }, 500);
-  });
-};
-
-export default function MapApi() {
-  const [pedidos, setPedidos] = useState([]);
+export default function MapApi({ pedidosIniciales = [] }) {
+  const [pedidos, setPedidos] = useState(pedidosIniciales);
   const [busqueda, setBusqueda] = useState("");
-  const [showModal, setShowModal] = useState(false); // Controla la visibilidad del modal
-  const [pedidoAEliminar, setPedidoAEliminar] = useState(null); // Pedido a eliminar
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const datos = await getPedidosFromAPI();
-      setPedidos(datos);
-    };
-    fetchData();
-  }, []);
+  const [showModal, setShowModal] = useState(false);
+  const [pedidoAEliminar, setPedidoAEliminar] = useState(null);
 
   const pedidosFiltrados = pedidos.filter(
     (p) =>
@@ -82,7 +15,6 @@ export default function MapApi() {
   );
 
   const handleEliminar = () => {
-    // Lógica para eliminar el pedido
     setPedidos((prevPedidos) =>
       prevPedidos.filter((pedido) => pedido !== pedidoAEliminar)
     );
@@ -91,9 +23,9 @@ export default function MapApi() {
   };
 
   return (
-    <div className="p-4 bg-orange-100 shadow-amber-900 rounded-lg shadow-xl w-full max-w-[100rem] mx-auto">
+    <div className="w-full h-full p-4 bg-orange-100 shadow-amber-900 rounded-lg shadow-xl">
       <h5 className="text-2xl font-bold mb-6 text-amber-900">Buscador</h5>
-      {/* Encabezado */}
+
       <div className="flex items-center justify-between mb-4">
         <input
           type="text"
@@ -105,19 +37,17 @@ export default function MapApi() {
         <button className="px-4 py-1 ml-28 bg-amber-900 text-white rounded-md hover:bg-amber-600">
           Buscar
         </button>
-        <div className="relative">
-          <select className="px-2 py-2 ml-28 w-32 border rounded-md bg-white">
-            <option>Celular</option>
-            <option>Nombre</option>
-            <option>Correo</option>
-          </select>
-        </div>
+        <select className="px-2 py-2 ml-28 w-32 border rounded-md bg-white">
+          <option>Celular</option>
+          <option>Nombre</option>
+          <option>Correo</option>
+        </select>
       </div>
 
-      {/* Tabla */}
-      <div className="overflow-x-auto shadow-lg shadow-amber-900 rounded-md">
+      {/* Contenedor con scroll para evitar desbordamiento */}
+      <div className="overflow-x-auto shadow-lg shadow-amber-900 rounded-md max-h-96 overflow-y-auto">
         <table className="min-w-full table-auto text-sm bg-yellow-50 rounded-lg">
-          <thead className="bg-yellow-200">
+          <thead className="bg-yellow-200 sticky top-0 z-10">
             <tr>
               <th className="p-2 text-left" />
               <th className="p-2 text-left">Nombre</th>
@@ -147,7 +77,7 @@ export default function MapApi() {
                     <button
                       onClick={() => {
                         setPedidoAEliminar(pedido);
-                        setShowModal(true); // Muestra el modal al hacer clic
+                        setShowModal(true);
                       }}
                       className="text-red-500 hover:text-red-700"
                     >
@@ -170,11 +100,10 @@ export default function MapApi() {
         </table>
       </div>
 
-      {/* Modal de confirmación */}
       <ConfirmModal
         isOpen={showModal}
-        onCancel={() => setShowModal(false)} // Cierra el modal
-        onConfirm={handleEliminar} // Confirma la eliminación
+        onCancel={() => setShowModal(false)}
+        onConfirm={handleEliminar}
       />
     </div>
   );

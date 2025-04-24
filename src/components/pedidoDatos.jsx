@@ -62,7 +62,7 @@ export default function PedidoForm({ onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      className="fixed inset-0 z-50 flex items-center justify-center"
       style={{ backdropFilter: "blur(5px)" }}
     >
       <div className="relative w-full max-w-2xl mx-auto p-6 bg-white border shadow rounded-xl">

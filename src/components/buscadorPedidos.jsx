@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Search, User, Phone, Mail } from "lucide-react";
+import { Search, User, Phone, Mail, X } from "lucide-react";
 
-const BuscadorPedidos = ({ pedidos }) => {
+const BuscadorPedidos = ({ pedidos, onClose }) => {
   const [filtro, setFiltro] = useState("nombre");
   const [busqueda, setBusqueda] = useState("");
 
@@ -20,7 +20,15 @@ const BuscadorPedidos = ({ pedidos }) => {
   });
 
   return (
-    <div className="relative w-full p-4 bg-[#FFF2C9] rounded-2xl shadow-lg border border-[#FFD538]">
+    <div className="relative max-w-2xl mx-auto p-4 bg-[#FFF2C9] rounded-2xl shadow-lg border border-[#FFD538]">
+      {/* Botón de cerrar */}
+      <button
+        onClick={onClose} // <- aquí usamos la prop pasada
+        className="absolute top-2 right-2 text-[#7E4300] hover:text-red-600 transition"
+        title="Cerrar"
+      >
+        <X className="w-6 h-6" />
+      </button>
       <h2 className="text-2xl font-bold mb-4 text-[#7E4300] text-center flex items-center gap-2">
         <Search className="w-6 h-6" /> Buscar Pedidos
       </h2>
