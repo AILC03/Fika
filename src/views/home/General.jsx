@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Calendar from "../../components/calendario";
 import Eventos from "../../components/Eventos";
-import PedidosTable from "../../components/tablapedidos"; // Importa el componente "Buscador"
+import PedidosTable from "../../components/tablaPedidos"; // Importa el componente "Buscador"
 import { Search } from "lucide-react";
 
 const eventosData = [
@@ -88,7 +88,7 @@ const General = () => {
           </h2>
 
           {/* Contenedor de eventos con scroll */}
-          <div className="flex-grow shadow-xl overflow-y-auto">
+          <div className="flex-grow overflow-y-auto">
             <Eventos eventos={eventosData} />
           </div>
         </div>
@@ -97,8 +97,8 @@ const General = () => {
       {/* Componente "Buscador" */}
       {showBuscador && (
         <div className="fixed inset-0 flex items-center justify-center">
-          <div className=" p-6 rounded">
-            <PedidosTable onClose={handleCloseBuscador} />{" "}
+          <div className="p-6 rounded">
+            <PedidosTable onClose={handleCloseBuscador} />
             {/* Pasa la función de cierre */}
           </div>
         </div>

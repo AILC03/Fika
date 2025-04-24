@@ -34,7 +34,7 @@ const getPedidos = async () => {
   ];
 };
 
-export default function PedidosTable({ onClose }) {
+export default function PedidosTable() {
   const [pedidos, setPedidos] = useState([]);
   const [busqueda, setBusqueda] = useState("");
   const [pedidoSeleccionado, setPedidoSeleccionado] = useState(null);
@@ -65,16 +65,7 @@ export default function PedidosTable({ onClose }) {
   };
 
   return (
-    <div className="relative p-4 bg-orange-100 shadow-amber-900 rounded-lg shadow-xl w-full max-w-[100rem] mx-auto">
-      {/* Botón para cerrar el componente */}
-      <button
-        onClick={onClose}
-        className="absolute top-2 right-2 text-white rounded-sm bg-red-500 hover:text-red-700"
-        title="Cerrar"
-      >
-        <X size={24} />
-      </button>
-
+    <div className="p-4 bg-orange-100 shadow-amber-900 rounded-lg shadow-xl w-full max-w-[100rem] mx-auto">
       <h2 className="text-2xl font-bold mb-6 text-amber-900">Pedidos</h2>
 
       <div className="flex items-center justify-between mb-4">
@@ -164,7 +155,7 @@ export default function PedidosTable({ onClose }) {
             </h3>
             <button
               onClick={() => setPedidoSeleccionado(null)}
-              className="text-white rounded-sm bg-red-500 hover:text-red-700"
+              className="text-red-500 hover:text-red-700"
             >
               <X />
             </button>

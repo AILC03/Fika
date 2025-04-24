@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import PedidoForm from "./pedidoDatos";
 
 const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date()); // Fecha actual
+  const [showForm, setShowForm] = useState(false); // Controla la visibilidad del formulario
+  const [selectedDay, setSelectedDay] = useState(null); // Día seleccionado
 
   // Obtiene el nombre del mes y el año actual
   const monthNames = [
@@ -82,9 +85,10 @@ const Calendar = () => {
               ? "bg-gray-200 text-gray-400 cursor-not-allowed" // Días pasados
               : "bg-white hover:bg-yellow-400 text-inherit" // Días futuros
           }`}
-          onClick={() => {
+          onDoubleClick={() => {
             if (!isPastDay) {
-              alert("Hola");
+              setSelectedDay(day); // Establece el día seleccionado
+              setShowForm(true); // Muestra el formulario
             }
           }}
         >
@@ -132,6 +136,14 @@ const Calendar = () => {
       <div className="grid grid-cols-7 gap-0.5 mt-2 flex-grow">
         {generateCalendarDays()}
       </div>
+
+      {/* Formulario de nuevo pedido */}
+      {showForm && (
+        <PedidoForm
+          onClose={() => setShowForm(false)} // Cierra el formulario
+          selectedDay={selectedDay} // Pasa el día seleccionado al formulario
+        />
+      )}
     </div>
   );
 };

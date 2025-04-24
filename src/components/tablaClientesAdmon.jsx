@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { Edit, Trash2 } from "lucide-react"; // Importa los iconos necesarios
+import ConfirmModal from "./alerta"; // Importa el componente de alerta
 
 const getPedidosFromAPI = async () => {
   // Simulación de una respuesta de API (esto puede ser reemplazado con fetch)
@@ -62,6 +64,8 @@ const getPedidosFromAPI = async () => {
 export default function MapApi() {
   const [pedidos, setPedidos] = useState([]);
   const [busqueda, setBusqueda] = useState("");
+  const [showModal, setShowModal] = useState(false); // Controla la visibilidad del modal
+  const [pedidoAEliminar, setPedidoAEliminar] = useState(null); // Pedido a eliminar
 
   useEffect(() => {
     const fetchData = async () => {
@@ -77,9 +81,18 @@ export default function MapApi() {
       p.celular.includes(busqueda)
   );
 
+  const handleEliminar = () => {
+    // Lógica para eliminar el pedido
+    setPedidos((prevPedidos) =>
+      prevPedidos.filter((pedido) => pedido !== pedidoAEliminar)
+    );
+    setShowModal(false);
+    setPedidoAEliminar(null);
+  };
+
   return (
     <div className="p-4 bg-orange-100 shadow-amber-900 rounded-lg shadow-xl w-full max-w-[100rem] mx-auto">
-    <h2 className="text-2xl font-bold mb-6 text-amber-900">Tabla Clientes</h2>  
+      <h5 className="text-2xl font-bold mb-6 text-amber-900">Buscador</h5>
       {/* Encabezado */}
       <div className="flex items-center justify-between mb-4">
         <input
@@ -94,9 +107,9 @@ export default function MapApi() {
         </button>
         <div className="relative">
           <select className="px-2 py-2 ml-28 w-32 border rounded-md bg-white">
-            <option>Filtro</option>
-            <option>Correo</option>
             <option>Celular</option>
+            <option>Nombre</option>
+            <option>Correo</option>
           </select>
         </div>
       </div>
@@ -131,9 +144,17 @@ export default function MapApi() {
                   <td className="p-2">{pedido.celular}</td>
                   <td className="p-2">{pedido.fechaRecoleccion}</td>
                   <td className="p-2 flex space-x-2">
-                    <button className="text-red-500 hover:underline">🗑</button>
-                    <button className="text-blue-500 hover:underline">
-                      ✏️
+                    <button
+                      onClick={() => {
+                        setPedidoAEliminar(pedido);
+                        setShowModal(true); // Muestra el modal al hacer clic
+                      }}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                    <button className="text-blue-500 hover:text-blue-700">
+                      <Edit size={16} />
                     </button>
                   </td>
                 </tr>
@@ -148,6 +169,13 @@ export default function MapApi() {
           </tbody>
         </table>
       </div>
+
+      {/* Modal de confirmación */}
+      <ConfirmModal
+        isOpen={showModal}
+        onCancel={() => setShowModal(false)} // Cierra el modal
+        onConfirm={handleEliminar} // Confirma la eliminación
+      />
     </div>
   );
 }

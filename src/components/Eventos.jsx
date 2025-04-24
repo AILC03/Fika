@@ -8,7 +8,7 @@ const Eventos = ({ eventos }) => {
           eventos.map((evento, index) => (
             <div
               key={index}
-              className="flex items-center bg-white shadow-xl rounded-xl p-10"
+              className="flex items-center bg-white rounded-xl p-10"
             >
               {/* Ícono o logo */}
               <div className="w-16 h-16 flex items-center justify-center bg-amber-200 text-white rounded-full mr-4">

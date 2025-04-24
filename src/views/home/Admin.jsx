@@ -11,19 +11,11 @@ const General = () => {
   };
 
   return (
-    <div className="h-screen  m-10 flex">
+    <div className="  m-10 flex">
       {/* Contenido principal con margen igual al ancho del menú */}
       <main className="flex-grow">
-        
         <div className="p-10">
           <NavigationMenu />
-          <button
-            onClick={() => setShowModal(true)}
-            className="bg-red-600 px-4 py-2 text-white rounded"
-          >
-            Eliminar algo
-          </button>
-
           <ConfirmModal
             isOpen={showModal}
             onCancel={() => setShowModal(false)}

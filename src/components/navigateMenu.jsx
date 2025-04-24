@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { view } from "framer-motion/client";
-import MapApi from "./tablaAdmonClientes"; // Ajusta la ruta si está en una carpeta diferente
+//import { view } from "framer-motion/client";
+import MapApi from "./tablaClientesAdmon"; // Ajusta la ruta si está en una carpeta diferente
 import Pasteles from "./listaProductos";
-import PedidosTable from "./tablaPedidos";
+import PedidosTable from "./tablaPedidosAdmon";
 
 const navItems = [
   {
@@ -13,7 +13,7 @@ const navItems = [
   },
   {
     label: "Productos",
-    view: "Productos"
+    view: "Productos",
   },
   {
     label: "Clientes",
@@ -27,7 +27,7 @@ const navItems = [
 
 export default function NavigationMenu() {
   const [openIndex, setOpenIndex] = useState(null);
-  const [currentView, setCurrentView] = useState("Pedidos"); 
+  const [currentView, setCurrentView] = useState("Pedidos");
 
   const handleClick = (view) => {
     setCurrentView(view);
@@ -39,7 +39,7 @@ export default function NavigationMenu() {
   };
 
   return (
-    <div className="w-full">
+    <div className="">
       {/* NAV */}
       <nav className="bg-white shadow px-6 py-4 rounded-md">
         <ul className="flex space-x-6">
@@ -60,7 +60,7 @@ export default function NavigationMenu() {
                     currentView === item.view
                       ? "bg-amber-100 text-amber-800"
                       : "hover:bg-amber-100 text-gray-800"
-                  }`}                  
+                  }`}
                 >
                   {item.label}
                 </button>
@@ -95,7 +95,7 @@ export default function NavigationMenu() {
       </nav>
 
       {/* VISTA ACTUAL */}
-      <div className="mt-6 p-6 border rounded-md bg-gray-50 shadow-inner min-h-[150px]">
+      <div className="mt-6 border rounded-md bg-gray-50 shadow-inner overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentView}
@@ -103,19 +103,12 @@ export default function NavigationMenu() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3 }}
+            className="max-h-[500px] overflow-y-auto" // Limita la altura y habilita el scroll
           >
-            {currentView === "Clientes" && (
-              <MapApi />
-            )}
-            {currentView === "Usuarios" && (
-              <MapApi />
-            )}
-            {currentView === "Productos" &&(
-              <Pasteles />
-            )}
-            {currentView === "Pedidos" &&(
-              <PedidosTable />
-            )}
+            {currentView === "Clientes" && <MapApi />}
+            {currentView === "Usuarios" && <MapApi />}
+            {currentView === "Productos" && <Pasteles />}
+            {currentView === "Pedidos" && <PedidosTable />}
           </motion.div>
         </AnimatePresence>
       </div>
