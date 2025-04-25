@@ -236,7 +236,7 @@ const General = () => {
       {/* Contenido principal */}
       <main className="flex-grow flex">
         {/* Columna izquierda */}
-        <div className="flex flex-col w-4/6 m-5">
+        <div className="flex flex-col w-3/4 m-5">
           <div
             id="Calendario"
             className="flex-grow mb-5 rounded-xl bg-yellow-100"
@@ -257,7 +257,7 @@ const General = () => {
             />
           </h2>
 
-          <div className="flex-grow overflow-y-auto">
+          <div className="flex-grow  overflow-y-auto">
             <Eventos eventos={eventosData} /> {/* Cards de eventos */}
           </div>
         </div>

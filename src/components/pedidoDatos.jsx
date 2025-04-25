@@ -1,371 +1,225 @@
 import { useState } from "react";
+import { X } from "lucide-react";
 
-export default function PedidoForm({ onClose }) {
-  const [tab, setTab] = useState("datos"); // Pestaña actual
-  const [tipoPastel, setTipoPastel] = useState(""); // Tipo de pastel
-  const [cantidad, setCantidad] = useState(""); // Cantidad o pisos
-  const [tamano, setTamano] = useState(""); // Tamaño del pastel
-  const [sabor, setSabor] = useState(""); // Sabor del pastel
-  const [decoracion, setDecoracion] = useState(""); // Decoración
-  const [escritura, setEscritura] = useState(""); // Texto en el pastel
-  const [decoracionesSeleccionadas, setDecoracionesSeleccionadas] = useState(
-    []
-  ); // Decoraciones seleccionadas
-  const [ingredientesSeleccionados, setIngredientesSeleccionados] = useState(
-    []
-  ); // Ingredientes seleccionados
-  const [celular, setCelular] = useState("");
-  const [email, setEmail] = useState("");
-  const [nombre, setNombre] = useState("");
-  const [date, setDate] = useState("");
-  const [hora, setHora] = useState("");
-  const [estatus, setEstatus] = useState("");
+const FormularioPastel = ({ datosIniciales = {}, onSubmit, onClose }) => {
+  const [pestañaActiva, setPestañaActiva] = useState("Datos");
 
-  const isDatosComplete = () =>
-    celular.trim() && email.trim() && nombre.trim() && tipoPastel && cantidad;
+  const [form, setForm] = useState({
+    celular: "",
+    email: "",
+    nombre: "",
+    tipo: "Regular",
+    cantidad: 1,
+    decoraciones: {
+      flores: false,
+      velas: false,
+      mensaje: false,
+    },
+    ingredientes: {
+      fresa: false,
+      chocolate: false,
+      nuez: false,
+    },
+    ...datosIniciales,
+  });
 
-  const isPastelComplete = () =>
-    tamano && sabor && decoracion && escritura.trim();
-
-  const isDecoracionesComplete = () =>
-    decoracionesSeleccionadas.length > 0 &&
-    ingredientesSeleccionados.length > 0;
-
-  const isFormComplete = () =>
-    isDatosComplete() &&
-    isPastelComplete() &&
-    isDecoracionesComplete() &&
-    date &&
-    hora &&
-    estatus;
-
-  const handleNext = () => {
-    if (tab === "datos" && isDatosComplete()) setTab("pastel");
-    else if (tab === "pastel" && isPastelComplete()) setTab("decoraciones");
-    else if (tab === "decoraciones" && isDecoracionesComplete())
-      setTab("detalles");
+  const actualizarCampo = (campo, valor) => {
+    setForm((prev) => ({ ...prev, [campo]: valor }));
   };
 
-  const handlePrevious = () => {
-    if (tab === "pastel") setTab("datos");
-    else if (tab === "decoraciones") setTab("pastel");
-    else if (tab === "detalles") setTab("decoraciones");
+  const toggleCheckbox = (tipo, grupo) => {
+    setForm((prev) => ({
+      ...prev,
+      [grupo]: {
+        ...prev[grupo],
+        [tipo]: !prev[grupo][tipo],
+      },
+    }));
   };
 
-  const toggleCheckbox = (list, setList, value) => {
-    if (list.includes(value)) {
-      setList(list.filter((item) => item !== value));
-    } else {
-      setList([...list, value]);
+  const handleInput = (e, tipo) => {
+    const value = e.target.value;
+    if (tipo === "nombre") {
+      if (/^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]*$/.test(value)) {
+        actualizarCampo("nombre", value);
+      }
+    } else if (tipo === "celular") {
+      if (/^\d{0,10}$/.test(value)) {
+        actualizarCampo("celular", value);
+      }
+    } else if (tipo === "email") {
+      actualizarCampo("email", value);
     }
   };
 
+  const handleSubmit = () => {
+    const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
+    if (!emailValido) {
+      alert("Correo no válido.");
+      return;
+    }
+
+    // Simular envío a API
+    console.log("Enviando datos a la API...", form);
+    setTimeout(() => {
+      console.log("Respuesta recibida: ✅");
+      if (onSubmit) onSubmit(form);
+      if (onClose) onClose();
+    }, 1000); // Simulación de espera de 1 segundo
+  };
+
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ backdropFilter: "blur(5px)" }}
-    >
-      <div className="relative w-full max-w-2xl mx-auto p-6 bg-white border shadow rounded-xl">
-        {/* Botón cerrar */}
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 text-gray-600 hover:text-black"
-        >
-          ✕
-        </button>
+    <div className="fixed top-24 left-1/2 -translate-x-1/2 bg-yellow-100 rounded-xl shadow-2xl p-4 w-[400px] border border-yellow-400 z-50">
+      {/* Cerrar */}
+      <button
+        onClick={onClose}
+        className="absolute top-2 right-2 text-red-600 hover:scale-110"
+      >
+        <X className="w-6 h-6" />
+      </button>
 
-        {/* Tabs */}
-        <div className="flex justify-between mb-4 text-sm font-medium">
-          {["datos", "pastel", "decoraciones", "detalles"].map((t, idx) => {
-            const tabs = ["datos", "pastel", "decoraciones", "detalles"];
-            const currentIndex = tabs.indexOf(tab);
-            const canGoBack = idx <= currentIndex; // Permite regresar o quedarse
+      {/* Pestañas */}
+      <div className="flex gap-2 mb-4 text-sm font-semibold text-amber-800">
+        {["Datos", "Pastel", "Decoraciones", "Detalles"].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setPestañaActiva(tab)}
+            className={`px-3 py-1 rounded-lg ${
+              pestañaActiva === tab ? "bg-white shadow" : "hover:bg-white/70"
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
 
-            return (
-              <button
-                key={t}
-                className={`px-4 py-2 border-b-2 ${
-                  tab === t
-                    ? "border-black font-bold"
-                    : canGoBack
-                    ? "border-transparent text-gray-400 hover:text-black"
-                    : "border-transparent text-gray-300 cursor-not-allowed"
-                }`}
-                onClick={() => {
-                  if (canGoBack) setTab(t);
-                }}
-                disabled={!canGoBack}
-              >
-                {t.charAt(0).toUpperCase() + t.slice(1)}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* TAB CONTENIDOS */}
-        {tab === "datos" && (
-          <div className="space-y-4">
+      {/* Contenido */}
+      <div className="space-y-4">
+        {pestañaActiva === "Datos" && (
+          <>
             <div>
-              <label className="block mb-1">Celular</label>
+              <label className="block text-sm text-amber-800">Celular</label>
               <input
                 type="text"
-                value={celular}
-                onChange={(e) => setCelular(e.target.value)}
-                className="w-full border p-2 rounded"
+                value={form.celular}
+                onChange={(e) => handleInput(e, "celular")}
+                placeholder="10 dígitos"
+                className="w-full p-2 rounded-md bg-white border border-yellow-400"
               />
             </div>
             <div>
-              <label className="block mb-1">Email</label>
+              <label className="block text-sm text-amber-800">Email</label>
               <input
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full border p-2 rounded"
+                value={form.email}
+                onChange={(e) => handleInput(e, "email")}
+                placeholder="ejemplo@correo.com"
+                className="w-full p-2 rounded-md bg-white border border-yellow-400"
               />
             </div>
             <div>
-              <label className="block mb-1">Nombre completo</label>
+              <label className="block text-sm text-amber-800">Nombre</label>
               <input
                 type="text"
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                className="w-full border p-2 rounded"
+                value={form.nombre}
+                onChange={(e) => handleInput(e, "nombre")}
+                placeholder="Nombre del cliente"
+                className="w-full p-2 rounded-md bg-white border border-yellow-400"
               />
             </div>
+          </>
+        )}
+
+        {pestañaActiva === "Pastel" && (
+          <>
             <div>
-              <label className="block mb-1">Tipo de pastel</label>
-              <select
-                value={tipoPastel}
-                onChange={(e) => setTipoPastel(e.target.value)}
-                className="w-full border p-2 rounded"
-              >
-                <option value="">Selecciona un tipo</option>
-                <option value="clasico">Clásico</option>
-                <option value="personalizado">Personalizado</option>
-                <option value="tematico">Temático</option>
-              </select>
-            </div>
-            <div>
-              <label className="block mb-1">
-                {tipoPastel === "personalizado" ? "Pisos" : "Cantidad"}
+              <label className="block text-sm text-amber-800">
+                Tipo de pastel
               </label>
-              <input
-                type="number"
-                value={cantidad}
-                onChange={(e) => setCantidad(e.target.value)}
-                className="w-full border p-2 rounded"
-              />
-            </div>
-            <div className="flex justify-between">
-              <button
-                onClick={handlePrevious}
-                className="px-4 py-2 bg-gray-300 text-gray-600 rounded hover:bg-gray-400"
-                disabled={tab === "datos"} // Deshabilita el botón si está en la primera pestaña
-              >
-                Anterior
-              </button>
-              <button
-                onClick={handleNext}
-                disabled={!isDatosComplete()}
-                className={`px-4 py-2 rounded ${
-                  isDatosComplete()
-                    ? "bg-blue-600 text-white hover:bg-blue-700"
-                    : "bg-gray-300 text-gray-600 cursor-not-allowed"
-                }`}
-              >
-                Continuar
-              </button>
-            </div>
-          </div>
-        )}
-
-        {tab === "pastel" && (
-          <div className="space-y-4">
-            <div>
-              <label className="block mb-1">Tamaño</label>
-              <input
-                type="text"
-                value={tamano}
-                onChange={(e) => setTamano(e.target.value)}
-                className="w-full border p-2 rounded"
-              />
-            </div>
-            <div>
-              <label className="block mb-1">Sabor</label>
               <select
-                value={sabor}
-                onChange={(e) => setSabor(e.target.value)}
-                className="w-full border p-2 rounded"
+                value={form.tipo}
+                onChange={(e) => actualizarCampo("tipo", e.target.value)}
+                className="w-full p-2 rounded-md bg-white border border-yellow-400"
               >
-                <option value="">Selecciona un sabor</option>
-                <option value="chocolate">Chocolate</option>
-                <option value="vainilla">Vainilla</option>
-                <option value="fresa">Fresa</option>
+                <option value="Regular">Regular</option>
+                <option value="Personalizado">Personalizado</option>
               </select>
             </div>
             <div>
-              <label className="block mb-1">Decoración</label>
+              <label className="block text-sm text-amber-800">Cantidad</label>
               <select
-                value={decoracion}
-                onChange={(e) => setDecoracion(e.target.value)}
-                className="w-full border p-2 rounded"
+                value={form.cantidad}
+                onChange={(e) =>
+                  actualizarCampo("cantidad", parseInt(e.target.value))
+                }
+                className="w-full p-2 rounded-md bg-white border border-yellow-400"
               >
-                <option value="">Selecciona una decoración</option>
-                <option value="flores">Flores</option>
-                <option value="tematica">Temática</option>
-                <option value="minimalista">Minimalista</option>
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
               </select>
             </div>
-            <div>
-              <label className="block mb-1">Escritura</label>
-              <input
-                type="text"
-                value={escritura}
-                onChange={(e) => setEscritura(e.target.value)}
-                className="w-full border p-2 rounded"
-              />
-            </div>
-            <div className="flex justify-between">
-              <button
-                onClick={handlePrevious}
-                className="px-4 py-2 bg-gray-300 text-gray-600 rounded hover:bg-gray-400"
-              >
-                Anterior
-              </button>
-              <button
-                onClick={handleNext}
-                disabled={!isPastelComplete()}
-                className={`px-4 py-2 rounded ${
-                  isPastelComplete()
-                    ? "bg-blue-600 text-white hover:bg-blue-700"
-                    : "bg-gray-300 text-gray-600 cursor-not-allowed"
-                }`}
-              >
-                Continuar
-              </button>
-            </div>
-          </div>
+          </>
         )}
 
-        {tab === "decoraciones" && (
-          <div className="space-y-4">
+        {pestañaActiva === "Decoraciones" && (
+          <>
             <div>
-              <h3 className="font-bold mb-2">Decoraciones</h3>
-              {["Flores", "Figuras", "Perlas"].map((item) => (
-                <div key={item} className="flex items-center">
+              <p className="text-sm font-semibold text-amber-800 mb-1">
+                Decoraciones
+              </p>
+              {Object.keys(form.decoraciones).map((key) => (
+                <label key={key} className="block text-sm text-amber-800">
                   <input
                     type="checkbox"
-                    checked={decoracionesSeleccionadas.includes(item)}
-                    onChange={() =>
-                      toggleCheckbox(
-                        decoracionesSeleccionadas,
-                        setDecoracionesSeleccionadas,
-                        item
-                      )
-                    }
+                    checked={form.decoraciones[key]}
+                    onChange={() => toggleCheckbox(key, "decoraciones")}
                     className="mr-2"
                   />
-                  <label>{item}</label>
-                </div>
+                  {key}
+                </label>
               ))}
             </div>
             <div>
-              <h3 className="font-bold mb-2">Ingredientes</h3>
-              {["Chocolate", "Frutas", "Crema"].map((item) => (
-                <div key={item} className="flex items-center">
+              <p className="text-sm font-semibold text-amber-800 mb-1">
+                Ingredientes
+              </p>
+              {Object.keys(form.ingredientes).map((key) => (
+                <label key={key} className="block text-sm text-amber-800">
                   <input
                     type="checkbox"
-                    checked={ingredientesSeleccionados.includes(item)}
-                    onChange={() =>
-                      toggleCheckbox(
-                        ingredientesSeleccionados,
-                        setIngredientesSeleccionados,
-                        item
-                      )
-                    }
+                    checked={form.ingredientes[key]}
+                    onChange={() => toggleCheckbox(key, "ingredientes")}
                     className="mr-2"
                   />
-                  <label>{item}</label>
-                </div>
+                  {key}
+                </label>
               ))}
             </div>
-            <div className="flex justify-between">
-              <button
-                onClick={handlePrevious}
-                className="px-4 py-2 bg-gray-300 text-gray-600 rounded hover:bg-gray-400"
-              >
-                Anterior
-              </button>
-              <button
-                onClick={handleNext}
-                disabled={!isDecoracionesComplete()}
-                className={`px-4 py-2 rounded ${
-                  isDecoracionesComplete()
-                    ? "bg-blue-600 text-white hover:bg-blue-700"
-                    : "bg-gray-300 text-gray-600 cursor-not-allowed"
-                }`}
-              >
-                Continuar
-              </button>
-            </div>
-          </div>
+          </>
         )}
 
-        {tab === "detalles" && (
-          <div className="space-y-4">
-            <div>
-              <label className="block mb-1">Fecha de recolección</label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full border p-2 rounded"
-              />
-            </div>
-            <div>
-              <label className="block mb-1">Hora</label>
-              <input
-                type="time"
-                value={hora}
-                onChange={(e) => setHora(e.target.value)}
-                className="w-full border p-2 rounded"
-              />
-            </div>
-            <div>
-              <label className="block mb-1">Estatus</label>
-              <select
-                value={estatus}
-                onChange={(e) => setEstatus(e.target.value)}
-                className="w-full border p-2 rounded"
-              >
-                <option value="">Selecciona un estatus</option>
-                <option value="pendiente">Pendiente</option>
-                <option value="en_proceso">En proceso</option>
-                <option value="completado">Completado</option>
-              </select>
-            </div>
-            <div className="flex justify-between">
-              <button
-                onClick={handlePrevious}
-                className="px-4 py-2 bg-gray-300 text-gray-600 rounded hover:bg-gray-400"
-              >
-                Anterior
-              </button>
-              <button
-                onClick={onClose}
-                disabled={!isFormComplete()}
-                className={`px-4 py-2 rounded ${
-                  isFormComplete()
-                    ? "bg-green-600 text-white hover:bg-green-700"
-                    : "bg-gray-300 text-gray-600 cursor-not-allowed"
-                }`}
-              >
-                Finalizar
-              </button>
-            </div>
+        {pestañaActiva === "Detalles" && (
+          <div className="text-sm text-amber-800">
+            Aquí puedes agregar instrucciones especiales u observaciones sobre
+            el pastel.
           </div>
         )}
       </div>
+
+      {/* Botón Aceptar */}
+      <div className="flex justify-end mt-4">
+        <button
+          onClick={handleSubmit}
+          className="bg-yellow-400 text-amber-800 px-4 py-2 rounded-lg font-semibold hover:brightness-105"
+        >
+          Aceptar
+        </button>
+      </div>
     </div>
   );
-}
+};
+
+export default FormularioPastel;

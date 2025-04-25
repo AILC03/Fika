@@ -6,6 +6,7 @@ const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date()); // Fecha actual
   const [showForm, setShowForm] = useState(false); // Controla la visibilidad del formulario
   const [selectedDay, setSelectedDay] = useState(null); // Día seleccionado
+  const [selectedPedido, setSelectedPedido] = useState(null);
 
   // Obtiene el nombre del mes y el año actual
   const monthNames = [
@@ -40,6 +41,11 @@ const Calendar = () => {
   // Obtiene los días del mes actual
   const getDaysInMonth = (year, month) => {
     return new Date(year, month + 1, 0).getDate();
+  };
+
+  const handleEnviar = (datos) => {
+    console.log("Datos enviados:", datos);
+    setShowForm(false);
   };
 
   // Genera los días del mes actual
@@ -78,17 +84,17 @@ const Calendar = () => {
       days.push(
         <div
           key={day}
-          className={`text-xs cursor-pointer p-2 rounded ${
+          className={`text-xs cursor-pointer p-2 rounded transition-transform duration-200 transform hover:scale-90 ${
             isToday
-              ? "bg-yellow-200 text-black hover:bg-yellow-400 font-bold" // Día actual resaltado
+              ? "bg-yellow-200 text-black hover:bg-yellow-400 font-bold"
               : isPastDay
-              ? "bg-gray-200 text-gray-400 cursor-not-allowed" // Días pasados
-              : "bg-white hover:bg-yellow-400 text-inherit" // Días futuros
+              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+              : "bg-white hover:bg-yellow-400 text-inherit"
           }`}
           onDoubleClick={() => {
             if (!isPastDay) {
-              setSelectedDay(day); // Establece el día seleccionado
-              setShowForm(true); // Muestra el formulario
+              setSelectedDay(day);
+              setShowForm(true);
             }
           }}
         >
@@ -140,8 +146,10 @@ const Calendar = () => {
       {/* Formulario de nuevo pedido */}
       {showForm && (
         <PedidoForm
-          onClose={() => setShowForm(false)} // Cierra el formulario
-          selectedDay={selectedDay} // Pasa el día seleccionado al formulario
+          onClose={() => setShowForm(false)} // Cierra el formulario si se cancela
+          onSubmit={handleEnviar} // Maneja el envío simulado
+          selectedDay={selectedDay} // Día seleccionado
+          datosIniciales={selectedPedido} // Por ahora puede ser null
         />
       )}
     </div>

@@ -1,9 +1,52 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Search, User, Phone, Mail, X } from "lucide-react";
+import FormularioPastel from "./pedidoDatos"; // Asegúrate de importar el FormularioPastel
 
 const BuscadorPedidos = ({ pedidos, onClose }) => {
   const [filtro, setFiltro] = useState("nombre");
   const [busqueda, setBusqueda] = useState("");
+  const [position, setPosition] = useState({ x: 100, y: 100 });
+  const [dragging, setDragging] = useState(false);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [pedidoSeleccionado, setPedidoSeleccionado] = useState(null); // Nuevo estado para el pedido seleccionado
+  const boxRef = useRef(null);
+
+  const startDrag = (e) => {
+    const box = boxRef.current.getBoundingClientRect();
+    setOffset({
+      x: e.clientX - box.left,
+      y: e.clientY - box.top,
+    });
+    setDragging(true);
+  };
+
+  const duringDrag = (e) => {
+    if (!dragging) return;
+    const newX = e.clientX - offset.x;
+    const newY = e.clientY - offset.y;
+
+    const box = boxRef.current.getBoundingClientRect();
+    const maxX = window.innerWidth - box.width;
+    const maxY = window.innerHeight - box.height;
+
+    setPosition({
+      x: Math.min(Math.max(0, newX), maxX),
+      y: Math.min(Math.max(0, newY), maxY),
+    });
+  };
+
+  const stopDrag = () => {
+    setDragging(false);
+  };
+
+  useEffect(() => {
+    window.addEventListener("mousemove", duringDrag);
+    window.addEventListener("mouseup", stopDrag);
+    return () => {
+      window.removeEventListener("mousemove", duringDrag);
+      window.removeEventListener("mouseup", stopDrag);
+    };
+  });
 
   const pedidosFiltrados = pedidos.filter((pedido) => {
     const valorBusqueda = busqueda.toLowerCase();
@@ -19,11 +62,20 @@ const BuscadorPedidos = ({ pedidos, onClose }) => {
     }
   });
 
+  const handlePedidoClick = (pedido) => {
+    // Actualizamos el estado con el pedido seleccionado
+    setPedidoSeleccionado(pedido);
+  };
+
   return (
-    <div className="relative max-w-2xl mx-auto p-4 bg-[#FFF2C9] rounded-2xl shadow-lg border border-[#FFD538]">
-      {/* Botón de cerrar */}
+    <div
+      ref={boxRef}
+      className="fixed z-50 max-w-2xl w-[90%] md:w-[600px] p-4 bg-[#FFF2C9] rounded-2xl shadow-lg border border-[#FFD538] cursor-move"
+      onMouseDown={startDrag}
+      style={{ top: position.y, left: position.x }}
+    >
       <button
-        onClick={onClose} // <- aquí usamos la prop pasada
+        onClick={onClose}
         className="absolute top-2 right-2 text-[#7E4300] hover:text-red-600 transition"
         title="Cerrar"
       >
@@ -58,6 +110,7 @@ const BuscadorPedidos = ({ pedidos, onClose }) => {
           <div
             key={index}
             className="bg-white border-l-4 border-[#FFD538] p-4 rounded-lg shadow-sm"
+            onClick={() => handlePedidoClick(pedido)} // Manejar el click
           >
             <p className="text-[#7E4300] font-semibold flex items-center gap-2">
               <User className="w-4 h-4" /> {pedido.nombre}
@@ -87,6 +140,16 @@ const BuscadorPedidos = ({ pedidos, onClose }) => {
         <p className="text-center text-[#7E4300] mt-4">
           No se encontraron pedidos.
         </p>
+      )}
+
+      {pedidoSeleccionado && (
+        <FormularioPastel
+          datosIniciales={pedidoSeleccionado}
+          onSubmit={(formData) => {
+            console.log("Datos del formulario:", formData);
+          }}
+          onClose={() => setPedidoSeleccionado(null)} // Cierra el formulario cuando se cancela
+        />
       )}
     </div>
   );

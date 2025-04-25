@@ -58,9 +58,9 @@ export default function ProductTable({ data }) {
         </div>
 
         {/* Contenedor con scroll si hay más de 4 filas */}
-        <div className="max-h-64 overflow-y-auto">
+        <div className="max-h-48 overflow-y-auto">
           <table className="w-full border-collapse">
-          <thead className="sticky top-0 bg-amber-100">
+            <thead className="sticky top-0 bg-amber-100">
               <tr>
                 <th className="py-2 px-4 text-left bg-amber-100 border border-amber-300 text-amber-900 font-medium">
                   Sabor
