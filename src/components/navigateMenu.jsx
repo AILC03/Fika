@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import MapApi from "./tablaClientesAdmon"; // Ajusta la ruta si está en una carpeta diferente
+import {motion, AnimatePresence } from "framer-motion";
 import Pasteles from "./listaProductos";
 import PedidosTable from "./tablaPedidosAdmon";
+import ListaClientes from "./tablaClientesAdmon"
 
 const navItems = [
   {
@@ -161,6 +161,58 @@ const pedidosSimulados = [
     ],
   },
 ];
+const Clientes = [
+  {
+    id: "6641230001",
+    nombre: "Ana Pérez",
+    email: "ana.perez@example.com",
+  },
+  {
+    id: "6641230002",
+    nombre: "Luis Martínez",
+    email: "luis.martinez@example.com",
+  },
+  {
+    id: "6641230003",
+    nombre: "Carla Gómez",
+    email: "carla.gomez@example.com",
+  },
+  {
+    id: "6641230004",
+    nombre: "Pedro Sánchez",
+    email: "pedro.sanchez@example.com",
+  },
+  {
+    id: "6641230005",
+    nombre: "Marta Rodríguez",
+    email: "marta.rodriguez@example.com",
+  },
+  {
+    id: "6641230006",
+    nombre: "Daniel Torres",
+    email: "daniel.torres@example.com",
+  },
+  {
+    id: "6641230007",
+    nombre: "Laura Jiménez",
+    email: "laura.jimenez@example.com",
+  },
+  {
+    id: "6641230008",
+    nombre: "Jorge Ramírez",
+    email: "jorge.ramirez@example.com",
+  },
+  {
+    id: "6641230009",
+    nombre: "Lucía Morales",
+    email: "lucia.morales@example.com",
+  },
+  {
+    id: "6641230010",
+    nombre: "Ricardo Herrera",
+    email: "ricardo.herrera@example.com",
+  },
+];
 
 const apiResponse = {
   Clásicos: [
@@ -196,113 +248,7 @@ const apiResponse = {
   ],
 };
 
-const datosPedidos = [
-  {
-    celular: "6641234567",
-    email: "juan.gonzales@email.com",
-    nombre: "Juan Gonzales",
-    fechaRecoleccion: "12-03-2025",
-    ejemplo: "ejemplo1",
-  },
-  {
-    celular: "6645551234",
-    email: "ernesto.pena@email.com",
-    nombre: "Ernesto Peña",
-    fechaRecoleccion: "12-03-2025",
-    ejemplo: "ejemplo2",
-  },
-  {
-    celular: "6649876543",
-    email: "juan.aguirre@email.com",
-    nombre: "Juan Aguirre",
-    fechaRecoleccion: "12-03-2025",
-    ejemplo: "ejemplo3",
-  },
-  {
-    celular: "6647890123",
-    email: "matilda.lopez@email.com",
-    nombre: "Matilda Lopez",
-    fechaRecoleccion: "13-03-2025",
-    ejemplo: "ejemplo4",
-  },
-  {
-    celular: "6642345678",
-    email: "david.benavides@email.com",
-    nombre: "David Benavides",
-    fechaRecoleccion: "13-03-2025",
-    ejemplo: "ejemplo5",
-  },
-  {
-    celular: "6648765432",
-    email: "omar.salcedo@email.com",
-    nombre: "Omar Salcedo",
-    fechaRecoleccion: "14-03-2025",
-    ejemplo: "ejemplo6",
-  },
-  {
-    celular: "6643456789",
-    email: "santiago.lugo@email.com",
-    nombre: "Santiago Lugo",
-    fechaRecoleccion: "14-03-2025",
-    ejemplo: "ejemplo7",
-  },
-  {
-    celular: "6641122334",
-    email: "valentina.nunez@email.com",
-    nombre: "Valentina Nuñez",
-    fechaRecoleccion: "15-03-2025",
-    ejemplo: "ejemplo8",
-  },
-  {
-    celular: "6645566778",
-    email: "jose.martinez@email.com",
-    nombre: "José Martínez",
-    fechaRecoleccion: "15-03-2025",
-    ejemplo: "ejemplo9",
-  },
-  {
-    celular: "6649988776",
-    email: "ana.torres@email.com",
-    nombre: "Ana Torres",
-    fechaRecoleccion: "16-03-2025",
-    ejemplo: "ejemplo10",
-  },
-  {
-    celular: "6646655443",
-    email: "carlos.diaz@email.com",
-    nombre: "Carlos Díaz",
-    fechaRecoleccion: "16-03-2025",
-    ejemplo: "ejemplo11",
-  },
-  {
-    celular: "6644433221",
-    email: "lucia.rojas@email.com",
-    nombre: "Lucía Rojas",
-    fechaRecoleccion: "17-03-2025",
-    ejemplo: "ejemplo12",
-  },
-  {
-    celular: "6647788990",
-    email: "diego.perez@email.com",
-    nombre: "Diego Pérez",
-    fechaRecoleccion: "17-03-2025",
-    ejemplo: "ejemplo13",
-  },
-  {
-    celular: "6642211334",
-    email: "mariana.flores@email.com",
-    nombre: "Mariana Flores",
-    fechaRecoleccion: "18-03-2025",
-    ejemplo: "ejemplo14",
-  },
-  {
-    celular: "6643322110",
-    email: "andres.rivera@email.com",
-    nombre: "Andrés Rivera",
-    fechaRecoleccion: "18-03-2025",
-    ejemplo: "ejemplo15",
-  },
-];
+
 
 export default function NavigationMenu() {
   const [openIndex, setOpenIndex] = useState(null);
@@ -389,10 +335,10 @@ export default function NavigationMenu() {
             className="h-full overflow-y-auto" // Asegura que ocupe todo el espacio disponible
           >
             {currentView === "Clientes" && (
-              <MapApi pedidosIniciales={datosPedidos} />
+              <ListaClientes personas={Clientes} />
             )}
             {currentView === "Usuarios" && (
-              <MapApi pedidosIniciales={datosPedidos} />
+              <ListaClientes personas={Clientes} />
             )}
             {currentView === "Productos" && (
               <Pasteles apiResponse={apiResponse} />
