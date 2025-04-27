@@ -1,20 +1,24 @@
 import { useState } from "react";
-import { Search, User, Phone, Mail, Edit, Trash } from "lucide-react";
-import FormularioCliente from "./formularioCliente";
-const ListaClientes = ({ personas, onActualizarCliente, onEliminarCliente }) => {
+import { Search, User, Clock, Briefcase, Edit, Trash } from "lucide-react";
+import FormularioEmpleado from "./formularioUsuarios";
+
+
+const ListaEmpleados = ({ empleados, onActualizarEmpleado, onEliminarEmpleado }) => {
   const [filtro, setFiltro] = useState("nombre");
   const [busqueda, setBusqueda] = useState("");
-  const [clienteEditando, setClienteEditando] = useState(null);
+  const [empleadoEditando, setEmpleadoEditando] = useState(null);
 
-  const personasFiltradas = personas.filter((persona) => {
+  const empleadosFiltrados = empleados.filter((empleado) => {
     const valorBusqueda = busqueda.toLowerCase();
     switch (filtro) {
       case "nombre":
-        return persona.nombre.toLowerCase().includes(valorBusqueda);
+        return empleado.nombre.toLowerCase().includes(valorBusqueda);
       case "id":
-        return persona.id.includes(valorBusqueda);
-      case "email":
-        return persona.email.toLowerCase().includes(valorBusqueda);
+        return empleado.numEmpleado.includes(valorBusqueda);
+      case "turno":
+        return empleado.turno.toLowerCase().includes(valorBusqueda);
+      case "cargo":
+        return empleado.cargo.toLowerCase().includes(valorBusqueda);
       default:
         return true;
     }
@@ -23,7 +27,7 @@ const ListaClientes = ({ personas, onActualizarCliente, onEliminarCliente }) => 
   return (
     <div className="p-6 bg-[#FFF2C9] rounded-2xl shadow-lg border border-[#FFD538] mx-auto relative">
       <h2 className="text-2xl font-bold mb-4 text-[#7E4300] text-center flex items-center justify-center gap-2">
-        <Search className="w-6 h-6" /> Buscar Personas
+        <Search className="w-6 h-6" /> Buscar Empleados
       </h2>
 
       <div className="flex flex-col sm:flex-row items-center gap-3 mb-4">
@@ -41,40 +45,44 @@ const ListaClientes = ({ personas, onActualizarCliente, onEliminarCliente }) => 
           className="p-2 rounded-lg border border-[#FFD538] bg-white text-[#7E4300] font-semibold"
         >
           <option value="nombre">Nombre</option>
-          <option value="id">ID (Celular)</option>
-          <option value="email">Email</option>
+          <option value="id">Número de empleado</option>
+          <option value="turno">Turno</option>
+          <option value="cargo">Cargo</option>
         </select>
       </div>
 
       <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-        {personasFiltradas.map((persona, index) => (
+        {empleadosFiltrados.map((empleado, index) => (
           <div
             key={index}
             className="bg-white border-l-4 border-[#FFD538] p-4 rounded-lg shadow-sm transition hover:bg-yellow-50 flex justify-between items-center"
           >
             <div>
               <p className="text-[#7E4300] font-semibold flex items-center gap-2">
-                <User className="w-4 h-4" /> {persona.nombre}
+                <User className="w-4 h-4" /> {empleado.nombre}
               </p>
               <p className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-[#FFD538]" /> {persona.id}
+                <Clock className="w-4 h-4 text-[#FFD538]" /> {empleado.turno}
               </p>
               <p className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-[#FFD538]" /> {persona.email}
+                <Briefcase className="w-4 h-4 text-[#FFD538]" /> {empleado.cargo}
+              </p>
+              <p className="flex items-center gap-2">
+                <span className="text-[#FFD538]"># {empleado.numEmpleado}</span>
               </p>
             </div>
 
             {/* Botones Editar / Eliminar */}
             <div className="flex gap-2">
               <button
-                onClick={() => setClienteEditando(persona)}
+                onClick={() => setEmpleadoEditando(empleado)}
                 className="text-blue-600 hover:scale-110"
                 title="Editar"
               >
                 <Edit className="w-5 h-5" />
               </button>
               <button
-                onClick={() => onEliminarCliente(persona)}
+                onClick={() => onEliminarEmpleado(empleado)}
                 className="text-red-600 hover:scale-110"
                 title="Eliminar"
               >
@@ -85,30 +93,31 @@ const ListaClientes = ({ personas, onActualizarCliente, onEliminarCliente }) => 
         ))}
       </div>
 
-      {personasFiltradas.length === 0 && (
+      {empleadosFiltrados.length === 0 && (
         <p className="text-center text-[#7E4300] mt-4">
-          No se encontraron personas.
+          No se encontraron empleados.
         </p>
       )}
 
-      {/* Modal de editar cliente */}
-      {clienteEditando && (
-        <FormularioCliente
+      {/* Modal de editar empleado */}
+      {empleadoEditando && (
+        <FormularioEmpleado
           datosIniciales={{
-            celular: clienteEditando.id,
-            nombre: clienteEditando.nombre,
-            email: clienteEditando.email,
+            numEmpleado: empleadoEditando.numEmpleado,
+            nombre: empleadoEditando.nombre,
+            turno: empleadoEditando.turno,
+            cargo: empleadoEditando.cargo,
           }}
           onSubmit={(datosActualizados) => {
             // Aseguramos que los datos se actualicen correctamente
-            onActualizarCliente(clienteEditando.id, datosActualizados);
-            setClienteEditando(null); // Cerramos el formulario al confirmar
+            onActualizarEmpleado(empleadoEditando.numEmpleado, datosActualizados);
+            setEmpleadoEditando(null); // Cerramos el formulario al confirmar
           }}
-          onClose={() => setClienteEditando(null)}
+          onClose={() => setEmpleadoEditando(null)}
         />
       )}
     </div>
   );
 };
 
-export default ListaClientes;
+export default ListaEmpleados;

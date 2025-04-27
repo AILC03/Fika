@@ -4,7 +4,7 @@ import {motion, AnimatePresence } from "framer-motion";
 import Pasteles from "./listaProductos";
 import PedidosTable from "./tablaPedidosAdmon";
 import ListaClientes from "./tablaClientesAdmon"
-
+import ListaEmpleados from "./tablaUsuarios";
 const navItems = [
   {
     label: "Pedidos",
@@ -249,6 +249,12 @@ const apiResponse = {
 };
 
 
+const empleados = [
+  { numEmpleado: "E001", nombre: "Juan Pérez", turno: "Mañana", cargo: "Desarrollador" },
+  { numEmpleado: "E002", nombre: "Ana García", turno: "Tarde", cargo: "Diseñadora" },
+  { numEmpleado: "E003", nombre: "Carlos López", turno: "Noche", cargo: "Analista" },
+  // Agregar más empleados según sea necesario
+];
 
 export default function NavigationMenu() {
   const [openIndex, setOpenIndex] = useState(null);
@@ -337,9 +343,9 @@ export default function NavigationMenu() {
             {currentView === "Clientes" && (
               <ListaClientes personas={Clientes} />
             )}
-            {currentView === "Usuarios" && (
-              <ListaClientes personas={Clientes} />
-            )}
+           {currentView === "Usuarios" && (
+              <ListaEmpleados empleados={empleados} />
+           )}
             {currentView === "Productos" && (
               <Pasteles apiResponse={apiResponse} />
             )}
