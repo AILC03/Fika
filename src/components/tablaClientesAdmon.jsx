@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Edit, Trash2 } from "lucide-react";
 import ConfirmModal from "./alerta";
 
