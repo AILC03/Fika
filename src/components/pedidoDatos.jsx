@@ -123,7 +123,8 @@ const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
         (c) =>
           c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           c.phone.includes(searchTerm)
-      ));
+      )
+    );
   };
 
   // Seleccionar cliente existente
@@ -160,8 +161,7 @@ const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
         const selectedFlavor = selectedType.flavors.find(
           (f) => f.id === parseInt(value)
         );
-        updatedCakes[cakeIndex].ingredients =
-          selectedFlavor?.ingredients || [];
+        updatedCakes[cakeIndex].ingredients = selectedFlavor?.ingredients || [];
       }
     }
 
@@ -290,9 +290,7 @@ const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
     const cake = cakes[cakeIndex];
     if (!cake.type) return [];
 
-    const typeData = apiData.pasteles.find(
-      (t) => t.id === parseInt(cake.type)
-    );
+    const typeData = apiData.pasteles.find((t) => t.id === parseInt(cake.type));
     if (!typeData) return [];
 
     return typeData.sizes.map((s) => ({ value: s.id, label: s.size }));
@@ -303,9 +301,7 @@ const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
     const cake = cakes[cakeIndex];
     if (!cake.type) return [];
 
-    const typeData = apiData.pasteles.find(
-      (t) => t.id === parseInt(cake.type)
-    );
+    const typeData = apiData.pasteles.find((t) => t.id === parseInt(cake.type));
     if (!typeData) return [];
 
     // Ordenar tamaños de mayor a menor
@@ -319,9 +315,7 @@ const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
 
     // Si no es el primer piso, filtrar tamaños menores que el piso anterior
     if (floorIndex > 0) {
-      const prevFloorSize = parseFloat(
-        cake.floors[floorIndex - 1].size
-      );
+      const prevFloorSize = parseFloat(cake.floors[floorIndex - 1].size);
       return sizes.filter((s) => s.numericValue < prevFloorSize);
     }
 
@@ -333,9 +327,7 @@ const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
     const cake = cakes[cakeIndex];
     if (!cake.type) return [];
 
-    const cakeType = apiData.pasteles.find(
-      (t) => t.id === parseInt(cake.type)
-    );
+    const cakeType = apiData.pasteles.find((t) => t.id === parseInt(cake.type));
     if (!cakeType?.category?.length) return [];
 
     return cakeType.category.map((c) => ({ value: c.id, label: c.name }));
@@ -366,10 +358,10 @@ const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
           alert("Todos los dígitos deben ser un único número (0-9)");
           return false;
         }
-        if (!cake.line) {
-          alert("Debe seleccionar una línea para el pastel numérico");
-          return false;
-        }
+        // if (!cake.line) {
+        //   alert("Debe seleccionar una línea para el pastel numérico");
+        //   return false;
+        // }
         if (!cake.flavor || !cake.size) {
           alert("Todos los pasteles deben tener sabor y tamaño definidos");
           return false;
@@ -410,7 +402,7 @@ const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
         }
       } else {
         // Validación para pasteles regulares
-        if (!cake.line) {
+        if (!cake.type) {
           alert("Debe seleccionar una línea para el pastel regular");
           return false;
         }
@@ -752,8 +744,8 @@ const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
                       </Select>
                     </FormControl>
 
-                    {/* Línea (Deluxe/Bizcocho) - solo para numérico y regular */}
-                    {(orderType === "numerico" || orderType === "regular") && (
+                    {/* Línea (Deluxe/Bizcocho) - solo para pisos */}
+                    {/* {orderType === "pisos" && (
                       <FormControl size="small" fullWidth>
                         <InputLabel>Línea</InputLabel>
                         <Select
@@ -770,33 +762,32 @@ const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
                           ))}
                         </Select>
                       </FormControl>
-                    )}
+                    )} */}
                   </Box>
 
                   {/* Categoría (si aplica) */}
-                  {cake.type &&
-                    getCategoryOptions(cakeIndex).length > 0 && (
-                      <FormControl size="small" fullWidth sx={{ mb: 2 }}>
-                        <InputLabel>Categoría</InputLabel>
-                        <Select
-                          value={cake.category}
-                          onChange={(e) =>
-                            handleCakeChange(
-                              cakeIndex,
-                              "category",
-                              e.target.value
-                            )
-                          }
-                          label="Categoría"
-                        >
-                          {getCategoryOptions(cakeIndex).map((option) => (
-                            <MenuItem key={option.value} value={option.value}>
-                              {option.label}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    )}
+                  {cake.type && getCategoryOptions(cakeIndex).length > 0 && (
+                    <FormControl size="small" fullWidth sx={{ mb: 2 }}>
+                      <InputLabel>Categoría</InputLabel>
+                      <Select
+                        value={cake.category}
+                        onChange={(e) =>
+                          handleCakeChange(
+                            cakeIndex,
+                            "category",
+                            e.target.value
+                          )
+                        }
+                        label="Categoría"
+                      >
+                        {getCategoryOptions(cakeIndex).map((option) => (
+                          <MenuItem key={option.value} value={option.value}>
+                            {option.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  )}
 
                   {/* Configuración para pasteles de pisos */}
                   {orderType === "pisos" && (
@@ -1022,11 +1013,7 @@ const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
                         <Select
                           value={cake.size}
                           onChange={(e) =>
-                            handleCakeChange(
-                              cakeIndex,
-                              "size",
-                              e.target.value
-                            )
+                            handleCakeChange(cakeIndex, "size", e.target.value)
                           }
                           label="Tamaño"
                           disabled={!cake.type}
@@ -1170,18 +1157,18 @@ const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
 
       <DialogActions sx={{ bgcolor: "#FFF2C9" }}>
         <Button onClick={onClose} sx={{ color: "#7E4300" }}>
-Cancelar
-</Button>
-<Button
-onClick={handleSubmit}
-variant="contained"
-sx={{ bgcolor: "#7E4300", "&:hover": { bgcolor: "#5E3200" } }}
->
-Guardar Pedido
-</Button>
-</DialogActions>
-</Dialog>
-);
+          Cancelar
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          variant="contained"
+          sx={{ bgcolor: "#7E4300", "&:hover": { bgcolor: "#5E3200" } }}
+        >
+          Guardar Pedido
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 };
 
 export default CakeOrderForm;
