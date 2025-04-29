@@ -1,225 +1,1139 @@
-import { useState } from "react";
-import { X } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  Button,
+  TextField,
+  MenuItem,
+  Checkbox,
+  FormControlLabel,
+  Select,
+  FormControl,
+  InputLabel,
+  Card,
+  CardContent,
+  Typography,
+  Tabs,
+  Tab,
+  Box,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  Divider,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
 
-const FormularioPastel = ({ datosIniciales = {}, onSubmit, onClose }) => {
-  const [pestañaActiva, setPestañaActiva] = useState("Datos");
-
-  const [form, setForm] = useState({
-    celular: "",
+const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
+  // Estados del formulario
+  const [orderType, setOrderType] = useState("regular");
+  const [customer, setCustomer] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [customerResults, setCustomerResults] = useState([]);
+  const [newCustomer, setNewCustomer] = useState({
+    name: "",
+    phone: "",
     email: "",
-    nombre: "",
-    tipo: "Regular",
-    cantidad: 1,
-    decoraciones: {
-      flores: false,
-      velas: false,
-      mensaje: false,
-    },
-    ingredientes: {
-      fresa: false,
-      chocolate: false,
-      nuez: false,
-    },
-    ...datosIniciales,
+  });
+  const [cakes, setCakes] = useState([]);
+  const [showCustomerForm, setShowCustomerForm] = useState(false);
+  const [pickupDate, setPickupDate] = useState("");
+  const [pickupTime, setPickupTime] = useState("");
+  const [status, setStatus] = useState("Pendiente");
+  const [activeTab, setActiveTab] = useState(0);
+  const [note, setNote] = useState("");
+  const [cakeText, setCakeText] = useState("");
+
+  // Tipos de pastel
+  const cakeTypes = [
+    { value: "numerico", label: "Numérico" },
+    { value: "regular", label: "Regular" },
+    { value: "pisos", label: "Pisos" },
+  ];
+
+  // Opciones de estado
+  const statusOptions = [
+    { value: "Pendiente", label: "Pendiente" },
+    { value: "Abonado", label: "Abonado" },
+    { value: "Pagado", label: "Pagado" },
+    { value: "No pagado", label: "No pagado" },
+  ];
+
+  // Inicializar pasteles según tipo de pedido
+  useEffect(() => {
+    initializeCakes();
+  }, [orderType]);
+
+  const initializeCakes = () => {
+    if (orderType === "numerico") {
+      setCakes([{ ...createEmptyCake(), digit: "" }]);
+    } else if (orderType === "pisos") {
+      // Para pasteles de pisos, inicializamos con un pastel que tiene 2 pisos
+      setCakes([
+        {
+          ...createEmptyCake(),
+          floors: [createEmptyFloor(), createEmptyFloor()],
+        },
+      ]);
+    } else {
+      setCakes([createEmptyCake()]);
+    }
+    setActiveTab(0);
+  };
+
+  const createEmptyCake = () => ({
+    type: "",
+    flavor: "",
+    size: "",
+    category: "",
+    ingredients: [],
+    digit: "",
+    floors:
+      orderType === "pisos"
+        ? [createEmptyFloor(), createEmptyFloor()]
+        : undefined,
   });
 
-  const actualizarCampo = (campo, valor) => {
-    setForm((prev) => ({ ...prev, [campo]: valor }));
-  };
+  const createEmptyFloor = () => ({
+    size: "",
+    flavor: "",
+    ingredients: [],
+  });
 
-  const toggleCheckbox = (tipo, grupo) => {
-    setForm((prev) => ({
-      ...prev,
-      [grupo]: {
-        ...prev[grupo],
-        [tipo]: !prev[grupo][tipo],
+  // Buscar clientes
+  const handleSearchCustomer = async () => {
+    // Simulación de búsqueda en API
+    const mockResults = [
+      {
+        id: 1,
+        name: "Cliente Existente 1",
+        phone: "555-1234",
+        email: "cliente1@example.com",
       },
-    }));
+      {
+        id: 2,
+        name: "Cliente Existente 2",
+        phone: "555-5678",
+        email: "cliente2@example.com",
+      },
+    ];
+    setCustomerResults(
+      mockResults.filter(
+        (c) =>
+          c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          c.phone.includes(searchTerm)
+      )
+    );
   };
 
-  const handleInput = (e, tipo) => {
-    const value = e.target.value;
-    if (tipo === "nombre") {
-      if (/^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]*$/.test(value)) {
-        actualizarCampo("nombre", value);
+  // Seleccionar cliente existente
+  const handleSelectCustomer = (selectedCustomer) => {
+    setCustomer(selectedCustomer);
+    setShowCustomerForm(false);
+  };
+
+  // Manejar cambios en nuevo cliente
+  const handleNewCustomerChange = (e) => {
+    const { name, value } = e.target;
+    setNewCustomer((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Manejar cambios en pasteles
+  const handleCakeChange = (cakeIndex, field, value) => {
+    const updatedCakes = [...cakes];
+    updatedCakes[cakeIndex][field] = value;
+
+    // Actualizar ingredientes si cambia el sabor
+    if (field === "flavor") {
+      const selectedType = apiData.pasteles.find(
+        (t) => t.id === parseInt(updatedCakes[cakeIndex].type)
+      );
+      if (selectedType) {
+        const selectedFlavor = selectedType.flavors.find(
+          (f) => f.id === parseInt(value)
+        );
+        updatedCakes[cakeIndex].ingredients = selectedFlavor?.ingredients || [];
       }
-    } else if (tipo === "celular") {
-      if (/^\d{0,10}$/.test(value)) {
-        actualizarCampo("celular", value);
+    }
+
+    setCakes(updatedCakes);
+  };
+
+  // Manejar cambios en pisos
+  const handleFloorChange = (cakeIndex, floorIndex, field, value) => {
+    const updatedCakes = [...cakes];
+    const updatedFloors = [...updatedCakes[cakeIndex].floors];
+
+    updatedFloors[floorIndex][field] = value;
+
+    // Si cambia el sabor, actualizar ingredientes
+    if (field === "flavor") {
+      const selectedType = apiData.pasteles.find(
+        (t) => t.id === parseInt(updatedCakes[cakeIndex].type)
+      );
+      if (selectedType) {
+        const selectedFlavor = selectedType.flavors.find(
+          (f) => f.id === parseInt(value)
+        );
+        updatedFloors[floorIndex].ingredients =
+          selectedFlavor?.ingredients || [];
       }
-    } else if (tipo === "email") {
-      actualizarCampo("email", value);
+    }
+
+    updatedCakes[cakeIndex].floors = updatedFloors;
+    setCakes(updatedCakes);
+  };
+
+  // Agregar más pasteles
+  const addCake = () => {
+    const newCake = createEmptyCake();
+    setCakes([...cakes, newCake]);
+    setActiveTab(cakes.length);
+  };
+
+  // Eliminar pastel
+  const removeCake = (index) => {
+    if (cakes.length <= 1) return;
+
+    const newCakes = cakes.filter((_, i) => i !== index);
+    setCakes(newCakes);
+
+    if (activeTab >= newCakes.length) {
+      setActiveTab(newCakes.length - 1);
     }
   };
 
-  const handleSubmit = () => {
-    const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
-    if (!emailValido) {
-      alert("Correo no válido.");
+  // Agregar piso a un pastel
+  const addFloor = (cakeIndex) => {
+    const updatedCakes = [...cakes];
+    if (!updatedCakes[cakeIndex].floors) {
+      updatedCakes[cakeIndex].floors = [];
+    }
+
+    if (updatedCakes[cakeIndex].floors.length >= 4) return;
+
+    updatedCakes[cakeIndex].floors.push(createEmptyFloor());
+    setCakes(updatedCakes);
+  };
+
+  // Eliminar piso de un pastel
+  const removeFloor = (cakeIndex, floorIndex) => {
+    if (cakes[cakeIndex].floors.length <= 2) return;
+
+    const updatedCakes = [...cakes];
+    updatedCakes[cakeIndex].floors = updatedCakes[cakeIndex].floors.filter(
+      (_, i) => i !== floorIndex
+    );
+    setCakes(updatedCakes);
+  };
+
+  // Enviar pedido
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!customer && !showCustomerForm) {
+      alert("Debe seleccionar o registrar un cliente");
       return;
     }
 
-    // Simular envío a API
-    console.log("Enviando datos a la API...", form);
-    setTimeout(() => {
-      console.log("Respuesta recibida: ✅");
-      if (onSubmit) onSubmit(form);
-      if (onClose) onClose();
-    }, 1000); // Simulación de espera de 1 segundo
+    if (showCustomerForm && (!newCustomer.name || !newCustomer.phone)) {
+      alert("Debe completar al menos nombre y teléfono del cliente");
+      return;
+    }
+
+    // Validación general para todos los pasteles
+    for (const cake of cakes) {
+      if (!cake.type) {
+        alert("Todos los pasteles deben tener un tipo definido");
+        return;
+      }
+
+      // Validación especial para pasteles de pisos
+      if (orderType === "pisos") {
+        for (let i = 0; i < cake.floors.length; i++) {
+          const floor = cake.floors[i];
+
+          if (!floor.size) {
+            alert(
+              `Todos los pisos del pastel ${
+                cakes.indexOf(cake) + 1
+              } deben tener tamaño definido`
+            );
+            return;
+          }
+
+          if (!floor.flavor) {
+            alert(
+              `Todos los pisos del pastel ${
+                cakes.indexOf(cake) + 1
+              } deben tener sabor definido`
+            );
+            return;
+          }
+
+          // Validar tamaños ascendentes
+          if (i > 0) {
+            const prevSize = parseFloat(cake.floors[i - 1].size);
+            const currentSize = parseFloat(floor.size);
+
+            if (currentSize >= prevSize) {
+              alert(
+                `En el pastel ${cakes.indexOf(cake) + 1}, el piso ${
+                  i + 1
+                } debe ser más pequeño que el piso ${i}`
+              );
+              return;
+            }
+          }
+        }
+      } else {
+        // Validación para pasteles regulares o numéricos
+        if (!cake.flavor || !cake.size) {
+          alert("Todos los pasteles deben tener sabor y tamaño definidos");
+          return;
+        }
+      }
+    }
+
+    // Validar dígitos en pedidos numéricos
+    if (
+      orderType === "numerico" &&
+      cakes.some((cake) => !cake.digit || !/^\d$/.test(cake.digit))
+    ) {
+      alert("Todos los dígitos deben ser un único número (0-9)");
+      return;
+    }
+
+    const orderData = {
+      orderType,
+      cakes,
+      customer: customer || newCustomer,
+      isNewCustomer: showCustomerForm,
+      pickupDate,
+      pickupTime,
+      status,
+      note,
+      cakeText,
+    };
+
+    console.log("Datos del pedido:", orderData);
+    if (onOrderSubmit) onOrderSubmit(orderData);
+
+    // Resetear formulario
+    setCustomer(null);
+    setNewCustomer({ name: "", phone: "", email: "" });
+    setShowCustomerForm(false);
+    setNote("");
+    setCakeText("");
+    setStatus("Pendiente");
+    initializeCakes();
+    onClose();
+  };
+
+  // Obtener opciones disponibles
+  const getAvailableOptions = (cakeIndex, field) => {
+    const cake = cakes[cakeIndex];
+
+    switch (field) {
+      case "type":
+        return apiData.pasteles.map((t) => ({
+          value: t.id,
+          label: t.type.replace("_", " "),
+        }));
+
+      case "flavor":
+        if (!cake.type) return [];
+        const selectedType = apiData.pasteles.find(
+          (t) => t.id === parseInt(cake.type)
+        );
+        if (!selectedType) return [];
+
+        return selectedType.flavors.map((f) => ({
+          value: f.id,
+          label: f.name,
+          disabled: f.ingredients.some((i) => !i.available),
+        }));
+
+      case "size":
+        if (!cake.type) return [];
+        const typeData = apiData.pasteles.find(
+          (t) => t.id === parseInt(cake.type)
+        );
+        if (!typeData) return [];
+
+        return typeData.sizes.map((s) => ({ value: s.id, label: s.size }));
+
+      case "category":
+        if (!cake.type) return [];
+        const cakeType = apiData.pasteles.find(
+          (t) => t.id === parseInt(cake.type)
+        );
+        if (!cakeType?.category?.length) return [];
+
+        return cakeType.category.map((c) => ({ value: c.id, label: c.name }));
+
+      default:
+        return [];
+    }
+  };
+
+  // Obtener opciones de tamaño para pisos con restricciones
+  const getFloorSizeOptions = (cakeIndex, floorIndex) => {
+    if (!cakes[cakeIndex].type) return [];
+
+    const typeData = apiData.pasteles.find(
+      (t) => t.id === parseInt(cakes[cakeIndex].type)
+    );
+    if (!typeData) return [];
+
+    const sizes = typeData.sizes
+      .map((s) => ({
+        value: s.id,
+        label: s.size,
+        numericValue: parseFloat(s.size),
+      }))
+      .sort((a, b) => b.numericValue - a.numericValue); // Orden descendente
+
+    // Si no es el primer piso, filtrar tamaños menores que el piso anterior
+    if (floorIndex > 0) {
+      const prevFloorSize = parseFloat(
+        cakes[cakeIndex].floors[floorIndex - 1].size
+      );
+      return sizes.filter((s) => s.numericValue < prevFloorSize);
+    }
+
+    return sizes;
   };
 
   return (
-    <div className="fixed top-24 left-1/2 -translate-x-1/2 bg-yellow-100 rounded-xl shadow-2xl p-4 w-[400px] border border-yellow-400 z-50">
-      {/* Cerrar */}
-      <button
-        onClick={onClose}
-        className="absolute top-2 right-2 text-red-600 hover:scale-110"
-      >
-        <X className="w-6 h-6" />
-      </button>
-
-      {/* Pestañas */}
-      <div className="flex gap-2 mb-4 text-sm font-semibold text-amber-800">
-        {["Datos", "Pastel", "Decoraciones", "Detalles"].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setPestañaActiva(tab)}
-            className={`px-3 py-1 rounded-lg ${
-              pestañaActiva === tab ? "bg-white shadow" : "hover:bg-white/70"
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
-      {/* Contenido */}
-      <div className="space-y-4">
-        {pestañaActiva === "Datos" && (
-          <>
-            <div>
-              <label className="block text-sm text-amber-800">Celular</label>
-              <input
-                type="text"
-                value={form.celular}
-                onChange={(e) => handleInput(e, "celular")}
-                placeholder="10 dígitos"
-                className="w-full p-2 rounded-md bg-white border border-yellow-400"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-amber-800">Email</label>
-              <input
-                type="email"
-                value={form.email}
-                onChange={(e) => handleInput(e, "email")}
-                placeholder="ejemplo@correo.com"
-                className="w-full p-2 rounded-md bg-white border border-yellow-400"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-amber-800">Nombre</label>
-              <input
-                type="text"
-                value={form.nombre}
-                onChange={(e) => handleInput(e, "nombre")}
-                placeholder="Nombre del cliente"
-                className="w-full p-2 rounded-md bg-white border border-yellow-400"
-              />
-            </div>
-          </>
-        )}
-
-        {pestañaActiva === "Pastel" && (
-          <>
-            <div>
-              <label className="block text-sm text-amber-800">
-                Tipo de pastel
-              </label>
-              <select
-                value={form.tipo}
-                onChange={(e) => actualizarCampo("tipo", e.target.value)}
-                className="w-full p-2 rounded-md bg-white border border-yellow-400"
-              >
-                <option value="Regular">Regular</option>
-                <option value="Personalizado">Personalizado</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm text-amber-800">Cantidad</label>
-              <select
-                value={form.cantidad}
-                onChange={(e) =>
-                  actualizarCampo("cantidad", parseInt(e.target.value))
-                }
-                className="w-full p-2 rounded-md bg-white border border-yellow-400"
-              >
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </>
-        )}
-
-        {pestañaActiva === "Decoraciones" && (
-          <>
-            <div>
-              <p className="text-sm font-semibold text-amber-800 mb-1">
-                Decoraciones
-              </p>
-              {Object.keys(form.decoraciones).map((key) => (
-                <label key={key} className="block text-sm text-amber-800">
-                  <input
-                    type="checkbox"
-                    checked={form.decoraciones[key]}
-                    onChange={() => toggleCheckbox(key, "decoraciones")}
-                    className="mr-2"
-                  />
-                  {key}
-                </label>
-              ))}
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-amber-800 mb-1">
-                Ingredientes
-              </p>
-              {Object.keys(form.ingredientes).map((key) => (
-                <label key={key} className="block text-sm text-amber-800">
-                  <input
-                    type="checkbox"
-                    checked={form.ingredientes[key]}
-                    onChange={() => toggleCheckbox(key, "ingredientes")}
-                    className="mr-2"
-                  />
-                  {key}
-                </label>
-              ))}
-            </div>
-          </>
-        )}
-
-        {pestañaActiva === "Detalles" && (
-          <div className="text-sm text-amber-800">
-            Aquí puedes agregar instrucciones especiales u observaciones sobre
-            el pastel.
-          </div>
-        )}
-      </div>
-
-      {/* Botón Aceptar */}
-      <div className="flex justify-end mt-4">
-        <button
-          onClick={handleSubmit}
-          className="bg-yellow-400 text-amber-800 px-4 py-2 rounded-lg font-semibold hover:brightness-105"
+    <Dialog open={isOpen} onClose={onClose} maxWidth="md" fullWidth>
+      <DialogTitle sx={{ bgcolor: "#FFF2C9", color: "#7E4300" }}>
+        Registro de Pedido
+        <IconButton
+          aria-label="close"
+          onClick={onClose}
+          sx={{
+            position: "absolute",
+            right: 8,
+            top: 8,
+            color: "#7E4300",
+          }}
         >
-          Aceptar
-        </button>
-      </div>
-    </div>
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+
+      <DialogContent dividers sx={{ bgcolor: "#FFF2C9" }}>
+        {/* Tipo de pedido */}
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="subtitle1" sx={{ color: "#7E4300", mb: 1 }}>
+            Tipo de Pedido
+          </Typography>
+          <Box sx={{ display: "flex", gap: 1 }}>
+            {cakeTypes.map((type) => (
+              <Button
+                key={type.value}
+                variant={orderType === type.value ? "contained" : "outlined"}
+                onClick={() => setOrderType(type.value)}
+                sx={{
+                  backgroundColor:
+                    orderType === type.value ? "#FFD538" : "inherit",
+                  color: "#7E4300",
+                  "&:hover": {
+                    backgroundColor:
+                      orderType === type.value
+                        ? "#FFD538"
+                        : "rgba(255, 213, 56, 0.1)",
+                  },
+                }}
+              >
+                {type.label}
+              </Button>
+            ))}
+          </Box>
+          <Typography variant="caption" sx={{ color: "#7E4300", mt: 1 }}>
+            {orderType === "numerico" &&
+              "Se creará un pastel por cada dígito del número (mínimo 1)"}
+            {orderType === "regular" &&
+              "Cada pastel se configura individualmente"}
+            {orderType === "pisos" &&
+              "Cada pastel puede tener 2-4 pisos. Tamaños descendentes (el piso superior más pequeño). Sabores independientes."}
+          </Typography>
+        </Box>
+
+        {/* Información del cliente */}
+        <Paper elevation={3} sx={{ p: 2, mb: 3, bgcolor: "#FFD538" }}>
+          <Typography variant="subtitle1" sx={{ color: "#7E4300", mb: 2 }}>
+            Información del Cliente
+          </Typography>
+
+          {!customer && !showCustomerForm ? (
+            <>
+              <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+                <TextField
+                  label="Buscar cliente por nombre o teléfono"
+                  variant="outlined"
+                  size="small"
+                  fullWidth
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <Button
+                  variant="contained"
+                  onClick={handleSearchCustomer}
+                  sx={{ bgcolor: "#7E4300", "&:hover": { bgcolor: "#5E3200" } }}
+                >
+                  Buscar
+                </Button>
+              </Box>
+
+              {customerResults.length > 0 && (
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="caption" sx={{ color: "#7E4300" }}>
+                    Clientes encontrados:
+                  </Typography>
+                  <Box
+                    sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+                  >
+                    {customerResults.map((cust) => (
+                      <Card
+                        key={cust.id}
+                        onClick={() => handleSelectCustomer(cust)}
+                        sx={{
+                          cursor: "pointer",
+                          "&:hover": { bgcolor: "rgba(255, 213, 56, 0.5)" },
+                          bgcolor: "#FFF2C9",
+                        }}
+                      >
+                        <CardContent sx={{ p: 1 }}>
+                          <Typography variant="body2">{cust.name}</Typography>
+                          <Typography variant="caption">
+                            {cust.phone}
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </Box>
+                </Box>
+              )}
+
+              <Button
+                variant="outlined"
+                onClick={() => setShowCustomerForm(true)}
+                sx={{ color: "#7E4300", borderColor: "#7E4300" }}
+              >
+                Registrar nuevo cliente
+              </Button>
+            </>
+          ) : showCustomerForm ? (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <Typography variant="subtitle2" sx={{ color: "#7E4300" }}>
+                Nuevo Cliente
+              </Typography>
+              <Box
+                sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}
+              >
+                <TextField
+                  label="Nombre*"
+                  name="name"
+                  value={newCustomer.name}
+                  onChange={handleNewCustomerChange}
+                  required
+                  size="small"
+                />
+                <TextField
+                  label="Teléfono*"
+                  name="phone"
+                  value={newCustomer.phone}
+                  onChange={handleNewCustomerChange}
+                  required
+                  size="small"
+                />
+                <TextField
+                  label="Email"
+                  name="email"
+                  value={newCustomer.email}
+                  onChange={handleNewCustomerChange}
+                  size="small"
+                />
+              </Box>
+              <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
+                <Button
+                  variant="outlined"
+                  onClick={() => setShowCustomerForm(false)}
+                  sx={{ color: "#7E4300", borderColor: "#7E4300" }}
+                >
+                  Cancelar
+                </Button>
+              </Box>
+            </Box>
+          ) : (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Box>
+                <Typography variant="body1">{customer.name}</Typography>
+                <Typography variant="caption">{customer.phone}</Typography>
+              </Box>
+              <Button
+                variant="text"
+                onClick={() => setCustomer(null)}
+                sx={{ color: "#7E4300" }}
+              >
+                Cambiar cliente
+              </Button>
+            </Box>
+          )}
+        </Paper>
+
+        {/* Estado del pedido */}
+        <Box sx={{ mb: 3 }}>
+          <FormControl fullWidth size="small">
+            <InputLabel>Estado del Pedido</InputLabel>
+            <Select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              label="Estado del Pedido"
+            >
+              {statusOptions.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+
+        {/* Configuración de pasteles */}
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="subtitle1" sx={{ color: "#7E4300", mb: 1 }}>
+            {orderType === "numerico"
+              ? "Configuración de Dígitos"
+              : orderType === "pisos"
+              ? "Configuración de Pasteles de Pisos"
+              : "Configuración de Pasteles"}
+          </Typography>
+
+          <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+            <Tabs
+              value={activeTab}
+              onChange={(_, newValue) => setActiveTab(newValue)}
+              variant="scrollable"
+              scrollButtons="auto"
+            >
+              {cakes.map((_, index) => (
+                <Tab
+                  key={index}
+                  label={
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      {orderType === "numerico"
+                        ? `Dígito ${index + 1}`
+                        : orderType === "pisos"
+                        ? `Pastel ${index + 1}`
+                        : `Pastel ${index + 1}`}
+                      {cakes.length > 1 && (
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeCake(index);
+                          }}
+                          sx={{ ml: 1, color: "error.main" }}
+                        >
+                          <RemoveIcon fontSize="small" />
+                        </IconButton>
+                      )}
+                    </Box>
+                  }
+                />
+              ))}
+            </Tabs>
+          </Box>
+
+          {cakes.map((cake, cakeIndex) => (
+            <Box
+              key={cakeIndex}
+              role="tabpanel"
+              hidden={activeTab !== cakeIndex}
+              id={`cake-tabpanel-${cakeIndex}`}
+              aria-labelledby={`cake-tab-${cakeIndex}`}
+            >
+              {activeTab === cakeIndex && (
+                <Box sx={{ p: 2 }}>
+                  {/* Para pedidos numéricos: campo para el dígito */}
+                  {orderType === "numerico" && (
+                    <TextField
+                      label="Dígito (0-9)"
+                      value={cake.digit}
+                      onChange={(e) =>
+                        handleCakeChange(cakeIndex, "digit", e.target.value)
+                      }
+                      inputProps={{ maxLength: 1 }}
+                      size="small"
+                      fullWidth
+                      sx={{ mb: 2 }}
+                    />
+                  )}
+
+                  {/* Configuración común para todos los tipos de pasteles */}
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: 2,
+                      mb: 2,
+                    }}
+                  >
+                    {/* Tipo de pastel */}
+                    <FormControl size="small" fullWidth>
+                      <InputLabel>Tipo de Pastel</InputLabel>
+                      <Select
+                        value={cake.type}
+                        onChange={(e) =>
+                          handleCakeChange(cakeIndex, "type", e.target.value)
+                        }
+                        label="Tipo de Pastel"
+                      >
+                        {getAvailableOptions(cakeIndex, "type").map(
+                          (option) => (
+                            <MenuItem
+                              key={option.value}
+                              value={option.value}
+                              disabled={option.disabled}
+                            >
+                              {option.label}
+                            </MenuItem>
+                          )
+                        )}
+                      </Select>
+                    </FormControl>
+
+                    {/* Categoría (si aplica) */}
+                    {cake.type &&
+                      apiData.pasteles.find((t) => t.id === parseInt(cake.type))
+                        ?.category?.length > 0 && (
+                        <FormControl size="small" fullWidth>
+                          <InputLabel>Categoría</InputLabel>
+                          <Select
+                            value={cake.category}
+                            onChange={(e) =>
+                              handleCakeChange(
+                                cakeIndex,
+                                "category",
+                                e.target.value
+                              )
+                            }
+                            label="Categoría"
+                          >
+                            {getAvailableOptions(cakeIndex, "category").map(
+                              (option) => (
+                                <MenuItem
+                                  key={option.value}
+                                  value={option.value}
+                                >
+                                  {option.label}
+                                </MenuItem>
+                              )
+                            )}
+                          </Select>
+                        </FormControl>
+                      )}
+                  </Box>
+
+                  {/* Configuración específica para pasteles de pisos */}
+                  {orderType === "pisos" && (
+                    <Box sx={{ mt: 3 }}>
+                      <Typography
+                        variant="subtitle2"
+                        sx={{ color: "#7E4300", mb: 2 }}
+                      >
+                        Configuración de Pisos
+                      </Typography>
+
+                      {cake.floors?.map((floor, floorIndex) => (
+                        <Paper
+                          key={floorIndex}
+                          elevation={2}
+                          sx={{ p: 2, mb: 2, bgcolor: "#FFE9A0" }}
+                        >
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              mb: 1,
+                            }}
+                          >
+                            <Typography variant="subtitle2">
+                              Piso {floorIndex + 1}
+                            </Typography>
+                            {cake.floors.length > 2 && (
+                              <IconButton
+                                size="small"
+                                onClick={() =>
+                                  removeFloor(cakeIndex, floorIndex)
+                                }
+                                sx={{ color: "error.main" }}
+                              >
+                                <RemoveIcon fontSize="small" />
+                              </IconButton>
+                            )}
+                          </Box>
+
+                          <Box
+                            sx={{
+                              display: "grid",
+                              gridTemplateColumns: "1fr 1fr",
+                              gap: 2,
+                            }}
+                          >
+                            {/* Sabor del piso */}
+                            <FormControl size="small" fullWidth>
+                              <InputLabel>Sabor</InputLabel>
+                              <Select
+                                value={floor.flavor}
+                                onChange={(e) =>
+                                  handleFloorChange(
+                                    cakeIndex,
+                                    floorIndex,
+                                    "flavor",
+                                    e.target.value
+                                  )
+                                }
+                                label="Sabor"
+                                disabled={!cake.type}
+                              >
+                                {cake.type &&
+                                  getAvailableOptions(cakeIndex, "flavor").map(
+                                    (option) => (
+                                      <MenuItem
+                                        key={option.value}
+                                        value={option.value}
+                                        disabled={option.disabled}
+                                      >
+                                        {option.disabled
+                                          ? `${option.label} (No disponible)`
+                                          : option.label}
+                                      </MenuItem>
+                                    )
+                                  )}
+                              </Select>
+                            </FormControl>
+
+                            {/* Tamaño del piso */}
+                            <FormControl size="small" fullWidth>
+                              <InputLabel>Tamaño</InputLabel>
+                              <Select
+                                value={floor.size}
+                                onChange={(e) =>
+                                  handleFloorChange(
+                                    cakeIndex,
+                                    floorIndex,
+                                    "size",
+                                    e.target.value
+                                  )
+                                }
+                                label="Tamaño"
+                                disabled={!cake.type}
+                              >
+                                {getFloorSizeOptions(cakeIndex, floorIndex).map(
+                                  (option) => (
+                                    <MenuItem
+                                      key={option.value}
+                                      value={option.value}
+                                    >
+                                      {option.label}
+                                    </MenuItem>
+                                  )
+                                )}
+                              </Select>
+                            </FormControl>
+                          </Box>
+
+                          {/* Ingredientes del piso */}
+                          {floor.flavor && floor.ingredients?.length > 0 && (
+                            <Box sx={{ mt: 2 }}>
+                              <Typography
+                                variant="subtitle2"
+                                sx={{ color: "#7E4300", mb: 1 }}
+                              >
+                                Ingredientes:
+                              </Typography>
+                              <Box
+                                sx={{
+                                  display: "grid",
+                                  gridTemplateColumns: "1fr 1fr",
+                                  gap: 1,
+                                }}
+                              >
+                                {floor.ingredients.map((ing, i) => (
+                                  <FormControlLabel
+                                    key={i}
+                                    control={
+                                      <Checkbox
+                                        checked={true}
+                                        disabled
+                                        sx={{
+                                          color: ing.available
+                                            ? "success.main"
+                                            : "error.main",
+                                          "&.Mui-checked": {
+                                            color: ing.available
+                                              ? "success.main"
+                                              : "error.main",
+                                          },
+                                        }}
+                                      />
+                                    }
+                                    label={
+                                      <Typography
+                                        variant="body2"
+                                        sx={
+                                          !ing.available
+                                            ? {
+                                                textDecoration: "line-through",
+                                                color: "text.disabled",
+                                              }
+                                            : {}
+                                        }
+                                      >
+                                        {ing.name}
+                                      </Typography>
+                                    }
+                                  />
+                                ))}
+                              </Box>
+                            </Box>
+                          )}
+                        </Paper>
+                      ))}
+
+                      {/* Botón para agregar más pisos */}
+                      {cake.floors && cake.floors.length < 4 && (
+                        <Button
+                          variant="outlined"
+                          startIcon={<AddIcon />}
+                          onClick={() => addFloor(cakeIndex)}
+                          sx={{ color: "#7E4300", borderColor: "#7E4300" }}
+                        >
+                          Agregar Piso
+                        </Button>
+                      )}
+                    </Box>
+                  )}
+
+                  {/* Configuración para pasteles regulares */}
+                  {orderType !== "pisos" && orderType !== "numerico" && (
+                    <Box
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr",
+                        gap: 2,
+                      }}
+                    >
+                      {/* Sabor */}
+                      <FormControl size="small" fullWidth>
+                        <InputLabel>Sabor</InputLabel>
+                        <Select
+                          value={cake.flavor}
+                          onChange={(e) =>
+                            handleCakeChange(
+                              cakeIndex,
+                              "flavor",
+                              e.target.value
+                            )
+                          }
+                          label="Sabor"
+                          disabled={!cake.type}
+                        >
+                          {getAvailableOptions(cakeIndex, "flavor").map(
+                            (option) => (
+                              <MenuItem
+                                key={option.value}
+                                value={option.value}
+                                disabled={option.disabled}
+                              >
+                                {option.disabled
+                                  ? `${option.label} (No disponible)`
+                                  : option.label}
+                              </MenuItem>
+                            )
+                          )}
+                        </Select>
+                      </FormControl>
+
+                      {/* Tamaño */}
+                      <FormControl size="small" fullWidth>
+                        <InputLabel>Tamaño</InputLabel>
+                        <Select
+                          value={cake.size}
+                          onChange={(e) =>
+                            handleCakeChange(cakeIndex, "size", e.target.value)
+                          }
+                          label="Tamaño"
+                          disabled={!cake.type}
+                        >
+                          {getAvailableOptions(cakeIndex, "size").map(
+                            (option) => (
+                              <MenuItem key={option.value} value={option.value}>
+                                {option.label}
+                              </MenuItem>
+                            )
+                          )}
+                        </Select>
+                      </FormControl>
+
+                      {/* Ingredientes */}
+                      {cake.flavor && cake.ingredients.length > 0 && (
+                        <Box sx={{ gridColumn: "1 / -1" }}>
+                          <Typography
+                            variant="subtitle2"
+                            sx={{ color: "#7E4300", mb: 1 }}
+                          >
+                            Ingredientes:
+                          </Typography>
+                          <Box
+                            sx={{
+                              display: "grid",
+                              gridTemplateColumns: "1fr 1fr",
+                              gap: 1,
+                            }}
+                          >
+                            {cake.ingredients.map((ing, i) => (
+                              <FormControlLabel
+                                key={i}
+                                control={
+                                  <Checkbox
+                                    checked={true}
+                                    disabled
+                                    sx={{
+                                      color: ing.available
+                                        ? "success.main"
+                                        : "error.main",
+                                      "&.Mui-checked": {
+                                        color: ing.available
+                                          ? "success.main"
+                                          : "error.main",
+                                      },
+                                    }}
+                                  />
+                                }
+                                label={
+                                  <Typography
+                                    variant="body2"
+                                    sx={
+                                      !ing.available
+                                        ? {
+                                            textDecoration: "line-through",
+                                            color: "text.disabled",
+                                          }
+                                        : {}
+                                    }
+                                  >
+                                    {ing.name}
+                                  </Typography>
+                                }
+                              />
+                            ))}
+                          </Box>
+                        </Box>
+                      )}
+                    </Box>
+                  )}
+                </Box>
+              )}
+            </Box>
+          ))}
+
+          {/* Botón para agregar más pasteles */}
+          <Button
+            variant="outlined"
+            startIcon={<AddIcon />}
+            onClick={addCake}
+            sx={{ mt: 2, color: "#7E4300", borderColor: "#7E4300" }}
+          >
+            Agregar Pastel
+          </Button>
+        </Box>
+
+        {/* Texto para el pastel */}
+        <Box sx={{ mb: 3 }}>
+          <TextField
+            label="Texto para el pastel (ej. 'Feliz Cumpleaños')"
+            variant="outlined"
+            fullWidth
+            value={cakeText}
+            onChange={(e) => setCakeText(e.target.value)}
+            size="small"
+          />
+        </Box>
+
+        {/* Notas adicionales */}
+        <Box sx={{ mb: 3 }}>
+          <TextField
+            label="Notas adicionales (instrucciones especiales, detalles, etc.)"
+            variant="outlined"
+            fullWidth
+            multiline
+            rows={3}
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            size="small"
+          />
+        </Box>
+
+        {/* Fecha y hora de recolección */}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 2,
+            mb: 3,
+          }}
+        >
+          <TextField
+            label="Fecha de recolección"
+            type="date"
+            value={pickupDate}
+            onChange={(e) => setPickupDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            size="small"
+          />
+          <TextField
+            label="Hora de recolección"
+            type="time"
+            value={pickupTime}
+            onChange={(e) => setPickupTime(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            size="small"
+          />
+        </Box>
+      </DialogContent>
+
+      <DialogActions sx={{ bgcolor: "#FFF2C9" }}>
+        <Button onClick={onClose} sx={{ color: "#7E4300" }}>
+          Cancelar
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          variant="contained"
+          sx={{
+            bgcolor: "#FFD538",
+            color: "#7E4300",
+            "&:hover": { bgcolor: "#FFE070" },
+          }}
+        >
+          Registrar Pedido
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 
-export default FormularioPastel;
+export default CakeOrderForm;

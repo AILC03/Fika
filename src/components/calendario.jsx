@@ -1,28 +1,534 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import PedidoForm from "./pedidoDatos";
+import CakeOrderForm from "./pedidoDatos";
 
 const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date()); // Fecha actual
   const [showForm, setShowForm] = useState(false); // Controla la visibilidad del formulario
   const [selectedDay, setSelectedDay] = useState(null); // Día seleccionado
-  const [selectedPedido, setSelectedPedido] = useState(null);
+  const [apiData, setApiData] = useState(null); // Datos de la API simulados
+  const [isModalOpen, setIsModalOpen] = useState(false); // Estado del modal
 
-  // Obtiene el nombre del mes y el año actual
-  const monthNames = [
-    "Enero",
-    "Febrero",
-    "Marzo",
-    "Abril",
-    "Mayo",
-    "Junio",
-    "Julio",
-    "Agosto",
-    "Septiembre",
-    "Octubre",
-    "Noviembre",
-    "Diciembre",
-  ];
+  // Datos simulados de la API
+  const mockApiData = {
+    pasteles: [
+      {
+        id: 1,
+        type: "DELUXE",
+        flavors: [
+          {
+            id: 1,
+            name: "Frutos Rojos",
+            ingredients: [
+              {
+                id: 1,
+                name: "Fresa",
+                available: true,
+              },
+              {
+                id: 5,
+                name: "Queso Mascarpone",
+                available: true,
+              },
+              {
+                id: 6,
+                name: "Frambuesa",
+                available: true,
+              },
+              {
+                id: 7,
+                name: "Zarzamora",
+                available: true,
+              },
+            ],
+          },
+          {
+            id: 5,
+            name: "Pellizco",
+            ingredients: [
+              {
+                id: 8,
+                name: "Dulce de leche",
+                available: true,
+              },
+              {
+                id: 9,
+                name: "Almendra",
+                available: true,
+              },
+            ],
+          },
+          {
+            id: 7,
+            name: "Pasion",
+            ingredients: [
+              {
+                id: 1,
+                name: "Fresa",
+                available: true,
+              },
+              {
+                id: 2,
+                name: "Platano",
+                available: true,
+              },
+              {
+                id: 3,
+                name: "Nutella",
+                available: true,
+              },
+              {
+                id: 4,
+                name: "Nuez",
+                available: true,
+              },
+            ],
+          },
+          {
+            id: 8,
+            name: "Fresas con Crema",
+            ingredients: [],
+          },
+          {
+            id: 9,
+            name: "Barroco",
+            ingredients: [
+              {
+                id: 1,
+                name: "Fresa",
+                available: true,
+              },
+              {
+                id: 3,
+                name: "Nutella",
+                available: true,
+              },
+              {
+                id: 4,
+                name: "Nuez",
+                available: true,
+              },
+            ],
+          },
+        ],
+        sizes: [
+          {
+            id: 1,
+            size: "3",
+          },
+          {
+            id: 2,
+            size: "4",
+          },
+          {
+            id: 3,
+            size: "6",
+          },
+          {
+            id: 5,
+            size: "9",
+          },
+          {
+            id: 6,
+            size: "12",
+          },
+          {
+            id: 7,
+            size: "1/4 de Plancha",
+          },
+          {
+            id: 8,
+            size: "1/2 Plancha",
+          },
+        ],
+        category: [],
+      },
+      {
+        id: 2,
+        type: "SPONGE_CAKE",
+        flavors: [
+          {
+            id: 2,
+            name: "Chocolate",
+            ingredients: [],
+          },
+          {
+            id: 10,
+            name: "Blueberry",
+            ingredients: [
+              {
+                id: 10,
+                name: "Cheesecake",
+                available: true,
+              },
+              {
+                id: 11,
+                name: "Curl de limon",
+                available: true,
+              },
+            ],
+          },
+          {
+            id: 11,
+            name: "Vainilla",
+            ingredients: [
+              {
+                id: 12,
+                name: "Cremoso de frutos rojos",
+                available: true,
+              },
+              {
+                id: 13,
+                name: "Confitura de frambuesa",
+                available: true,
+              },
+            ],
+          },
+          {
+            id: 12,
+            name: "Red Velvet",
+            ingredients: [
+              {
+                id: 10,
+                name: "Cheesecake",
+                available: true,
+              },
+              {
+                id: 14,
+                name: "Galleta de cheesecake",
+                available: true,
+              },
+            ],
+          },
+          {
+            id: 13,
+            name: "Zanahoria",
+            ingredients: [],
+          },
+        ],
+        sizes: [
+          {
+            id: 1,
+            size: "3",
+          },
+          {
+            id: 4,
+            size: "8",
+          },
+          {
+            id: 6,
+            size: "12",
+          },
+        ],
+        category: [],
+      },
+      {
+        id: 3,
+        type: "TRADITIONAL",
+        flavors: [
+          {
+            id: 1,
+            name: "Frutos Rojos",
+            ingredients: [
+              {
+                id: 1,
+                name: "Fresa",
+                available: true,
+              },
+              {
+                id: 5,
+                name: "Queso Mascarpone",
+                available: true,
+              },
+              {
+                id: 6,
+                name: "Frambuesa",
+                available: true,
+              },
+              {
+                id: 7,
+                name: "Zarzamora",
+                available: true,
+              },
+            ],
+          },
+          {
+            id: 5,
+            name: "Pellizco",
+            ingredients: [
+              {
+                id: 8,
+                name: "Dulce de leche",
+                available: true,
+              },
+              {
+                id: 9,
+                name: "Almendra",
+                available: true,
+              },
+            ],
+          },
+          {
+            id: 7,
+            name: "Pasion",
+            ingredients: [
+              {
+                id: 1,
+                name: "Fresa",
+                available: true,
+              },
+              {
+                id: 2,
+                name: "Platano",
+                available: true,
+              },
+              {
+                id: 3,
+                name: "Nutella",
+                available: true,
+              },
+              {
+                id: 4,
+                name: "Nuez",
+                available: true,
+              },
+            ],
+          },
+          {
+            id: 8,
+            name: "Fresas con Crema",
+            ingredients: [],
+          },
+          {
+            id: 9,
+            name: "Barroco",
+            ingredients: [
+              {
+                id: 1,
+                name: "Fresa",
+                available: true,
+              },
+              {
+                id: 3,
+                name: "Nutella",
+                available: true,
+              },
+              {
+                id: 4,
+                name: "Nuez",
+                available: true,
+              },
+            ],
+          },
+        ],
+        sizes: [
+          {
+            id: 1,
+            size: "3",
+          },
+          {
+            id: 2,
+            size: "4",
+          },
+          {
+            id: 3,
+            size: "6",
+          },
+          {
+            id: 5,
+            size: "9",
+          },
+          {
+            id: 6,
+            size: "12",
+          },
+          {
+            id: 7,
+            size: "1/4 de Plancha",
+          },
+          {
+            id: 8,
+            size: "1/2 Plancha",
+          },
+        ],
+        category: [
+          {
+            id: 1,
+            name: "Tartas",
+            flavors: [
+              {
+                id: 1,
+                name: "Frutos Rojos",
+              },
+              {
+                id: 14,
+                name: "Limon",
+              },
+            ],
+            sizes: [
+              {
+                id: 1,
+                size: "3",
+              },
+              {
+                id: 5,
+                size: "9",
+              },
+            ],
+          },
+          {
+            id: 2,
+            name: "3 Leches",
+            flavors: [],
+            sizes: [
+              {
+                id: 4,
+                size: "8",
+              },
+              {
+                id: 6,
+                size: "12",
+              },
+            ],
+          },
+          {
+            id: 3,
+            name: "Chocoflan",
+            flavors: [],
+            sizes: [
+              {
+                id: 5,
+                size: "9",
+              },
+            ],
+          },
+          {
+            id: 4,
+            name: "Cheesecake",
+            flavors: [
+              {
+                id: 1,
+                name: "Frutos Rojos",
+              },
+              {
+                id: 6,
+                name: "Temporada",
+              },
+            ],
+            sizes: [
+              {
+                id: 1,
+                size: "3",
+              },
+              {
+                id: 3,
+                size: "6",
+              },
+              {
+                id: 5,
+                size: "9",
+              },
+            ],
+          },
+          {
+            id: 5,
+            name: "Tiramisú",
+            flavors: [],
+            sizes: [
+              {
+                id: 1,
+                size: "3",
+              },
+              {
+                id: 5,
+                size: "9",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 4,
+        type: "CLASIC",
+        flavors: [
+          {
+            id: 1,
+            name: "Frutos Rojos",
+            ingredients: [
+              {
+                id: 1,
+                name: "Fresa",
+                available: true,
+              },
+              {
+                id: 5,
+                name: "Queso Mascarpone",
+                available: true,
+              },
+              {
+                id: 6,
+                name: "Frambuesa",
+                available: true,
+              },
+              {
+                id: 7,
+                name: "Zarzamora",
+                available: true,
+              },
+            ],
+          },
+          {
+            id: 2,
+            name: "Chocolate",
+            ingredients: [],
+          },
+          {
+            id: 3,
+            name: "Guayaba",
+            ingredients: [],
+          },
+          {
+            id: 4,
+            name: "Mango",
+            ingredients: [],
+          },
+          {
+            id: 5,
+            name: "Pellizco",
+            ingredients: [
+              {
+                id: 8,
+                name: "Dulce de leche",
+                available: true,
+              },
+              {
+                id: 9,
+                name: "Almendra",
+                available: true,
+              },
+            ],
+          },
+          {
+            id: 6,
+            name: "Temporada",
+            ingredients: [],
+          },
+        ],
+        sizes: [
+          {
+            id: 4,
+            size: "8",
+          },
+        ],
+        category: [],
+      },
+    ],
+  };
+
+  // Cargar datos simulados en lugar de la API
+  useEffect(() => {
+    setApiData(mockApiData); // Asigna los datos simulados al estado
+  }, []);
 
   // Cambia al mes anterior
   const handlePrevMonth = () => {
@@ -43,9 +549,10 @@ const Calendar = () => {
     return new Date(year, month + 1, 0).getDate();
   };
 
-  const handleEnviar = (datos) => {
-    console.log("Datos enviados:", datos);
-    setShowForm(false);
+  // Maneja el envío del pedido
+  const handleOrderSubmit = (orderData) => {
+    console.log("Pedido enviado:", orderData);
+    setIsModalOpen(false); // Cierra el modal después de enviar
   };
 
   // Genera los días del mes actual
@@ -94,7 +601,7 @@ const Calendar = () => {
           onDoubleClick={() => {
             if (!isPastDay) {
               setSelectedDay(day);
-              setShowForm(true);
+              setIsModalOpen(true);
             }
           }}
         >
@@ -105,6 +612,8 @@ const Calendar = () => {
 
     return days;
   };
+
+  // if (!apiData) return <div>Cargando...</div>; // Muestra un mensaje mientras se cargan los datos
 
   return (
     <div className="w-full h-full p-4 flex flex-col">
@@ -117,7 +626,9 @@ const Calendar = () => {
           <ChevronLeft className="w-5 h-5" /> {/* Flecha izquierda */}
         </button>
         <h2 className="text-xl font-bold">
-          {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+          {`${currentDate.toLocaleString("default", {
+            month: "long",
+          })} ${currentDate.getFullYear()}`}
         </h2>
         <button
           onClick={handleNextMonth}
@@ -144,14 +655,12 @@ const Calendar = () => {
       </div>
 
       {/* Formulario de nuevo pedido */}
-      {showForm && (
-        <PedidoForm
-          onClose={() => setShowForm(false)} // Cierra el formulario si se cancela
-          onSubmit={handleEnviar} // Maneja el envío simulado
-          selectedDay={selectedDay} // Día seleccionado
-          datosIniciales={selectedPedido} // Por ahora puede ser null
-        />
-      )}
+      <CakeOrderForm
+        apiData={mockApiData} // Pasa los datos de la API aquí
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onOrderSubmit={handleOrderSubmit}
+      />
     </div>
   );
 };
