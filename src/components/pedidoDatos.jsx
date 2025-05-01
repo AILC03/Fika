@@ -86,22 +86,21 @@ const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
   };
 
   const createEmptyCake = () => ({
-    type: "", // Tipo de pastel (ID)
-    line: "", // Línea (Deluxe/Bizcocho) - solo para numérico y regular
-    flavor: "", // Sabor seleccionado
-    size: "", // Tamaño seleccionado
-    category: "", // Categoría (si aplica)
-    ingredients: [], // Ingredientes (derivados del sabor)
-    digit: "", // Dígito (solo para numérico)
-    floors: [], // Pisos (solo para tipo pisos)
+    type: "",
+    line: "",
+    flavor: "",
+    size: "",
+    category: "",
+    ingredients: [], // Este array contendrá objetos con {id, name, available, selected}
+    digit: "",
+    floors: [],
   });
 
   const createEmptyFloor = () => ({
-    size: "", // Tamaño del piso
-    flavor: "", // Sabor del piso
-    ingredients: [], // Ingredientes del piso
+    size: "",
+    flavor: "",
+    ingredients: [], // Este array contendrá objetos con {id, name, available, selected}
   });
-
   // Buscar clientes (simulado)
   const handleSearchCustomer = async () => {
     const mockResults = [
@@ -161,7 +160,11 @@ const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
         const selectedFlavor = selectedType.flavors.find(
           (f) => f.id === parseInt(value)
         );
-        updatedCakes[cakeIndex].ingredients = selectedFlavor?.ingredients || [];
+        updatedCakes[cakeIndex].ingredients =
+          selectedFlavor?.ingredients.map((ing) => ({
+            ...ing,
+            selected: true, // Por defecto seleccionado
+          })) || [];
       }
     }
 
@@ -185,11 +188,43 @@ const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
           (f) => f.id === parseInt(value)
         );
         updatedFloors[floorIndex].ingredients =
-          selectedFlavor?.ingredients || [];
+          selectedFlavor?.ingredients.map((ing) => ({
+            ...ing,
+            selected: true, // Por defecto seleccionado
+          })) || [];
       }
     }
 
     updatedCakes[cakeIndex].floors = updatedFloors;
+    setCakes(updatedCakes);
+  };
+
+  const handleIngredientToggle = (
+    cakeIndex,
+    ingredientId,
+    isFloor = false,
+    floorIndex = null
+  ) => {
+    const updatedCakes = [...cakes];
+
+    if (isFloor && floorIndex !== null) {
+      // Para ingredientes de pisos
+      const updatedFloors = [...updatedCakes[cakeIndex].floors];
+      updatedFloors[floorIndex].ingredients = updatedFloors[
+        floorIndex
+      ].ingredients.map((ing) =>
+        ing.id === ingredientId ? { ...ing, selected: !ing.selected } : ing
+      );
+      updatedCakes[cakeIndex].floors = updatedFloors;
+    } else {
+      // Para ingredientes de pasteles regulares/numéricos
+      updatedCakes[cakeIndex].ingredients = updatedCakes[
+        cakeIndex
+      ].ingredients.map((ing) =>
+        ing.id === ingredientId ? { ...ing, selected: !ing.selected } : ing
+      );
+    }
+
     setCakes(updatedCakes);
   };
 
@@ -917,16 +952,19 @@ const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
                                     key={i}
                                     control={
                                       <Checkbox
-                                        checked={true}
-                                        disabled
+                                        checked={ing.selected}
+                                        onChange={() =>
+                                          handleIngredientToggle(
+                                            cakeIndex,
+                                            ing.id,
+                                            true,
+                                            floorIndex
+                                          )
+                                        }
                                         sx={{
-                                          color: ing.available
-                                            ? "success.main"
-                                            : "error.main",
+                                          color: "primary.main",
                                           "&.Mui-checked": {
-                                            color: ing.available
-                                              ? "success.main"
-                                              : "error.main",
+                                            color: "primary.main",
                                           },
                                         }}
                                       />
@@ -1046,42 +1084,42 @@ const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
                             gap: 1,
                           }}
                         >
-                          {cake.ingredients.map((ing, i) => (
-                            <FormControlLabel
-                              key={i}
-                              control={
-                                <Checkbox
-                                  checked={true}
-                                  disabled
-                                  sx={{
-                                    color: ing.available
-                                      ? "success.main"
-                                      : "error.main",
-                                    "&.Mui-checked": {
-                                      color: ing.available
-                                        ? "success.main"
-                                        : "error.main",
-                                    },
-                                  }}
-                                />
-                              }
-                              label={
-                                <Typography
-                                  variant="body2"
-                                  sx={
-                                    !ing.available
-                                      ? {
-                                          textDecoration: "line-through",
-                                          color: "text.disabled",
-                                        }
-                                      : {}
-                                  }
-                                >
-                                  {ing.name}
-                                </Typography>
-                              }
-                            />
-                          ))}
+                          {cake.ingredients
+                            .filter((ing) => ing.available) // Solo mostrar ingredientes disponibles
+                            .map((ing, i) => (
+                              <FormControlLabel
+                                key={i}
+                                control={
+                                  <Checkbox
+                                    checked={ing.selected}
+                                    onChange={() =>
+                                      handleIngredientToggle(cakeIndex, ing.id)
+                                    }
+                                    sx={{
+                                      color: "primary.main",
+                                      "&.Mui-checked": {
+                                        color: "primary.main",
+                                      },
+                                    }}
+                                  />
+                                }
+                                label={
+                                  <Typography
+                                    variant="body2"
+                                    sx={
+                                      !ing.available
+                                        ? {
+                                            textDecoration: "line-through",
+                                            color: "text.disabled",
+                                          }
+                                        : {}
+                                    }
+                                  >
+                                    {ing.name}
+                                  </Typography>
+                                }
+                              />
+                            ))}
                         </Box>
                       </Box>
                     )}
