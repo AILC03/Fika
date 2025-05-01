@@ -26,7 +26,13 @@ import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 
-const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
+const CakeOrderForm = ({
+  apiData,
+  onOrderSubmit,
+  isOpen,
+  onClose,
+  orderDate,
+}) => {
   // Estados del formulario
   const [orderType, setOrderType] = useState("regular");
   const [customer, setCustomer] = useState(null);
@@ -63,8 +69,23 @@ const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
 
   // Inicializar pasteles según tipo de pedido
   useEffect(() => {
-    initializeCakes();
-  }, [orderType]);
+    if (isOpen && orderDate) {
+      // Formatear la fecha a YYYY-MM-DD para el input type="date"
+      const formattedDate = formatDateForInput(orderDate);
+      setPickupDate(formattedDate);
+    }
+  }, [isOpen, orderDate]);
+
+  const formatDateForInput = (date) => {
+    if (!date) return "";
+
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
 
   const initializeCakes = () => {
     if (orderType === "numerico") {
@@ -486,7 +507,7 @@ const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
   return (
     <Dialog open={isOpen} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ bgcolor: "#FFF2C9", color: "#7E4300" }}>
-        Registro de Pedido
+      Ordenar Pastel
         <IconButton
           aria-label="close"
           onClick={onClose}
@@ -531,11 +552,11 @@ const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
           </Box>
           <Typography variant="caption" sx={{ color: "#7E4300", mt: 1 }}>
             {orderType === "numerico" &&
-              "Se creará un pastel por cada dígito (mínimo 1)"}
+              "Anade un pastel por cada numero"}
             {orderType === "regular" &&
-              "Cada pastel se configura individualmente (mínimo 1)"}
+              "Cada pastel se maneja por separado"}
             {orderType === "pisos" &&
-              "Cada pastel puede tener 2-4 pisos con tamaños descendentes"}
+              "Cada pastel debe tener al menos 2 pisos"}
           </Typography>
         </Box>
 
@@ -552,6 +573,7 @@ const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
                   label="Buscar cliente por nombre o teléfono"
                   variant="outlined"
                   size="small"
+                  sx={{ bgcolor: "#FFF2C9" }}
                   fullWidth
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -612,16 +634,18 @@ const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
                 sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}
               >
                 <TextField
-                  label="Nombre*"
+                  label="Nombre"
                   name="name"
+                  sx={{ bgcolor: "#FFF2C9" }}
                   value={newCustomer.name}
                   onChange={handleNewCustomerChange}
                   required
                   size="small"
                 />
                 <TextField
-                  label="Teléfono*"
+                  label="Teléfono"
                   name="phone"
+                  sx={{ bgcolor: "#FFF2C9" }}
                   value={newCustomer.phone}
                   onChange={handleNewCustomerChange}
                   required
@@ -630,6 +654,7 @@ const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
                 <TextField
                   label="Email"
                   name="email"
+                  sx={{ bgcolor: "#FFF2C9" }}
                   value={newCustomer.email}
                   onChange={handleNewCustomerChange}
                   size="small"
@@ -692,7 +717,7 @@ const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
             {orderType === "numerico"
               ? "Configuración de Dígitos"
               : orderType === "pisos"
-              ? "Configuración de Pasteles de Pisos"
+              ? "Configuración de Pasteles y Pisos"
               : "Configuración de Pasteles"}
           </Typography>
 
@@ -1142,7 +1167,7 @@ const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
         {/* Texto para el pastel */}
         <Box sx={{ mb: 3 }}>
           <TextField
-            label="Texto para el pastel (ej. 'Feliz Cumpleaños')"
+            label="Escritura para el pastel (ej. 'Feliz Cumpleaños')"
             variant="outlined"
             fullWidth
             value={cakeText}
@@ -1154,7 +1179,7 @@ const CakeOrderForm = ({ apiData, onOrderSubmit, isOpen, onClose }) => {
         {/* Notas adicionales */}
         <Box sx={{ mb: 3 }}>
           <TextField
-            label="Notas adicionales (instrucciones especiales, detalles, etc.)"
+            label="Notas adicionales (ej. Escritura en el lateral del pastel en color blanco)"
             variant="outlined"
             fullWidth
             multiline

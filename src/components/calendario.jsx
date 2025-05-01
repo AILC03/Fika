@@ -141,7 +141,6 @@ const Calendar = () => {
             size: "1/2 Plancha",
           },
         ],
-        category: [],
       },
       {
         id: 2,
@@ -220,15 +219,14 @@ const Calendar = () => {
             size: "12",
           },
         ],
-        category: [],
       },
       {
         id: 3,
         type: "TRADITIONAL",
         flavors: [
           {
-            id: 1,
-            name: "Frutos Rojos",
+            id: 15,
+            name: "Tartas",
             ingredients: [
               {
                 id: 1,
@@ -236,8 +234,29 @@ const Calendar = () => {
                 available: true,
               },
               {
-                id: 5,
-                name: "Queso Mascarpone",
+                id: 14,
+                name: "Galleta de cheesecake",
+                available: true,
+              },
+            ],
+          },
+          {
+            id: 16,
+            name: "3 Leches",
+            ingredients: [],
+          },
+          {
+            id: 17,
+            name: "Chocoflan",
+            ingredients: [],
+          },
+          {
+            id: 18,
+            name: "Cheesecake",
+            ingredients: [
+              {
+                id: 1,
+                name: "Fresa",
                 available: true,
               },
               {
@@ -245,80 +264,12 @@ const Calendar = () => {
                 name: "Frambuesa",
                 available: true,
               },
-              {
-                id: 7,
-                name: "Zarzamora",
-                available: true,
-              },
             ],
           },
           {
-            id: 5,
-            name: "Pellizco",
-            ingredients: [
-              {
-                id: 8,
-                name: "Dulce de leche",
-                available: true,
-              },
-              {
-                id: 9,
-                name: "Almendra",
-                available: true,
-              },
-            ],
-          },
-          {
-            id: 7,
-            name: "Pasion",
-            ingredients: [
-              {
-                id: 1,
-                name: "Fresa",
-                available: true,
-              },
-              {
-                id: 2,
-                name: "Platano",
-                available: true,
-              },
-              {
-                id: 3,
-                name: "Nutella",
-                available: true,
-              },
-              {
-                id: 4,
-                name: "Nuez",
-                available: true,
-              },
-            ],
-          },
-          {
-            id: 8,
-            name: "Fresas con Crema",
+            id: 19,
+            name: "Tiramisu",
             ingredients: [],
-          },
-          {
-            id: 9,
-            name: "Barroco",
-            ingredients: [
-              {
-                id: 1,
-                name: "Fresa",
-                available: true,
-              },
-              {
-                id: 3,
-                name: "Nutella",
-                available: true,
-              },
-              {
-                id: 4,
-                name: "Nuez",
-                available: true,
-              },
-            ],
           },
         ],
         sizes: [
@@ -327,12 +278,12 @@ const Calendar = () => {
             size: "3",
           },
           {
-            id: 2,
-            size: "4",
-          },
-          {
             id: 3,
             size: "6",
+          },
+          {
+            id: 4,
+            size: "8",
           },
           {
             id: 5,
@@ -341,109 +292,6 @@ const Calendar = () => {
           {
             id: 6,
             size: "12",
-          },
-          {
-            id: 7,
-            size: "1/4 de Plancha",
-          },
-          {
-            id: 8,
-            size: "1/2 Plancha",
-          },
-        ],
-        category: [
-          {
-            id: 1,
-            name: "Tartas",
-            flavors: [
-              {
-                id: 1,
-                name: "Frutos Rojos",
-              },
-              {
-                id: 14,
-                name: "Limon",
-              },
-            ],
-            sizes: [
-              {
-                id: 1,
-                size: "3",
-              },
-              {
-                id: 5,
-                size: "9",
-              },
-            ],
-          },
-          {
-            id: 2,
-            name: "3 Leches",
-            flavors: [],
-            sizes: [
-              {
-                id: 4,
-                size: "8",
-              },
-              {
-                id: 6,
-                size: "12",
-              },
-            ],
-          },
-          {
-            id: 3,
-            name: "Chocoflan",
-            flavors: [],
-            sizes: [
-              {
-                id: 5,
-                size: "9",
-              },
-            ],
-          },
-          {
-            id: 4,
-            name: "Cheesecake",
-            flavors: [
-              {
-                id: 1,
-                name: "Frutos Rojos",
-              },
-              {
-                id: 6,
-                name: "Temporada",
-              },
-            ],
-            sizes: [
-              {
-                id: 1,
-                size: "3",
-              },
-              {
-                id: 3,
-                size: "6",
-              },
-              {
-                id: 5,
-                size: "9",
-              },
-            ],
-          },
-          {
-            id: 5,
-            name: "Tiramisú",
-            flavors: [],
-            sizes: [
-              {
-                id: 1,
-                size: "3",
-              },
-              {
-                id: 5,
-                size: "9",
-              },
-            ],
           },
         ],
       },
@@ -520,7 +368,6 @@ const Calendar = () => {
             size: "8",
           },
         ],
-        category: [],
       },
     ],
   };
@@ -551,8 +398,8 @@ const Calendar = () => {
 
   // Maneja el envío del pedido
   const handleOrderSubmit = (orderData) => {
-    console.log("Pedido enviado:", orderData);
-    setIsModalOpen(false); // Cierra el modal después de enviar
+    console.log("Pedido enviado:", orderData); // Informacion que sale del formulario
+    setIsModalOpen(false);
   };
 
   // Genera los días del mes actual
@@ -600,7 +447,12 @@ const Calendar = () => {
           }`}
           onDoubleClick={() => {
             if (!isPastDay) {
-              setSelectedDay(day);
+              const selectedDate = new Date(
+                currentDate.getFullYear(),
+                currentDate.getMonth(),
+                day
+              );
+              setSelectedDay(selectedDate);
               setIsModalOpen(true);
             }
           }}
@@ -660,6 +512,7 @@ const Calendar = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onOrderSubmit={handleOrderSubmit}
+        orderDate={selectedDay}
       />
     </div>
   );
