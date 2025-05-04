@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import {motion, AnimatePresence } from "framer-motion";
-import Pasteles from "./listaProductos";
+import { motion, AnimatePresence } from "framer-motion";
+import Ingredientes from "./listaProductos";
 import PedidosTable from "./tablaPedidosAdmon";
-import ListaClientes from "./tablaClientesAdmon"
+import ListaClientes from "./tablaClientesAdmon";
 import ListaEmpleados from "./tablaUsuarios";
 const navItems = [
   {
@@ -11,8 +11,8 @@ const navItems = [
     view: "Pedidos",
   },
   {
-    label: "Productos",
-    view: "Productos",
+    label: "Ingredientes",
+    view: "Ingredientes",
   },
   {
     label: "Clientes",
@@ -214,45 +214,387 @@ const Clientes = [
   },
 ];
 
-const apiResponse = {
-  Clásicos: [
-    { sabor: "Frutos rojos", disponible: true },
-    { sabor: "Chocolate", disponible: false },
-    { sabor: "Guayaba", disponible: true },
-    { sabor: "Mango", disponible: false },
-    { sabor: "Pellizco", disponible: true },
-    { sabor: "Temporada", disponible: false },
-  ],
-  Deluxe: [
-    { sabor: "Pasión", disponible: true },
-    { sabor: "Frutos Rojos", disponible: false },
-    { sabor: "Fresas con crema", disponible: true },
-    { sabor: "Barroco", disponible: false },
-    { sabor: "Pellizco", disponible: true },
-  ],
-  Biscochos: [
-    { sabor: "Chocolate", disponible: true },
-    { sabor: "Blueberry", disponible: false },
-    { sabor: "Vainilla", disponible: true },
-    { sabor: "Red Velvet", disponible: false },
-    { sabor: "Zanahoria", disponible: true },
-  ],
-  Tradicionales: [
-    { sabor: "Tartas - Limón", disponible: false },
-    { sabor: "Tartas - Frutos Rojos", disponible: true },
-    { sabor: "3 leches", disponible: true },
-    { sabor: "Chocoflan", disponible: false },
-    { sabor: "Cheesecake - Frutos Rojos", disponible: true },
-    { sabor: "Cheesecake - Temporada", disponible: false },
-    { sabor: "Tiramisú", disponible: true },
+const mockApiData = {
+  pasteles: [
+    {
+      id: 1,
+      type: "DELUXE",
+      flavors: [
+        {
+          id: 1,
+          name: "Frutos Rojos",
+          ingredients: [
+            {
+              id: 1,
+              name: "Fresa",
+              available: true,
+            },
+            {
+              id: 5,
+              name: "Queso Mascarpone",
+              available: true,
+            },
+            {
+              id: 6,
+              name: "Frambuesa",
+              available: true,
+            },
+            {
+              id: 7,
+              name: "Zarzamora",
+              available: true,
+            },
+          ],
+        },
+        {
+          id: 5,
+          name: "Pellizco",
+          ingredients: [
+            {
+              id: 8,
+              name: "Dulce de leche",
+              available: true,
+            },
+            {
+              id: 9,
+              name: "Almendra",
+              available: true,
+            },
+          ],
+        },
+        {
+          id: 7,
+          name: "Pasion",
+          ingredients: [
+            {
+              id: 1,
+              name: "Fresa",
+              available: true,
+            },
+            {
+              id: 2,
+              name: "Platano",
+              available: true,
+            },
+            {
+              id: 3,
+              name: "Nutella",
+              available: true,
+            },
+            {
+              id: 4,
+              name: "Nuez",
+              available: true,
+            },
+          ],
+        },
+        {
+          id: 8,
+          name: "Fresas con Crema",
+          ingredients: [],
+        },
+        {
+          id: 9,
+          name: "Barroco",
+          ingredients: [
+            {
+              id: 1,
+              name: "Fresa",
+              available: true,
+            },
+            {
+              id: 3,
+              name: "Nutella",
+              available: true,
+            },
+            {
+              id: 4,
+              name: "Nuez",
+              available: true,
+            },
+          ],
+        },
+      ],
+      sizes: [
+        {
+          id: 1,
+          size: "3",
+        },
+        {
+          id: 2,
+          size: "4",
+        },
+        {
+          id: 3,
+          size: "6",
+        },
+        {
+          id: 5,
+          size: "9",
+        },
+        {
+          id: 6,
+          size: "12",
+        },
+        {
+          id: 7,
+          size: "1/4 de Plancha",
+        },
+        {
+          id: 8,
+          size: "1/2 Plancha",
+        },
+      ],
+    },
+    {
+      id: 2,
+      type: "SPONGE_CAKE",
+      flavors: [
+        {
+          id: 2,
+          name: "Chocolate",
+          ingredients: [],
+        },
+        {
+          id: 10,
+          name: "Blueberry",
+          ingredients: [
+            {
+              id: 10,
+              name: "Cheesecake",
+              available: true,
+            },
+            {
+              id: 11,
+              name: "Curl de limon",
+              available: true,
+            },
+          ],
+        },
+        {
+          id: 11,
+          name: "Vainilla",
+          ingredients: [
+            {
+              id: 12,
+              name: "Cremoso de frutos rojos",
+              available: true,
+            },
+            {
+              id: 13,
+              name: "Confitura de frambuesa",
+              available: true,
+            },
+          ],
+        },
+        {
+          id: 12,
+          name: "Red Velvet",
+          ingredients: [
+            {
+              id: 10,
+              name: "Cheesecake",
+              available: true,
+            },
+            {
+              id: 14,
+              name: "Galleta de cheesecake",
+              available: true,
+            },
+          ],
+        },
+        {
+          id: 13,
+          name: "Zanahoria",
+          ingredients: [],
+        },
+      ],
+      sizes: [
+        {
+          id: 1,
+          size: "3",
+        },
+        {
+          id: 4,
+          size: "8",
+        },
+        {
+          id: 6,
+          size: "12",
+        },
+      ],
+    },
+    {
+      id: 3,
+      type: "TRADITIONAL",
+      flavors: [
+        {
+          id: 15,
+          name: "Tartas",
+          ingredients: [
+            {
+              id: 1,
+              name: "Fresa",
+              available: true,
+            },
+            {
+              id: 14,
+              name: "Galleta de cheesecake",
+              available: true,
+            },
+          ],
+        },
+        {
+          id: 16,
+          name: "3 Leches",
+          ingredients: [],
+        },
+        {
+          id: 17,
+          name: "Chocoflan",
+          ingredients: [],
+        },
+        {
+          id: 18,
+          name: "Cheesecake",
+          ingredients: [
+            {
+              id: 1,
+              name: "Fresa",
+              available: true,
+            },
+            {
+              id: 6,
+              name: "Frambuesa",
+              available: true,
+            },
+          ],
+        },
+        {
+          id: 19,
+          name: "Tiramisu",
+          ingredients: [],
+        },
+      ],
+      sizes: [
+        {
+          id: 1,
+          size: "3",
+        },
+        {
+          id: 3,
+          size: "6",
+        },
+        {
+          id: 4,
+          size: "8",
+        },
+        {
+          id: 5,
+          size: "9",
+        },
+        {
+          id: 6,
+          size: "12",
+        },
+      ],
+    },
+    {
+      id: 4,
+      type: "CLASIC",
+      flavors: [
+        {
+          id: 1,
+          name: "Frutos Rojos",
+          ingredients: [
+            {
+              id: 1,
+              name: "Fresa",
+              available: true,
+            },
+            {
+              id: 5,
+              name: "Queso Mascarpone",
+              available: true,
+            },
+            {
+              id: 6,
+              name: "Frambuesa",
+              available: true,
+            },
+            {
+              id: 7,
+              name: "Zarzamora",
+              available: true,
+            },
+          ],
+        },
+        {
+          id: 2,
+          name: "Chocolate",
+          ingredients: [],
+        },
+        {
+          id: 3,
+          name: "Guayaba",
+          ingredients: [],
+        },
+        {
+          id: 4,
+          name: "Mango",
+          ingredients: [],
+        },
+        {
+          id: 5,
+          name: "Pellizco",
+          ingredients: [
+            {
+              id: 8,
+              name: "Dulce de leche",
+              available: true,
+            },
+            {
+              id: 9,
+              name: "Almendra",
+              available: true,
+            },
+          ],
+        },
+        {
+          id: 6,
+          name: "Temporada",
+          ingredients: [],
+        },
+      ],
+      sizes: [
+        {
+          id: 4,
+          size: "8",
+        },
+      ],
+    },
   ],
 };
 
-
 const empleados = [
-  { numEmpleado: "E001", nombre: "Juan Pérez", turno: "Mañana", cargo: "Desarrollador" },
-  { numEmpleado: "E002", nombre: "Ana García", turno: "Tarde", cargo: "Diseñadora" },
-  { numEmpleado: "E003", nombre: "Carlos López", turno: "Noche", cargo: "Analista" },
+  {
+    numEmpleado: "E001",
+    nombre: "Juan Pérez",
+    turno: "Mañana",
+    cargo: "Caja",
+  },
+  {
+    numEmpleado: "E002",
+    nombre: "Ana García",
+    turno: "Tarde",
+    cargo: "Cocinero",
+  },
+  {
+    numEmpleado: "E003",
+    nombre: "Carlos López",
+    turno: "Noche",
+    cargo: "General",
+  },
   // Agregar más empleados según sea necesario
 ];
 
@@ -343,15 +685,15 @@ export default function NavigationMenu() {
             {currentView === "Clientes" && (
               <ListaClientes personas={Clientes} />
             )}
-           {currentView === "Usuarios" && (
+            {currentView === "Usuarios" && (
               <ListaEmpleados empleados={empleados} />
-           )}
-            {currentView === "Productos" && (
-              <Pasteles apiResponse={apiResponse} />
+            )}
+            {currentView === "Ingredientes" && (
+              <Ingredientes apiData={mockApiData} />
             )}
             {currentView === "Pedidos" && (
               <PedidosTable
-                pedidos={pedidosSimulados}
+                pedidos={pedidosSimulados} // recibe info de pedidos
                 onClose={handleCloseBuscador}
               />
             )}

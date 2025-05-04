@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import CakeOrderForm from "./pedidoDatos";
+import CakeOrderForm from "./registroPedidos";
 
 const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date()); // Fecha actual
-  const [showForm, setShowForm] = useState(false); // Controla la visibilidad del formulario
   const [selectedDay, setSelectedDay] = useState(null); // Día seleccionado
   const [apiData, setApiData] = useState(null); // Datos de la API simulados
   const [isModalOpen, setIsModalOpen] = useState(false); // Estado del modal
@@ -512,7 +511,7 @@ const Calendar = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onOrderSubmit={handleOrderSubmit}
-        orderDate={selectedDay}
+        orderDate={selectedDay} // Pasa la fecha seleccionada al formulario
       />
     </div>
   );

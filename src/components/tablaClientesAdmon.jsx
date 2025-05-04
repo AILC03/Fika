@@ -1,10 +1,22 @@
 import { useState } from "react";
 import { Search, User, Phone, Mail, Edit, Trash } from "lucide-react";
 import FormularioCliente from "./formularioCliente";
-const ListaClientes = ({ personas, onActualizarCliente, onEliminarCliente }) => {
+import ConfirmModal from "./alerta";
+
+const ListaClientes = ({
+  personas,
+  onActualizarCliente,
+  onEliminarCliente,
+}) => {
   const [filtro, setFiltro] = useState("nombre");
   const [busqueda, setBusqueda] = useState("");
   const [clienteEditando, setClienteEditando] = useState(null);
+  const [modal, setModal] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: null,
+  });
 
   const personasFiltradas = personas.filter((persona) => {
     const valorBusqueda = busqueda.toLowerCase();
@@ -19,6 +31,22 @@ const ListaClientes = ({ personas, onActualizarCliente, onEliminarCliente }) => 
         return true;
     }
   });
+
+  const handleEliminarClick = (cliente) => {
+    setModal({
+      isOpen: true,
+      title: "Confirmar eliminación",
+      message: `¿Estás seguro de eliminar a ${cliente.nombre} (${cliente.email})?`,
+      onConfirm: () => {
+        onEliminarCliente(cliente);
+        setModal((prev) => ({ ...prev, isOpen: false }));
+      },
+    });
+  };
+
+  const closeModal = () => {
+    setModal((prev) => ({ ...prev, isOpen: false }));
+  };
 
   return (
     <div className="p-6 bg-[#FFF2C9] rounded-2xl shadow-lg border border-[#FFD538] mx-auto relative">
@@ -64,7 +92,6 @@ const ListaClientes = ({ personas, onActualizarCliente, onEliminarCliente }) => 
               </p>
             </div>
 
-            {/* Botones Editar / Eliminar */}
             <div className="flex gap-2">
               <button
                 onClick={() => setClienteEditando(persona)}
@@ -74,7 +101,7 @@ const ListaClientes = ({ personas, onActualizarCliente, onEliminarCliente }) => 
                 <Edit className="w-5 h-5" />
               </button>
               <button
-                onClick={() => onEliminarCliente(persona)}
+                onClick={() => handleEliminarClick(persona)}
                 className="text-red-600 hover:scale-110"
                 title="Eliminar"
               >
@@ -91,7 +118,6 @@ const ListaClientes = ({ personas, onActualizarCliente, onEliminarCliente }) => 
         </p>
       )}
 
-      {/* Modal de editar cliente */}
       {clienteEditando && (
         <FormularioCliente
           datosIniciales={{
@@ -100,13 +126,23 @@ const ListaClientes = ({ personas, onActualizarCliente, onEliminarCliente }) => 
             email: clienteEditando.email,
           }}
           onSubmit={(datosActualizados) => {
-            // Aseguramos que los datos se actualicen correctamente
             onActualizarCliente(clienteEditando.id, datosActualizados);
-            setClienteEditando(null); // Cerramos el formulario al confirmar
+            setClienteEditando(null);
           }}
           onClose={() => setClienteEditando(null)}
         />
       )}
+
+      <ConfirmModal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        onConfirm={modal.onConfirm}
+        title={modal.title}
+        message={modal.message}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        confirmButtonColor="bg-red-600 hover:bg-red-700"
+      />
     </div>
   );
 };

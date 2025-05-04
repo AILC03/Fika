@@ -1,6 +1,4 @@
-import React, { useState } from "react";
-import ConfirmModal from "../../components/alerta";
-import NavigationMenu from "../../components/navigateMenu";
+import NavigationMenu from "../../components/adminMenu";
 
 const General = () => {
   return (

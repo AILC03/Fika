@@ -1,96 +1,195 @@
 import { useEffect, useState } from "react";
+import ConfirmModal from "./alerta"; // Asegúrate de importar el componente
 
-export default function Pasteles({ apiResponse }) {
-  const [pasteles, setPasteles] = useState({});
-  const [activos, setActivos] = useState({});
-  const [activosOriginal, setActivosOriginal] = useState({}); // Guardamos el estado original
-  const [guardado, setGuardado] = useState(true); // Estado para saber si se han realizado cambios
+export default function Ingredientes({ apiData }) {
+  const [pasteles, setPasteles] = useState([]);
+  const [ingredientesState, setIngredientesState] = useState({});
+  const [hasChanges, setHasChanges] = useState(false);
+  const [modal, setModal] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    isSuccess: false,
+  });
 
   useEffect(() => {
-    // Usamos la respuesta simulada de la API pasada como prop
-    const data = apiResponse;
-    setPasteles(data);
+    if (apiData?.pasteles) {
+      const pastelesFiltrados = apiData.pasteles
+        .map((pastel) => ({
+          ...pastel,
+          flavors: pastel.flavors.filter(
+            (sabor) => sabor.ingredients?.length > 0
+          ),
+        }))
+        .filter((pastel) => pastel.flavors.length > 0);
 
-    // Inicializa el estado de disponibilidad
-    const inicial = {};
-    Object.keys(data).forEach((categoria) => {
-      inicial[categoria] = data[categoria].reduce((acc, producto) => {
-        acc[producto.sabor] = producto.disponible;
-        return acc;
-      }, {});
-    });
+      setPasteles(pastelesFiltrados);
 
-    // Guardamos el estado original
-    setActivos(inicial);
-    setActivosOriginal(inicial);
-  }, [apiResponse]);
+      const initialState = {};
+      pastelesFiltrados.forEach((pastel) => {
+        pastel.flavors.forEach((sabor) => {
+          sabor.ingredients.forEach((ingrediente) => {
+            const key = `${pastel.id}-${sabor.id}-${ingrediente.id}`;
+            initialState[key] = ingrediente.available;
+          });
+        });
+      });
+      setIngredientesState(initialState);
+    }
+  }, [apiData]);
 
-  const toggleActivo = (categoria, sabor) => {
-    setActivos((prev) => ({
-      ...prev,
-      [categoria]: {
-        ...prev[categoria],
-        [sabor]: !prev[categoria][sabor],
-      },
-    }));
-    setGuardado(false); // Marcar como "no guardado" cuando hay cambios
+  const toggleIngrediente = (pastelId, saborId, ingredienteId) => {
+    const key = `${pastelId}-${saborId}-${ingredienteId}`;
+    setIngredientesState((prev) => ({ ...prev, [key]: !prev[key] }));
+    setHasChanges(true);
   };
 
   const guardarCambios = async () => {
-    await new Promise((res) => setTimeout(res, 500)); // Simula retardo
-    setGuardado(true);
-    localStorage.setItem("pastelesState", JSON.stringify(activos)); // Guardamos el estado en localStorage
+    try {
+      console.log("Datos a enviar a la API:", ingredientesState);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      setHasChanges(false);
+      // Mostrar modal de éxito
+      setModal({
+        isOpen: true,
+        title: "Éxito",
+        message: "Los cambios se guardaron correctamente",
+        isSuccess: true,
+      });
+    } catch (error) {
+      console.error("Error al guardar:", error);
+      // Mostrar modal de error
+      setModal({
+        isOpen: true,
+        title: "Error",
+        message: "Hubo un problema al guardar los cambios",
+        isSuccess: false,
+      });
+    }
   };
 
-  return (
-    <div className="p-6 bg-orange-100 rounded-lg shadow-xl">
-      <h2 className="text-2xl font-bold mb-6 text-amber-900">
-        Gestión de Pasteles
-      </h2>
-      <div className="max-h-96 overflow-y-auto">
-        {Object.entries(pasteles).map(([categoria, sabores]) => (
-          <div key={categoria} className="mb-6">
-            <h3 className="text-xl font-semibold text-amber-800 mb-2">
-              {categoria}
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {sabores.map((producto) => {
-                const key = `${categoria}-${producto.sabor}`;
-                return (
-                  <label
-                    key={key}
-                    className={`flex items-center p-3 rounded shadow transition-all duration-300 ${
-                      activos[categoria]?.[producto.sabor]
-                        ? "bg-yellow-200 hover:bg-yellow-300"
-                        : "bg-gray-300 hover:bg-gray-400 text-gray-500"
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={activos[categoria]?.[producto.sabor]}
-                      onChange={() => toggleActivo(categoria, producto.sabor)}
-                      disabled={false} // Los checkboxes siempre son habilitados
-                      className="mr-2"
-                    />
-                    {producto.sabor}
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-        ))}
+  const closeModal = () => {
+    setModal((prev) => ({ ...prev, isOpen: false }));
+  };
+
+  const getTipoPastelNombre = (tipo) => {
+    switch (tipo) {
+      case "DELUXE":
+        return "Deluxe";
+      case "SPONGE_CAKE":
+        return "Bisquet";
+      case "TRADITIONAL":
+        return "Tradicional";
+      case "CLASIC":
+        return "Clásico";
+      default:
+        return tipo;
+    }
+  };
+
+  if (!pasteles?.length) {
+    return (
+      <div className="w-full p-6 rounded-lg shadow-lg">
+        <h1 className="text-3xl font-bold text-amber-900 mb-6">
+          Gestión de Ingredientes
+        </h1>
+        <p className="text-gray-600">Cargando datos...</p>
       </div>
-      {/* Botones para guardar o deshacer cambios */}
-      {!guardado && (
-        <div className="mt-4 space-x-2">
+    );
+  }
+
+  return (
+    <div className="w-full h-2/6 flex flex-col p-4 md:p-6 bg-amber-100 rounded-lg shadow-lg">
+      <h1 className="text-2xl md:text-3xl font-bold text-amber-900 mb-4 md:mb-6">
+        Gestión de Ingredientes
+      </h1>
+
+      <div className="flex-1 overflow-y-auto pr-2 md:max-h-96">
+        <div className="space-y-4">
+          {pasteles.map((pastel) => (
+            <div
+              key={pastel.id}
+              className="bg-amber-200 p-3 md:p-4 rounded-lg shadow"
+            >
+              <h2 className="text-lg md:text-xl font-semibold text-amber-800 mb-3">
+                {getTipoPastelNombre(pastel.type)}
+              </h2>
+
+              <div className="space-y-4">
+                {pastel.flavors.map((sabor) => (
+                  <div
+                    key={`${pastel.id}-${sabor.id}`}
+                    className="border-b pb-3 last:border-b-0"
+                  >
+                    <h3 className="text-base md:text-lg font-medium text-amber-700 mb-2">
+                      {sabor.name}
+                    </h3>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+                      {sabor.ingredients.map((ingrediente) => {
+                        const key = `${pastel.id}-${sabor.id}-${ingrediente.id}`;
+                        return (
+                          <label
+                            key={key}
+                            className={`flex items-center p-2 rounded cursor-pointer transition-colors ${
+                              ingredientesState[key]
+                                ? "bg-green-50 hover:bg-green-100 border border-green-200"
+                                : "bg-red-50 hover:bg-red-100 border border-red-200"
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={ingredientesState[key] || false}
+                              onChange={() =>
+                                toggleIngrediente(
+                                  pastel.id,
+                                  sabor.id,
+                                  ingrediente.id
+                                )
+                              }
+                              className="mr-2 h-4 w-4 text-amber-600 focus:ring-amber-500"
+                            />
+                            <span className="text-sm md:text-base">
+                              {ingrediente.name}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {hasChanges && (
+        <div className="sticky bottom-0 pt-4 bg-orange-50 border-t border-amber-200">
           <button
             onClick={guardarCambios}
-            className="py-2 px-4 bg-amber-500 text-white rounded-md"
+            className="w-full md:w-auto px-6 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors shadow-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
           >
-            Guardar cambios
+            Guardar Cambios
           </button>
         </div>
       )}
+
+      {/* Modal de confirmación */}
+      <ConfirmModal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        title={modal.title}
+        message={modal.message}
+        confirmText="Aceptar"
+        showCancelButton={false}
+        confirmButtonColor={
+          modal.isSuccess
+            ? "bg-green-600 hover:bg-green-700"
+            : "bg-blue-600 hover:bg-blue-700"
+        }
+      />
     </div>
   );
 }

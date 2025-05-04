@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Search } from "lucide-react";
 import Calendar from "../../components/calendario";
-import Eventos from "../../components/Eventos"; // Componente de eventos
+import Eventos from "../../components/pedidosXDia"; // Componente de eventos
 import BuscadorPedidos from "../../components/buscadorPedidos"; // Tabla de busqueda de pedidos
-import ProductTable from "../../components/Cantidades"; // Tabla de cantidades
+import ProductTable from "../../components/cantidadesDiarias"; // Tabla de cantidades
 
 // Datos simulados para la tabla de eventos
 const eventosData = [

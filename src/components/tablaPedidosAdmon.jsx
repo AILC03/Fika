@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Search, User, Phone, Mail } from "lucide-react";
-import FormularioPastel from "./pedidoDatos";
 
-const BuscadorPedidos = ({ pedidos }) => {
+
+const BuscadorPedidos = ({ pedidos }) => { //recibe la info de pedidos
   const [filtro, setFiltro] = useState("nombre");
   const [busqueda, setBusqueda] = useState("");
   const [pedidoSeleccionado, setPedidoSeleccionado] = useState(null);
@@ -87,16 +87,7 @@ const BuscadorPedidos = ({ pedidos }) => {
           No se encontraron pedidos.
         </p>
       )}
-
-      {pedidoSeleccionado && (
-        <FormularioPastel
-          datosIniciales={pedidoSeleccionado}
-          onSubmit={(formData) => {
-            console.log("Datos del formulario:", formData);
-          }}
-          onClose={() => setPedidoSeleccionado(null)}
-        />
-      )}
+      // Componente para editar la informacion que hay en ese pedido
     </div>
   );
 };

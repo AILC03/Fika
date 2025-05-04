@@ -1,12 +1,23 @@
 import { useState } from "react";
 import { Search, User, Clock, Briefcase, Edit, Trash } from "lucide-react";
 import FormularioEmpleado from "./formularioUsuarios";
+import ConfirmModal from "./alerta";
 
-
-const ListaEmpleados = ({ empleados, onActualizarEmpleado, onEliminarEmpleado }) => {
+const ListaEmpleados = ({
+  empleados,
+  onActualizarEmpleado,
+  onEliminarEmpleado,
+}) => {
   const [filtro, setFiltro] = useState("nombre");
   const [busqueda, setBusqueda] = useState("");
   const [empleadoEditando, setEmpleadoEditando] = useState(null);
+  const [empleadoAEliminar, setEmpleadoAEliminar] = useState(null);
+  const [modal, setModal] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: null,
+  });
 
   const empleadosFiltrados = empleados.filter((empleado) => {
     const valorBusqueda = busqueda.toLowerCase();
@@ -23,6 +34,22 @@ const ListaEmpleados = ({ empleados, onActualizarEmpleado, onEliminarEmpleado })
         return true;
     }
   });
+
+  const handleEliminarClick = (empleado) => {
+    setModal({
+      isOpen: true,
+      title: "Confirmar eliminación",
+      message: `¿Estás seguro de eliminar a ${empleado.nombre} (${empleado.cargo})?`,
+      onConfirm: () => {
+        onEliminarEmpleado(empleado);
+        setModal((prev) => ({ ...prev, isOpen: false }));
+      },
+    });
+  };
+
+  const closeModal = () => {
+    setModal((prev) => ({ ...prev, isOpen: false }));
+  };
 
   return (
     <div className="p-6 bg-[#FFF2C9] rounded-2xl shadow-lg border border-[#FFD538] mx-auto relative">
@@ -65,14 +92,14 @@ const ListaEmpleados = ({ empleados, onActualizarEmpleado, onEliminarEmpleado })
                 <Clock className="w-4 h-4 text-[#FFD538]" /> {empleado.turno}
               </p>
               <p className="flex items-center gap-2">
-                <Briefcase className="w-4 h-4 text-[#FFD538]" /> {empleado.cargo}
+                <Briefcase className="w-4 h-4 text-[#FFD538]" />{" "}
+                {empleado.cargo}
               </p>
               <p className="flex items-center gap-2">
                 <span className="text-[#FFD538]"># {empleado.numEmpleado}</span>
               </p>
             </div>
 
-            {/* Botones Editar / Eliminar */}
             <div className="flex gap-2">
               <button
                 onClick={() => setEmpleadoEditando(empleado)}
@@ -82,7 +109,7 @@ const ListaEmpleados = ({ empleados, onActualizarEmpleado, onEliminarEmpleado })
                 <Edit className="w-5 h-5" />
               </button>
               <button
-                onClick={() => onEliminarEmpleado(empleado)}
+                onClick={() => handleEliminarClick(empleado)}
                 className="text-red-600 hover:scale-110"
                 title="Eliminar"
               >
@@ -99,7 +126,6 @@ const ListaEmpleados = ({ empleados, onActualizarEmpleado, onEliminarEmpleado })
         </p>
       )}
 
-      {/* Modal de editar empleado */}
       {empleadoEditando && (
         <FormularioEmpleado
           datosIniciales={{
@@ -109,13 +135,26 @@ const ListaEmpleados = ({ empleados, onActualizarEmpleado, onEliminarEmpleado })
             cargo: empleadoEditando.cargo,
           }}
           onSubmit={(datosActualizados) => {
-            // Aseguramos que los datos se actualicen correctamente
-            onActualizarEmpleado(empleadoEditando.numEmpleado, datosActualizados);
-            setEmpleadoEditando(null); // Cerramos el formulario al confirmar
+            onActualizarEmpleado(
+              empleadoEditando.numEmpleado,
+              datosActualizados
+            );
+            setEmpleadoEditando(null);
           }}
           onClose={() => setEmpleadoEditando(null)}
         />
       )}
+
+      <ConfirmModal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        onConfirm={modal.onConfirm}
+        title={modal.title}
+        message={modal.message}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        confirmButtonColor="bg-red-600 hover:bg-red-700"
+      />
     </div>
   );
 };
