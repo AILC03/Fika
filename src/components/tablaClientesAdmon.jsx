@@ -120,6 +120,7 @@ const ListaClientes = ({
 
       {clienteEditando && (
         <FormularioCliente
+        titulo="Editar Cliente"
           datosIniciales={{
             celular: clienteEditando.id,
             nombre: clienteEditando.nombre,

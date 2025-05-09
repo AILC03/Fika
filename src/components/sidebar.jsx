@@ -5,11 +5,16 @@ import Logo from "../Assets/logo1.png"; // Ruta del logo
 import AccountIcon from "../Assets/account_avatar_face_man_people_profile_user_icon_123197.png"; // Ruta del ícono de cuenta
 import HomeIcon from "../Assets/32422shortcake_98853.png"; // Ruta del ícono de "Home"
 import AdminIcon from "../Assets/agenda_icon_129512.png"; // Ruta del ícono de "Admin"
+import nuevoUsuario from "../Assets/nuevoUsuario.png";
+
+
+
 
 const Sidebar = () => {
   const routes = [
     { path: "/home", icon: HomeIcon },
     { path: "/admin", icon: AdminIcon },
+    { path: "/formCliente", icon: nuevoUsuario},
   ];
 
   return (

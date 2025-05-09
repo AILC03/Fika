@@ -243,6 +243,7 @@ const General = () => {
           >
             <Calendar />
           </div>
+          
           {/* Componente "Cantidades" para mostrar los totales de productos */}
           <ProductTable data={productData} />
         </div>

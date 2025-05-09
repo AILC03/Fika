@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 
-const FormularioCliente = ({ datosIniciales = {}, onSubmit, onClose }) => {
+const FormularioCliente = ({ datosIniciales = {}, onSubmit, onClose, titulo = "Nuevo Cliente" }) => {
   const [form, setForm] = useState({
     celular: "",
     nombre: "",
@@ -50,7 +50,7 @@ const FormularioCliente = ({ datosIniciales = {}, onSubmit, onClose }) => {
       </button>
 
       <h2 className="text-xl font-bold text-center text-amber-800 mb-4">
-        Editar Cliente
+        {titulo} {/* Título dinámico */}
       </h2>
 
       <div className="space-y-4">

@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { Search, User, Phone, Mail } from "lucide-react";
+import { Search, User, Phone, Mail, Edit, Delete } from "lucide-react";
 
-
-const BuscadorPedidos = ({ pedidos }) => { //recibe la info de pedidos
+const BuscadorPedidos = ({ pedidos }) => { 
   const [filtro, setFiltro] = useState("nombre");
   const [busqueda, setBusqueda] = useState("");
   const [pedidoSeleccionado, setPedidoSeleccionado] = useState(null);
@@ -25,8 +24,18 @@ const BuscadorPedidos = ({ pedidos }) => { //recibe la info de pedidos
     setPedidoSeleccionado(pedido);
   };
 
+  const handleEditClick = (pedido) => {
+    // Lógica para editar el pedido
+    console.log("Editar pedido: ", pedido);
+  };
+
+  const handleDeleteClick = (pedido) => {
+    // Lógica para eliminar el pedido
+    console.log("Eliminar pedido: ", pedido);
+  };
+
   return (
-    <div className=" p-6 bg-[#FFF2C9] rounded-2xl shadow-lg border border-[#FFD538] mx-auto">
+    <div className="p-6 bg-[#FFF2C9] rounded-2xl shadow-lg border border-[#FFD538] mx-auto">
       <h2 className="text-2xl font-bold mb-4 text-[#7E4300] text-center flex items-center justify-center gap-2">
         <Search className="w-6 h-6" /> Buscar Pedidos
       </h2>
@@ -55,7 +64,7 @@ const BuscadorPedidos = ({ pedidos }) => { //recibe la info de pedidos
         {pedidosFiltrados.map((pedido, index) => (
           <div
             key={index}
-            className="bg-white border-l-4 border-[#FFD538] p-4 rounded-lg shadow-sm cursor-pointer transition hover:bg-yellow-50"
+            className="bg-white border-l-4 border-[#FFD538] p-4 rounded-lg shadow-sm cursor-pointer transition hover:bg-yellow-50 relative"
             onClick={() => handlePedidoClick(pedido)}
           >
             <p className="text-[#7E4300] font-semibold flex items-center gap-2">
@@ -78,6 +87,28 @@ const BuscadorPedidos = ({ pedidos }) => { //recibe la info de pedidos
                 </li>
               ))}
             </ul>
+
+            {/* Íconos de Editar y Eliminar */}
+            <div className="absolute top-1/2 transform -translate-y-1/2 right-[5%] flex gap-4">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation(); // Evitar que se ejecute el onClick del div
+                  handleEditClick(pedido);
+                }}
+                className="text-blue-600 hover:text-blue-800"
+              >
+                <Edit className="w-5 h-5" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation(); // Evitar que se ejecute el onClick del div
+                  handleDeleteClick(pedido);
+                }}
+                className="text-red-600 hover:text-red-800"
+              >
+                <Delete className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         ))}
       </div>
@@ -87,7 +118,6 @@ const BuscadorPedidos = ({ pedidos }) => { //recibe la info de pedidos
           No se encontraron pedidos.
         </p>
       )}
-      // Componente para editar la informacion que hay en ese pedido
     </div>
   );
 };
