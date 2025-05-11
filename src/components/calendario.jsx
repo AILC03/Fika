@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import CakeOrderForm from "./registroPedidos";
+import OrderForm from "./orderForm/OrderForm";
 
 const Calendar = () => {
-  const [currentDate, setCurrentDate] = useState(new Date()); // Fecha actual
-  const [selectedDay, setSelectedDay] = useState(null); // Día seleccionado
-  const [apiData, setApiData] = useState(null); // Datos de la API simulados
-  const [isModalOpen, setIsModalOpen] = useState(false); // Estado del modal
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState({ id: 1 });
 
   // Datos simulados de la API
   const mockApiData = {
@@ -14,367 +14,252 @@ const Calendar = () => {
       {
         id: 1,
         type: "DELUXE",
+        date: "2025-05-05",
+        avalible: true,
         flavors: [
           {
             id: 1,
             name: "Frutos Rojos",
+            date: "2025-05-05",
+            avalible: true,
             ingredients: [
-              {
-                id: 1,
-                name: "Fresa",
-                available: true,
-              },
-              {
-                id: 5,
-                name: "Queso Mascarpone",
-                available: true,
-              },
-              {
-                id: 6,
-                name: "Frambuesa",
-                available: true,
-              },
-              {
-                id: 7,
-                name: "Zarzamora",
-                available: true,
-              },
+              { id: 6, name: "Frambuesa", date: "2025-05-05" },
+              { id: 7, name: "Zarzamora", date: "2025-05-05" },
             ],
           },
           {
             id: 5,
             name: "Pellizco",
+            date: "2025-05-05",
+            avalible: true,
             ingredients: [
-              {
-                id: 8,
-                name: "Dulce de leche",
-                available: true,
-              },
-              {
-                id: 9,
-                name: "Almendra",
-                available: true,
-              },
+              { id: 8, name: "Dulce de leche", date: "2025-05-05" },
+              { id: 9, name: "Almendra", date: "2025-05-05" },
             ],
           },
           {
             id: 7,
             name: "Pasion",
+            date: "2025-05-05",
+            avalible: true,
             ingredients: [
-              {
-                id: 1,
-                name: "Fresa",
-                available: true,
-              },
-              {
-                id: 2,
-                name: "Platano",
-                available: true,
-              },
-              {
-                id: 3,
-                name: "Nutella",
-                available: true,
-              },
-              {
-                id: 4,
-                name: "Nuez",
-                available: true,
-              },
+              { id: 1, name: "Fresa", date: "2025-05-05" },
+              { id: 2, name: "Platano", date: "2025-05-05" },
+              { id: 3, name: "Nutella", date: "2025-05-05" },
+              { id: 4, name: "Nuez", date: "2025-05-05" },
             ],
           },
           {
             id: 8,
             name: "Fresas con Crema",
+            date: "2025-05-05",
+            avalible: true,
             ingredients: [],
           },
           {
             id: 9,
             name: "Barroco",
+            date: "2025-05-05",
+            avalible: true,
             ingredients: [
-              {
-                id: 1,
-                name: "Fresa",
-                available: true,
-              },
-              {
-                id: 3,
-                name: "Nutella",
-                available: true,
-              },
-              {
-                id: 4,
-                name: "Nuez",
-                available: true,
-              },
+              { id: 1, name: "Fresa", date: "2025-05-05" },
+              { id: 3, name: "Nutella", date: "2025-05-05" },
+              { id: 4, name: "Nuez", date: "2025-05-05" },
             ],
           },
         ],
         sizes: [
-          {
-            id: 1,
-            size: "3",
-          },
-          {
-            id: 2,
-            size: "4",
-          },
-          {
-            id: 3,
-            size: "6",
-          },
-          {
-            id: 5,
-            size: "9",
-          },
-          {
-            id: 6,
-            size: "12",
-          },
-          {
-            id: 7,
-            size: "1/4 de Plancha",
-          },
-          {
-            id: 8,
-            size: "1/2 Plancha",
-          },
+          { id: 1, size: "3", date: "2025-05-06", avalible: true },
+          { id: 2, size: "4", date: "2025-05-05", avalible: true },
+          { id: 3, size: "6", date: "2025-05-05", avalible: true },
+          { id: 5, size: "9", date: "2025-05-05", avalible: true },
+          { id: 6, size: "12", date: "2025-05-05", avalible: true },
+          { id: 7, size: "1/4 de Plancha", date: "2025-05-05", avalible: true },
+          { id: 8, size: "1/2 Plancha", date: "2025-05-05", avalible: true },
         ],
       },
       {
         id: 2,
         type: "SPONGE_CAKE",
+        date: "2025-05-05",
+        avalible: true,
         flavors: [
           {
             id: 2,
             name: "Chocolate",
+            date: "2025-05-05",
+            avalible: true,
             ingredients: [],
           },
           {
             id: 10,
             name: "Blueberry",
+            date: "2025-05-05",
+            avalible: true,
             ingredients: [
-              {
-                id: 10,
-                name: "Cheesecake",
-                available: true,
-              },
-              {
-                id: 11,
-                name: "Curl de limon",
-                available: true,
-              },
+              { id: 10, name: "Cheesecake", date: "2025-05-05" },
+              { id: 11, name: "Curl de limon", date: "2025-05-05" },
             ],
           },
           {
             id: 11,
             name: "Vainilla",
+            date: "2025-05-05",
+            avalible: true,
             ingredients: [
-              {
-                id: 12,
-                name: "Cremoso de frutos rojos",
-                available: true,
-              },
-              {
-                id: 13,
-                name: "Confitura de frambuesa",
-                available: true,
-              },
+              { id: 12, name: "Cremoso de frutos rojos", date: "2025-05-05" },
+              { id: 13, name: "Confitura de frambuesa", date: "2025-05-05" },
             ],
           },
           {
             id: 12,
             name: "Red Velvet",
+            date: "2025-05-05",
+            avalible: true,
             ingredients: [
-              {
-                id: 10,
-                name: "Cheesecake",
-                available: true,
-              },
-              {
-                id: 14,
-                name: "Galleta de cheesecake",
-                available: true,
-              },
+              { id: 10, name: "Cheesecake", date: "2025-05-05" },
+              { id: 14, name: "Galleta de cheesecake", date: "2025-05-05" },
             ],
           },
           {
             id: 13,
             name: "Zanahoria",
+            date: "2025-05-05",
+            avalible: true,
             ingredients: [],
           },
         ],
         sizes: [
-          {
-            id: 1,
-            size: "3",
-          },
-          {
-            id: 4,
-            size: "8",
-          },
-          {
-            id: 6,
-            size: "12",
-          },
+          { id: 1, size: "3", date: "2025-05-05", avalible: true },
+          { id: 4, size: "8", date: "2025-05-05", avalible: true },
+          { id: 6, size: "12", date: "2025-05-05", avalible: true },
         ],
       },
       {
         id: 3,
         type: "TRADITIONAL",
+        date: "2025-05-05",
+        avalible: true,
         flavors: [
           {
             id: 15,
             name: "Tartas",
+            date: "2025-05-05",
+            avalible: true,
             ingredients: [
-              {
-                id: 1,
-                name: "Fresa",
-                available: true,
-              },
-              {
-                id: 14,
-                name: "Galleta de cheesecake",
-                available: true,
-              },
+              { id: 15, name: "Limon", date: "2025-05-05" },
+              { id: 16, name: "Frutos rojos", date: "2025-05-05" },
             ],
           },
           {
             id: 16,
             name: "3 Leches",
+            date: "2025-05-05",
+            avalible: true,
             ingredients: [],
           },
           {
             id: 17,
             name: "Chocoflan",
+            date: "2025-05-05",
+            avalible: true,
             ingredients: [],
           },
           {
             id: 18,
             name: "Cheesecake",
+            date: "2025-05-05",
+            avalible: true,
             ingredients: [
-              {
-                id: 1,
-                name: "Fresa",
-                available: true,
-              },
-              {
-                id: 6,
-                name: "Frambuesa",
-                available: true,
-              },
+              { id: 16, name: "Frutos rojos", date: "2025-05-05" },
+              { id: 17, name: "temporada", date: "2025-05-05" },
             ],
           },
           {
             id: 19,
             name: "Tiramisu",
+            date: "2025-05-05",
+            avalible: true,
             ingredients: [],
           },
         ],
         sizes: [
-          {
-            id: 1,
-            size: "3",
-          },
-          {
-            id: 3,
-            size: "6",
-          },
-          {
-            id: 4,
-            size: "8",
-          },
-          {
-            id: 5,
-            size: "9",
-          },
-          {
-            id: 6,
-            size: "12",
-          },
+          { id: 1, size: "3", date: "2025-05-05", avalible: true },
+          { id: 3, size: "6", date: "2025-05-05", avalible: true },
+          { id: 4, size: "8", date: "2025-05-05", avalible: true },
+          { id: 5, size: "9", date: "2025-05-05", avalible: true },
+          { id: 6, size: "12", date: "2025-05-05", avalible: true },
         ],
       },
       {
         id: 4,
         type: "CLASIC",
+        date: "2025-05-05",
+        avalible: true,
         flavors: [
           {
             id: 1,
             name: "Frutos Rojos",
-            ingredients: [
-              {
-                id: 1,
-                name: "Fresa",
-                available: true,
-              },
-              {
-                id: 5,
-                name: "Queso Mascarpone",
-                available: true,
-              },
-              {
-                id: 6,
-                name: "Frambuesa",
-                available: true,
-              },
-              {
-                id: 7,
-                name: "Zarzamora",
-                available: true,
-              },
-            ],
+            date: "2025-05-05",
+            avalible: true,
+            ingredients: [],
           },
           {
             id: 2,
             name: "Chocolate",
+            date: "2025-05-05",
+            avalible: true,
             ingredients: [],
           },
           {
             id: 3,
             name: "Guayaba",
+            date: "2025-05-05",
+            avalible: true,
             ingredients: [],
           },
           {
             id: 4,
             name: "Mango",
+            date: "2025-05-05",
+            avalible: true,
             ingredients: [],
           },
           {
             id: 5,
             name: "Pellizco",
-            ingredients: [
-              {
-                id: 8,
-                name: "Dulce de leche",
-                available: true,
-              },
-              {
-                id: 9,
-                name: "Almendra",
-                available: true,
-              },
-            ],
+            date: "2025-05-05",
+            avalible: true,
+            ingredients: [],
           },
           {
             id: 6,
             name: "Temporada",
+            date: "2025-05-07",
+            avalible: true,
             ingredients: [],
           },
         ],
-        sizes: [
+        sizes: [{ id: 4, size: "8", date: "2025-05-07", avalible: true }],
+      },
+      {
+        id: 5,
+        type: "CUPCAKE",
+        date: "2025-05-05",
+        avalible: true,
+        flavors: [
           {
-            id: 4,
-            size: "8",
+            id: 1,
+            name: "SABOR 1",
+            date: "2025-05-05",
+            avalible: true,
+            ingredients: [{ id: 33, name: "RELLENNO 1", date: "2025-05-05" }],
           },
         ],
+        sizes: [{}],
       },
     ],
   };
-
-  // Cargar datos simulados en lugar de la API
-  useEffect(() => {
-    setApiData(mockApiData); // Asigna los datos simulados al estado
-  }, []);
 
   // Cambia al mes anterior
   const handlePrevMonth = () => {
@@ -397,8 +282,17 @@ const Calendar = () => {
 
   // Maneja el envío del pedido
   const handleOrderSubmit = (orderData) => {
-    console.log("Pedido enviado:", orderData); // Informacion que sale del formulario
+    console.log("Pedido enviado:", orderData);
     setIsModalOpen(false);
+
+    // Aquí puedes hacer el envío real a tu API
+    // fetch('/api/orders', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify(orderData)
+    // })
   };
 
   // Genera los días del mes actual
@@ -407,17 +301,13 @@ const Calendar = () => {
     const month = currentDate.getMonth();
     const daysInMonth = getDaysInMonth(year, month);
 
-    const firstDayOfMonth = new Date(year, month, 1).getDay(); // Día de la semana del primer día del mes
-    const today = new Date(); // Fecha actual
+    const firstDayOfMonth = new Date(year, month, 1).getDay();
+    const today = new Date();
     const days = [];
 
     // Agregar días vacíos al inicio del mes
     for (let i = 0; i < firstDayOfMonth; i++) {
-      days.push(
-        <div key={`empty-${i}`} className="text-gray-300">
-          {" "}
-        </div>
-      );
+      days.push(<div key={`empty-${i}`} className="text-gray-300"></div>);
     }
 
     // Agregar días del mes
@@ -446,11 +336,7 @@ const Calendar = () => {
           }`}
           onDoubleClick={() => {
             if (!isPastDay) {
-              const selectedDate = new Date(
-                currentDate.getFullYear(),
-                currentDate.getMonth(),
-                day
-              );
+              const selectedDate = new Date(year, month, day);
               setSelectedDay(selectedDate);
               setIsModalOpen(true);
             }
@@ -464,7 +350,13 @@ const Calendar = () => {
     return days;
   };
 
-  // if (!apiData) return <div>Cargando...</div>; // Muestra un mensaje mientras se cargan los datos
+  // Obtener userId del localStorage al cargar el componente
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    if (userId) {
+      setCurrentUser({ id: Number(userId) });
+    }
+  }, []);
 
   return (
     <div className="w-full h-full p-4 flex flex-col">
@@ -474,7 +366,7 @@ const Calendar = () => {
           onClick={handlePrevMonth}
           className="text-amber-900 px-2 py-2 rounded border border-amber-800 hover:bg-yellow-400 flex items-center"
         >
-          <ChevronLeft className="w-5 h-5" /> {/* Flecha izquierda */}
+          <ChevronLeft className="w-5 h-5" />
         </button>
         <h2 className="text-xl font-bold">
           {`${currentDate.toLocaleString("default", {
@@ -485,19 +377,15 @@ const Calendar = () => {
           onClick={handleNextMonth}
           className="text-amber-900 px-2 py-2 rounded border border-amber-800 hover:bg-yellow-400 flex items-center"
         >
-          <ChevronRight className="w-5 h-5" /> {/* Flecha derecha */}
+          <ChevronRight className="w-5 h-5" />
         </button>
       </div>
 
       {/* Días de la semana */}
       <div className="grid grid-cols-7 gap-2 text-center font-bold">
-        <div>Dom</div>
-        <div>Lun</div>
-        <div>Mar</div>
-        <div>Mié</div>
-        <div>Jue</div>
-        <div>Vie</div>
-        <div>Sáb</div>
+        {["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"].map((day) => (
+          <div key={day}>{day}</div>
+        ))}
       </div>
 
       {/* Días del mes */}
@@ -505,13 +393,14 @@ const Calendar = () => {
         {generateCalendarDays()}
       </div>
 
-      {/* Formulario de nuevo pedido */}
-      <CakeOrderForm
-        apiData={mockApiData} // Pasa los datos de la API aquí
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onOrderSubmit={handleOrderSubmit}
-        orderDate={selectedDay} // Pasa la fecha seleccionada al formulario
+      {/* Formulario de pedido */}
+      <OrderForm
+        apiData={mockApiData} // Datos de la API
+        isOpen={isModalOpen} // Estado del modal
+        onClose={() => setIsModalOpen(false)} // Función para cerrar
+        onOrderSubmit={handleOrderSubmit} // Función para manejar el pedido
+        orderDate={selectedDay ? selectedDay.toISOString().split("T")[0] : null} // Fecha formateada
+        userId={currentUser.id} // ID de usuario
       />
     </div>
   );
