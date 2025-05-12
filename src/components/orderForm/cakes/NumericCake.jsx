@@ -42,52 +42,55 @@ const NumericCakeForm = ({ cakeData, onAddCake, onCancel }) => {
     setNumber((prev) => prev + digit);
   };
 
+  const handleClearForm = () => {
+    setNumber("");
+    setSelectedLine("");
+    setDigitConfigs([]);
+  };
+
   const handleSubmit = () => {
     if (!number || !selectedLine) return;
 
-    // Obtener el objeto completo de la línea seleccionada
     const selectedLineObj = availableLines.find(
       (line) => line.type === selectedLine
     );
 
-    const digits = number.split("").map((digit, index) => {
-      const config = digitConfigs[index] || {};
-      const flavorData = lineData.flavors.find(
-        (f) => f.id === config.flavor
-      ) || { ingredients: [] };
-
-      // Obtener los ingredientes seleccionados con sus datos completos
-      const selectedIngredientsData = flavorData.ingredients.filter((ing) =>
-        config.selectedIngredients?.includes(ing.id)
-      );
-
-      return {
-        digit,
-        size: {
-          id: config.size || "",
-          text:
-            lineData.sizes.find((size) => size.id === config.size)?.size || "",
-        },
-        flavor: {
-          id: config.flavor || "",
-          text:
-            lineData.flavors.find((f) => f.id === config.flavor)?.name || "",
-          ingredients: selectedIngredientsData.map((ing) => ({
-            id: ing.id,
-            name: ing.name,
-          })),
-        },
-      };
-    });
-
-    onAddCake({
+    // Preparar los datos según el estándar
+    const cakeData = {
       type: "numeric",
       line: {
-        id: selectedLineObj?.id || "", // Incluir el ID de la línea
-        type: selectedLine,
+        id: selectedLineObj?.id || 0,
+        name: selectedLineObj?.type || "",
       },
-      digits,
-    });
+      digits: number.split("").map((digit, index) => {
+        const config = digitConfigs[index] || {};
+        const flavorObj = lineData.flavors.find((f) => f.id === config.flavor);
+        const sizeObj = lineData.sizes.find((s) => s.id === config.size);
+        const ingredientsData =
+          flavorObj?.ingredients?.filter((ing) =>
+            config.selectedIngredients?.includes(ing.id)
+          ) || [];
+
+        return {
+          digit,
+          flavor: {
+            id: flavorObj?.id || 0,
+            name: flavorObj?.name || "",
+            ingredients: ingredientsData.map((ing) => ({
+              id: ing.id,
+              name: ing.name,
+            })),
+          },
+          size: {
+            id: sizeObj?.id || 0,
+            name: sizeObj?.size || "",
+          },
+        };
+      }),
+      quantity: 1, // Asumiendo cantidad 1 por defecto
+    };
+
+    onAddCake(cakeData);
   };
 
   const handleDigitConfigChange = (index, field, value) => {
@@ -265,8 +268,8 @@ const NumericCakeForm = ({ cakeData, onAddCake, onCancel }) => {
       )}
 
       <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
-        <Button onClick={onCancel} variant="outlined">
-          Cancelar
+        <Button onClick={handleClearForm} variant="outlined">
+          Limpiar
         </Button>
         <Button
           onClick={handleSubmit}

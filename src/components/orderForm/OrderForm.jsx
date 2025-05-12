@@ -94,16 +94,128 @@ const OrderForm = ({
     setExpandedForm(expandedForm === type ? null : type);
   };
 
+  // Normalizar los datos del pastel antes de agregarlos
+  const normalizeCakeData = (cakeDetails) => {
+    const normalized = { type: cakeDetails.type };
+
+    // Campos comunes a todos los tipos
+    if (cakeDetails.line) {
+      normalized.line = {
+        id: cakeDetails.line.id,
+        name: cakeDetails.line.name,
+      };
+    }
+
+    // Campos específicos por tipo
+    switch (cakeDetails.type) {
+      case "regular":
+        if (cakeDetails.flavor) {
+          normalized.flavor = {
+            id: cakeDetails.flavor.id,
+            name: cakeDetails.flavor.name,
+            ingredients:
+              cakeDetails.flavor.ingredients?.map((ing) => ({
+                id: ing.id,
+                name: ing.name,
+              })) || [],
+          };
+        }
+        if (cakeDetails.size) {
+          normalized.size = {
+            id: cakeDetails.size.id,
+            name: cakeDetails.size.name,
+          };
+        }
+        break;
+
+      case "numeric":
+        if (cakeDetails.digits) {
+          normalized.digits = cakeDetails.digits.map((digit) => ({
+            digit: digit.digit,
+            ...(digit.flavor && {
+              flavor: {
+                id: digit.flavor.id,
+                name: digit.flavor.name,
+                ingredients:
+                  digit.flavor.ingredients?.map((ing) => ({
+                    id: ing.id,
+                    name: ing.name,
+                  })) || [],
+              },
+            }),
+            ...(digit.size && {
+              size: {
+                id: digit.size.id,
+                name: digit.size.name,
+              },
+            }),
+          }));
+        }
+        break;
+
+      case "tiered":
+        if (cakeDetails.tiers) {
+          normalized.tiers = cakeDetails.tiers.map((tier) => ({
+            ...(tier.flavor && {
+              flavor: {
+                id: tier.flavor.id,
+                name: tier.flavor.name,
+                ingredients:
+                  tier.flavor.ingredients?.map((ing) => ({
+                    id: ing.id,
+                    name: ing.name,
+                  })) || [],
+              },
+            }),
+            ...(tier.size && {
+              size: {
+                id: tier.size.id,
+                name: tier.size.name,
+              },
+            }),
+          }));
+        }
+        break;
+
+      case "cupcakes":
+        if (cakeDetails.quantity) {
+          normalized.quantity = cakeDetails.quantity;
+        }
+        if (cakeDetails.flavor) {
+          normalized.flavor = {
+            id: cakeDetails.flavor.id,
+            name: cakeDetails.flavor.name,
+            ingredients:
+              cakeDetails.flavor.ingredients?.map((ing) => ({
+                id: ing.id,
+                name: ing.name,
+              })) || [],
+          };
+        }
+        if (cakeDetails.size) {
+          normalized.size = {
+            id: cakeDetails.size.id,
+            name: cakeDetails.size.name,
+          };
+        }
+        break;
+    }
+
+    return normalized;
+  };
+
   // Agregar nuevo pastel
   const handleAddCake = (cakeDetails) => {
-    setOrderItems([...orderItems, cakeDetails]);
+    const normalizedData = normalizeCakeData(cakeDetails);
+    setOrderItems([...orderItems, normalizedData]);
     setExpandedForm(null); // Colapsar el formulario después de agregar
   };
 
   // Editar pastel existente
   const handleEditCake = (index, updatedDetails) => {
+    const normalizedData = normalizeCakeData(updatedDetails);
     const updatedItems = [...orderItems];
-    updatedItems[index] = updatedDetails;
+    updatedItems[index] = normalizedData;
     setOrderItems(updatedItems);
     setExpandedForm(null);
   };
@@ -137,6 +249,7 @@ const OrderForm = ({
       customerId: customer?.id,
       items: orderItems,
       ...orderGeneral,
+      pickupDateTime: orderGeneral.pickupDateTime.toISOString(),
     };
     onOrderSubmit(orderData);
     handleClose();
@@ -167,45 +280,50 @@ const OrderForm = ({
   const getCakeDetails = (item) => {
     switch (item.type) {
       case "numeric":
-        return item.digits
-          .map((digit, index) => {
-            const details = [];
-            if (digit.line) details.push(`Línea: ${digit.line}`);
-            if (digit.flavor) details.push(`Sabor: ${digit.flavor}`);
-            if (digit.size) details.push(`Tamaño: ${digit.size}`);
-            return `Dígito ${digit.digit}: ${details.join(", ")}`;
-          })
-          .join("\n");
+        return (
+          item.digits
+            ?.map((digit, index) => {
+              const details = [];
+              if (item.line) details.push(`Línea: ${item.line.name}`);
+              if (digit.flavor) details.push(`Sabor: ${digit.flavor.name}`);
+              if (digit.size) details.push(`Tamaño: ${digit.size.name}`);
+              return `Dígito ${digit.digit}: ${details.join(", ")}`;
+            })
+            .join("\n") || "Sin detalles"
+        );
 
       case "regular":
         const regularDetails = [];
-        if (item.line) regularDetails.push(`Línea: ${item.line}`);
-        if (item.flavorName) regularDetails.push(`Sabor: ${item.flavorName}`);
-        if (item.sizeName) regularDetails.push(`Tamaño: ${item.sizeName}`);
-        return regularDetails.join(", ");
+        if (item.line) regularDetails.push(`Línea: ${item.line.name}`);
+        if (item.flavor) regularDetails.push(`Sabor: ${item.flavor.name}`);
+        if (item.size) regularDetails.push(`Tamaño: ${item.size.name}`);
+        return regularDetails.join(", ") || "Sin detalles";
 
       case "tiered":
-        return item.tiers
-          .map((tier, index) => {
-            const tierDetails = [];
-            if (tier.line) tierDetails.push(`Línea: ${tier.line}`);
-            if (tier.flavor) tierDetails.push(`Sabor: ${tier.flavor}`);
-            if (tier.size) tierDetails.push(`Tamaño: ${tier.size}`);
-            return `Piso ${index + 1}: ${tierDetails.join(", ")}`;
-          })
-          .join("\n");
+        return (
+          item.tiers
+            ?.map((tier, index) => {
+              const tierDetails = [];
+              if (item.line) tierDetails.push(`Línea: ${item.line.name}`);
+              if (tier.flavor) tierDetails.push(`Sabor: ${tier.flavor.name}`);
+              if (tier.size) tierDetails.push(`Tamaño: ${tier.size.name}`);
+              return `Piso ${index + 1}: ${tierDetails.join(", ")}`;
+            })
+            .join("\n") || "Sin detalles"
+        );
 
       case "cupcakes":
         const cupcakeDetails = [];
         if (item.quantity) cupcakeDetails.push(`Cantidad: ${item.quantity}`);
-        if (item.flavorName) cupcakeDetails.push(`Sabor: ${item.flavorName}`);
-        if (item.sizeName) cupcakeDetails.push(`Tamaño: ${item.sizeName}`);
-        return cupcakeDetails.join(", ");
+        if (item.flavor) cupcakeDetails.push(`Sabor: ${item.flavor.name}`);
+        if (item.size) cupcakeDetails.push(`Tamaño: ${item.size.name}`);
+        return cupcakeDetails.join(", ") || "Sin detalles";
 
       default:
         return "Detalles no disponibles";
     }
   };
+
   // Renderizar contenido de cada paso
   const renderStepContent = (step) => {
     switch (step) {
@@ -222,14 +340,7 @@ const OrderForm = ({
             </Typography>
 
             {orderItems.map((item, index) => (
-              <Paper
-                key={index}
-                sx={{
-                  p: 2,
-                  mb: 2,
-                  position: "relative",
-                }}
-              >
+              <Paper key={index} sx={{ p: 2, mb: 2, position: "relative" }}>
                 <Box
                   sx={{
                     display: "flex",
@@ -248,14 +359,80 @@ const OrderForm = ({
                       {getCakeDetails(item)}
                     </Typography>
                   </Box>
-                  <Button
-                    size="small"
-                    color="error"
-                    onClick={() => handleRemoveCake(index)}
-                  >
-                    Eliminar
-                  </Button>
+                  <Box>
+                    {expandedForm === `${item.type}-edit-${index}` ? (
+                      <Button
+                        size="small"
+                        color="error"
+                        onClick={() => setExpandedForm(null)}
+                        sx={{ mr: 1 }}
+                      >
+                        Cancelar
+                      </Button>
+                    ) : (
+                      <>
+                        <Button
+                          size="small"
+                          onClick={() => {
+                            setExpandedForm(`${item.type}-edit-${index}`);
+                          }}
+                          sx={{ mr: 1 }}
+                        >
+                          Editar
+                        </Button>
+                        <Button
+                          size="small"
+                          color="error"
+                          onClick={() => handleRemoveCake(index)}
+                        >
+                          Eliminar
+                        </Button>
+                      </>
+                    )}
+                  </Box>
                 </Box>
+
+                {/* Formulario de edición */}
+                <Collapse in={expandedForm === `${item.type}-edit-${index}`}>
+                  <Box sx={{ mt: 2 }}>
+                    {item.type === "numeric" && (
+                      <NumericCakeForm
+                        cakeData={filteredCakeData}
+                        onAddCake={(updated) => handleEditCake(index, updated)}
+                        initialData={item}
+                        editMode
+                        onCancel={() => setExpandedForm(null)}
+                      />
+                    )}
+                    {item.type === "regular" && (
+                      <RegularCakeForm
+                        cakeData={filteredCakeData}
+                        onAddCake={(updated) => handleEditCake(index, updated)}
+                        initialData={item}
+                        editMode
+                        onCancel={() => setExpandedForm(null)}
+                      />
+                    )}
+                    {item.type === "tiered" && (
+                      <TieredCakeForm
+                        cakeData={filteredCakeData}
+                        onAddCake={(updated) => handleEditCake(index, updated)}
+                        initialData={item}
+                        editMode
+                        onCancel={() => setExpandedForm(null)}
+                      />
+                    )}
+                    {item.type === "cupcakes" && (
+                      <CupcakesForm
+                        cakeData={filteredCakeData}
+                        onAddCake={(updated) => handleEditCake(index, updated)}
+                        initialData={item}
+                        editMode
+                        onCancel={() => setExpandedForm(null)}
+                      />
+                    )}
+                  </Box>
+                </Collapse>
               </Paper>
             ))}
 
@@ -385,7 +562,10 @@ const OrderForm = ({
                   <Typography fontWeight="bold">
                     {index + 1}. {getCakeTypeName(item.type)}
                   </Typography>
-                  <Typography variant="body2">
+                  <Typography
+                    variant="body2"
+                    style={{ whiteSpace: "pre-line" }}
+                  >
                     {getCakeDetails(item)}
                   </Typography>
                 </Box>
@@ -404,6 +584,10 @@ const OrderForm = ({
               <Typography>
                 <strong>Fecha de recolección:</strong>{" "}
                 {orderGeneral.pickupDateTime.toLocaleString()}
+              </Typography>
+              <Typography>
+                <strong>Estado:</strong>{" "}
+                {orderGeneral.status === "pending" ? "Pendiente" : "Confirmado"}
               </Typography>
             </Box>
           </Box>
@@ -461,7 +645,7 @@ const OrderForm = ({
               <Button
                 variant="contained"
                 onClick={handleSubmitOrder}
-                disabled={orderItems.length === 0}
+                disabled={orderItems.length === 0 || !customer}
               >
                 Confirmar Pedido
               </Button>

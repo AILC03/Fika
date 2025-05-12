@@ -12,7 +12,7 @@ import {
   FormControlLabel,
 } from "@mui/material";
 
-const RegularCakeForm = ({ cakeData, onAddCake, onCancel }) => {
+const RegularCakeForm = ({ cakeData, onAddCake }) => {
   // Estados para la configuración del pastel
   const [selectedLine, setSelectedLine] = useState("");
   const [selectedFlavor, setSelectedFlavor] = useState("");
@@ -41,8 +41,11 @@ const RegularCakeForm = ({ cakeData, onAddCake, onCancel }) => {
   };
 
   // Manejar cambio de línea (resetear selecciones cuando cambia)
-  const handleLineChange = (line) => {
-    setSelectedLine(line);
+  const handleLineChange = (lineType) => {
+    const selectedLineObj = availableLines.find(
+      (line) => line.type === lineType
+    );
+    setSelectedLine(lineType);
     setSelectedFlavor("");
     setSelectedSize("");
     setSelectedIngredients([]);
@@ -63,39 +66,58 @@ const RegularCakeForm = ({ cakeData, onAddCake, onCancel }) => {
     );
   };
 
+  // Limpiar todo el formulario
+  const handleClearForm = () => {
+    setSelectedLine("");
+    setSelectedFlavor("");
+    setSelectedSize("");
+    setSelectedIngredients([]);
+  };
+
   // Enviar datos al componente padre
   const handleSubmit = () => {
     // Verificar que los campos obligatorios estén completos
     if (!selectedLine || !selectedFlavor || !selectedSize) return;
 
-    // Obtener los objetos completos de sabor y tamaño
+    // Obtener los objetos completos de los elementos seleccionados
+    const selectedLineObj = availableLines.find(
+      (line) => line.type === selectedLine
+    );
     const selectedFlavorObj = lineData.flavors.find(
       (f) => f.id === selectedFlavor
     );
     const selectedSizeObj = lineData.sizes.find((s) => s.id === selectedSize);
 
     // Obtener los ingredientes seleccionados con sus datos completos
-    const selectedIngredientsData = flavorData.ingredients.filter((ing) =>
-      selectedIngredients.includes(ing.id)
-    );
+    const selectedIngredientsData = flavorData.ingredients
+      .filter((ing) => selectedIngredients.includes(ing.id))
+      .map((ing) => ({
+        id: ing.id,
+        name: ing.name,
+      }));
 
-    // Construir el objeto del pastel
+    // Construir el objeto del pastel según el estándar
     const cake = {
       type: "regular",
-      line: selectedLine,
+      line: {
+        id: selectedLineObj?.id || 0,
+        name: selectedLineObj?.type || "",
+      },
       flavor: {
-        id: selectedFlavor,
+        id: selectedFlavorObj?.id || 0,
         name: selectedFlavorObj?.name || "",
-        ingredients: selectedIngredientsData.map((ing) => ({
-          id: ing.id,
-          name: ing.name,
-        })),
+        ingredients:
+          selectedFlavorObj?.ingredients?.map((ing) => ({
+            id: ing.id,
+            name: ing.name,
+          })) || [],
       },
       size: {
-        id: selectedSize,
+        id: selectedSizeObj?.id || 0,
         name: selectedSizeObj?.size || "",
       },
-      ingredients: selectedIngredientsData.map((ing) => ing.name),
+      ingredients: selectedIngredientsData,
+      quantity: 1, // Valor por defecto
     };
 
     // Enviar al componente padre
@@ -206,8 +228,8 @@ const RegularCakeForm = ({ cakeData, onAddCake, onCancel }) => {
 
       {/* Botones de acción */}
       <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Button onClick={onCancel} variant="outlined">
-          Cancelar
+        <Button onClick={handleClearForm} variant="outlined">
+          Limpiar
         </Button>
         <Button
           onClick={handleSubmit}

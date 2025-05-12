@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -8,14 +8,11 @@ import {
   FormControl,
   Typography,
   Grid,
-  TextField,
   IconButton,
-  Divider,
-  Chip,
 } from "@mui/material";
 import { Plus, Minus } from "lucide-react";
 
-const CupcakesForm = ({ cakeData, onAddCake, onCancel }) => {
+const CupcakesForm = ({ cakeData, onAddCake }) => {
   // Estados del formulario
   const [quantity, setQuantity] = useState(6); // Mínimo 6 cupcakes
   const [selectedFlavor, setSelectedFlavor] = useState("");
@@ -52,21 +49,48 @@ const CupcakesForm = ({ cakeData, onAddCake, onCancel }) => {
     }
   };
 
+  // Limpiar todo el formulario
+  const handleClearForm = () => {
+    setQuantity(6);
+    setSelectedFlavor("");
+    setSelectedIngredients([]);
+  };
+
   // Enviar datos al componente padre
   const handleSubmit = () => {
     if (!selectedFlavor) return;
 
     const flavorData = availableFlavors.find((f) => f.id === selectedFlavor);
+    const selectedIngredientsData =
+      flavorData?.ingredients?.filter((ing) =>
+        selectedIngredients.includes(ing.id)
+      ) || [];
 
     onAddCake({
       type: "cupcakes",
       quantity,
-      flavor: flavorData.name,
-      flavorId: selectedFlavor,
-      ingredients: selectedIngredients
-        .map((id) => flavorData.ingredients.find((ing) => ing.id === id)?.name)
-        .filter(Boolean),
-      // Nota: writing y notes se manejan en el componente padre
+      line: {
+        id: cupcakeLine.id,
+        name: cupcakeLine.name,
+      },
+      flavor: {
+        id: flavorData?.id || null,
+        name: flavorData?.name || "",
+        ingredients: selectedIngredientsData.map((ing) => ({
+          id: ing.id,
+          name: ing.name,
+        })),
+      },
+      size: {
+        id: 0,
+        name: "N/A",
+      },
+      ingredients: selectedIngredientsData.map((ing) => ({
+        id: ing.id,
+        name: ing.name,
+      })),
+      tiers: [],
+      digits: [],
     });
   };
 
@@ -88,26 +112,26 @@ const CupcakesForm = ({ cakeData, onAddCake, onCancel }) => {
       <Box sx={{ mb: 3 }}>
         <Typography gutterBottom>Cantidad</Typography>
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Button
-            variant="outlined"
+          <IconButton
             onClick={() => adjustQuantity(-6)}
             disabled={quantity <= 6}
+            color="primary"
           >
             <Minus />
-          </Button>
+          </IconButton>
           <Typography
             variant="h6"
             sx={{ minWidth: "3rem", textAlign: "center" }}
           >
             {quantity}
           </Typography>
-          <Button
-            variant="outlined"
+          <IconButton
             onClick={() => adjustQuantity(6)}
             disabled={quantity >= 120}
+            color="primary"
           >
             <Plus />
-          </Button>
+          </IconButton>
         </Box>
       </Box>
 
@@ -157,7 +181,10 @@ const CupcakesForm = ({ cakeData, onAddCake, onCancel }) => {
         )}
 
       {/* Botones de acción */}
-      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
+        <Button onClick={handleClearForm} variant="outlined">
+          Limpiar
+        </Button>
         <Button
           onClick={handleSubmit}
           variant="contained"

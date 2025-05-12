@@ -10,15 +10,17 @@ import {
   Grid,
   IconButton,
   Paper,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 import { Trash2, Plus } from "lucide-react";
 
-const TieredCakeForm = ({ cakeData, onAddCake, onCancel }) => {
+const TieredCakeForm = ({ cakeData, onAddCake }) => {
   const [selectedLine, setSelectedLine] = useState("");
-  const [tiers, setTiers] = useState([{ size: "", flavor: "" }]);
-
-  // DEBUG: Verificar que cakeData llega correctamente
-  console.log("Datos de pasteles recibidos en TieredCakeForm:", cakeData);
+  const [tiers, setTiers] = useState([
+    { size: "", flavor: "", selectedIngredients: [] },
+    { size: "", flavor: "", selectedIngredients: [] },
+  ]);
 
   // Obtener solo líneas disponibles para pasteles de pisos
   const availableLines = cakeData
@@ -35,20 +37,28 @@ const TieredCakeForm = ({ cakeData, onAddCake, onCancel }) => {
 
   // Función para manejar cambio de línea
   const handleLineChange = (lineType) => {
-    setSelectedLine(lineType);
-    setTiers([{ size: "", flavor: "" }]); // Resetear pisos al cambiar línea
+    const selectedLineData = availableLines.find(
+      (line) => line.type === lineType
+    );
+    setSelectedLine(selectedLineData?.type || "");
+    // Inicializar con 2 pisos al cambiar línea
+    setTiers([
+      { size: "", flavor: "", selectedIngredients: [] },
+      { size: "", flavor: "", selectedIngredients: [] },
+    ]);
   };
 
   // Función para agregar nuevo piso
   const handleAddTier = () => {
     if (tiers.length < 4) {
-      setTiers([...tiers, { size: "", flavor: "" }]);
+      setTiers([...tiers, { size: "", flavor: "", selectedIngredients: [] }]);
     }
   };
 
   // Función para eliminar piso
   const handleRemoveTier = (index) => {
-    if (tiers.length > 1) {
+    if (tiers.length > 2) {
+      // Mínimo 2 pisos
       const newTiers = [...tiers];
       newTiers.splice(index, 1);
       setTiers(newTiers);
@@ -57,10 +67,36 @@ const TieredCakeForm = ({ cakeData, onAddCake, onCancel }) => {
 
   // Función para actualizar un piso
   const handleTierChange = (index, field, value) => {
-    const newTiers = tiers.map((tier, i) =>
-      i === index ? { ...tier, [field]: value } : tier
-    );
+    const newTiers = tiers.map((tier, i) => {
+      if (i === index) {
+        // Resetear ingredientes cuando cambia el sabor
+        if (field === "flavor") {
+          return { ...tier, [field]: value, selectedIngredients: [] };
+        }
+        return { ...tier, [field]: value };
+      }
+      return tier;
+    });
     setTiers(newTiers);
+  };
+
+  // Manejar selección de ingredientes
+  const handleIngredientToggle = (tierIndex, ingredientId) => {
+    const newTiers = [...tiers];
+    newTiers[tierIndex].selectedIngredients = newTiers[
+      tierIndex
+    ].selectedIngredients.includes(ingredientId)
+      ? newTiers[tierIndex].selectedIngredients.filter(
+          (id) => id !== ingredientId
+        )
+      : [...newTiers[tierIndex].selectedIngredients, ingredientId];
+    setTiers(newTiers);
+  };
+
+  // Obtener ingredientes del sabor seleccionado
+  const getFlavorIngredients = (flavorId) => {
+    const flavor = lineData.flavors.find((f) => f.id === flavorId);
+    return flavor?.ingredients || [];
   };
 
   // Validar que los tamaños sean decrecientes
@@ -82,6 +118,15 @@ const TieredCakeForm = ({ cakeData, onAddCake, onCancel }) => {
     return true;
   };
 
+  // Limpiar todo el formulario
+  const handleClearForm = () => {
+    setSelectedLine("");
+    setTiers([
+      { size: "", flavor: "", selectedIngredients: [] },
+      { size: "", flavor: "", selectedIngredients: [] },
+    ]);
+  };
+
   // Función para enviar los datos al padre
   const handleSubmit = () => {
     if (!validateSizes()) {
@@ -89,29 +134,44 @@ const TieredCakeForm = ({ cakeData, onAddCake, onCancel }) => {
       return;
     }
 
-    const preparedTiers = tiers.map((tier) => {
-      const sizeObj = lineData.sizes.find((s) => s.id === tier.size);
-      const flavorObj = lineData.flavors.find((f) => f.id === tier.flavor);
+    const selectedLineData = availableLines.find(
+      (line) => line.type === selectedLine
+    );
 
-      return {
-        size: sizeObj ? sizeObj.size : "",
-        sizeId: tier.size,
-        flavor: flavorObj ? flavorObj.name : "",
-        flavorId: tier.flavor,
-        ingredients: flavorObj ? flavorObj.ingredients : [],
-      };
-    });
-
-    onAddCake({
+    // Preparar los datos según el estándar
+    const cakeData = {
       type: "tiered",
-      line: selectedLine,
-      tiers: tiers.map((tier) => ({
-        size: lineData.sizes.find((s) => s.id === tier.size)?.size || "",
-        flavor: lineData.flavors.find((f) => f.id === tier.flavor)?.name || "",
-        sizeId: tier.size,
-        flavorId: tier.flavor,
-      })),
-    });
+      line: {
+        id: selectedLineData?.id || 0,
+        name: selectedLineData?.type || "",
+      },
+      tiers: tiers.map((tier) => {
+        const sizeObj = lineData.sizes.find((s) => s.id === tier.size);
+        const flavorObj = lineData.flavors.find((f) => f.id === tier.flavor);
+        const ingredientsData =
+          flavorObj?.ingredients?.filter((ing) =>
+            tier.selectedIngredients.includes(ing.id)
+          ) || [];
+
+        return {
+          flavor: {
+            id: flavorObj?.id || 0,
+            name: flavorObj?.name || "",
+            ingredients: ingredientsData.map((ing) => ({
+              id: ing.id,
+              name: ing.name,
+            })),
+          },
+          size: {
+            id: sizeObj?.id || 0,
+            name: sizeObj?.size || "",
+          },
+        };
+      }),
+      quantity: 1, // Asumiendo cantidad 1 por defecto
+    };
+
+    onAddCake(cakeData);
   };
 
   // Verificar si el formulario está completo
@@ -153,66 +213,98 @@ const TieredCakeForm = ({ cakeData, onAddCake, onCancel }) => {
       {selectedLine && (
         <>
           {/* Lista de pisos */}
-          {tiers.map((tier, index) => (
-            <Paper key={index} sx={{ p: 2, mb: 2, position: "relative" }}>
-              <Typography variant="subtitle1" gutterBottom>
-                Piso {index + 1}
-              </Typography>
+          {tiers.map((tier, index) => {
+            const flavorIngredients = getFlavorIngredients(tier.flavor);
 
-              {index > 0 && (
-                <IconButton
-                  size="small"
-                  onClick={() => handleRemoveTier(index)}
-                  sx={{ position: "absolute", top: 8, right: 8 }}
-                  color="error"
-                >
-                  <Trash2 size={16} />
-                </IconButton>
-              )}
+            return (
+              <Paper key={index} sx={{ p: 2, mb: 2, position: "relative" }}>
+                <Typography variant="subtitle1" gutterBottom>
+                  Piso {index + 1}
+                </Typography>
 
-              <Grid container spacing={2}>
-                {/* Selector de tamaño */}
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth>
-                    <InputLabel>Tamaño</InputLabel>
-                    <Select
-                      value={tier.size}
-                      onChange={(e) =>
-                        handleTierChange(index, "size", e.target.value)
-                      }
-                      label="Tamaño"
-                    >
-                      {lineData.sizes.map((size) => (
-                        <MenuItem key={size.id} value={size.id}>
-                          {size.size}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                {index >= 2 && ( // Solo mostrar botón de eliminar en pisos adicionales
+                  <IconButton
+                    size="small"
+                    onClick={() => handleRemoveTier(index)}
+                    sx={{ position: "absolute", top: 8, right: 8 }}
+                    color="error"
+                  >
+                    <Trash2 size={16} />
+                  </IconButton>
+                )}
+
+                <Grid container spacing={2}>
+                  {/* Selector de tamaño */}
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth>
+                      <InputLabel>Tamaño</InputLabel>
+                      <Select
+                        value={tier.size}
+                        onChange={(e) =>
+                          handleTierChange(index, "size", e.target.value)
+                        }
+                        label="Tamaño"
+                      >
+                        {lineData.sizes.map((size) => (
+                          <MenuItem key={size.id} value={size.id}>
+                            {size.size}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+
+                  {/* Selector de sabor */}
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth>
+                      <InputLabel>Sabor</InputLabel>
+                      <Select
+                        value={tier.flavor}
+                        onChange={(e) =>
+                          handleTierChange(index, "flavor", e.target.value)
+                        }
+                        label="Sabor"
+                      >
+                        {lineData.flavors.map((flavor) => (
+                          <MenuItem key={flavor.id} value={flavor.id}>
+                            {flavor.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+
+                  {/* Ingredientes del sabor seleccionado */}
+                  {tier.flavor && flavorIngredients.length > 0 && (
+                    <Grid item xs={12}>
+                      <Typography variant="subtitle2" gutterBottom>
+                        Ingredientes Adicionales
+                      </Typography>
+                      <Grid container spacing={1}>
+                        {flavorIngredients.map((ingredient) => (
+                          <Grid item xs={12} sm={6} key={ingredient.id}>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={tier.selectedIngredients?.includes(
+                                    ingredient.id
+                                  )}
+                                  onChange={() =>
+                                    handleIngredientToggle(index, ingredient.id)
+                                  }
+                                />
+                              }
+                              label={ingredient.name}
+                            />
+                          </Grid>
+                        ))}
+                      </Grid>
+                    </Grid>
+                  )}
                 </Grid>
-
-                {/* Selector de sabor */}
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth>
-                    <InputLabel>Sabor</InputLabel>
-                    <Select
-                      value={tier.flavor}
-                      onChange={(e) =>
-                        handleTierChange(index, "flavor", e.target.value)
-                      }
-                      label="Sabor"
-                    >
-                      {lineData.flavors.map((flavor) => (
-                        <MenuItem key={flavor.id} value={flavor.id}>
-                          {flavor.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-              </Grid>
-            </Paper>
-          ))}
+              </Paper>
+            );
+          })}
 
           {/* Botón para agregar más pisos */}
           {tiers.length < 4 && (
@@ -223,7 +315,7 @@ const TieredCakeForm = ({ cakeData, onAddCake, onCancel }) => {
               fullWidth
               sx={{ mb: 3 }}
             >
-              Agregar Piso
+              Agregar Piso (Máximo 4)
             </Button>
           )}
 
@@ -236,8 +328,8 @@ const TieredCakeForm = ({ cakeData, onAddCake, onCancel }) => {
 
           {/* Botones de acción */}
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-            <Button onClick={onCancel} variant="outlined">
-              Cancelar
+            <Button onClick={handleClearForm} variant="outlined">
+              Limpiar
             </Button>
             <Button
               onClick={handleSubmit}
