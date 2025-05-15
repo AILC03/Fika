@@ -359,48 +359,48 @@ const Calendar = () => {
   }, []);
 
   return (
-    <div className="w-full h-full p-4 flex flex-col">
+    <div className="w-full h-full p-2 sm:p-4 flex flex-col">
       {/* Encabezado del calendario */}
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-2 sm:mb-4">
         <button
           onClick={handlePrevMonth}
-          className="text-amber-900 px-2 py-2 rounded border border-amber-800 hover:bg-yellow-400 flex items-center"
+          className="text-amber-900 px-2 py-1 sm:py-2 rounded border border-amber-800 hover:bg-yellow-400 flex items-center"
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
-        <h2 className="text-xl font-bold">
+        <h2 className="text-lg sm:text-xl font-bold">
           {`${currentDate.toLocaleString("default", {
             month: "long",
           })} ${currentDate.getFullYear()}`}
         </h2>
         <button
           onClick={handleNextMonth}
-          className="text-amber-900 px-2 py-2 rounded border border-amber-800 hover:bg-yellow-400 flex items-center"
+          className="text-amber-900 px-2 py-1 sm:py-2 rounded border border-amber-800 hover:bg-yellow-400 flex items-center"
         >
-          <ChevronRight className="w-5 h-5" />
+          <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
       </div>
 
       {/* Días de la semana */}
-      <div className="grid grid-cols-7 gap-2 text-center font-bold">
+      <div className="grid grid-cols-7 gap-1 sm:gap-2 text-center text-xs sm:text-base font-bold">
         {["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"].map((day) => (
           <div key={day}>{day}</div>
         ))}
       </div>
 
       {/* Días del mes */}
-      <div className="grid grid-cols-7 gap-0.5 mt-2 flex-grow">
+      <div className="grid grid-cols-7 gap-0.5 mt-1 sm:mt-2 flex-grow">
         {generateCalendarDays()}
       </div>
 
-      {/* Formulario de pedido */}
+      {/* Formulario de pedido (permanece igual) */}
       <OrderForm
-        apiData={mockApiData} // Datos de la API
-        isOpen={isModalOpen} // Estado del modal
-        onClose={() => setIsModalOpen(false)} // Función para cerrar
-        onOrderSubmit={handleOrderSubmit} // Función para manejar el pedido
-        orderDate={selectedDay ? selectedDay.toISOString().split("T")[0] : null} // Fecha formateada
-        userId={currentUser.id} // ID de usuario
+        apiData={mockApiData}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onOrderSubmit={handleOrderSubmit}
+        orderDate={selectedDay ? selectedDay.toISOString().split("T")[0] : null}
+        userId={currentUser.id}
       />
     </div>
   );

@@ -6,10 +6,7 @@ amber-800 == 7E4300 -> Marrón oscuro
 
 yellow-100 == FFF2C9 -> Crema claro
 
-Despues de Login se construye todo en app:
- APP.jsx
-
-Estandar de envio de informacion a la api, de componente hijo a componente padre:
+Estandar de componente hijo a componente padre:
 {
   "type": "regular | tiered | numeric | cupcakes",
   "line": {
@@ -65,3 +62,23 @@ Estandar de envio de informacion a la api, de componente hijo a componente padre
   ],
   "quantity": number
 }
+
+Estructura de OrderForm:
+─ OrderForm.jsx          # Componente padre
+─ CustomerSearch.jsx     # Búsqueda de cliente
+─ CakeTypeSelector.jsx   # Selector de tipo de pastel
+─ cakes/
+ ─ NumericCake.jsx    # Componente para pasteles numéricos
+ ─ RegularCake.jsx    # Componente para pasteles regulares
+ ─ TieredCake.jsx     # Componente para pasteles de pisos
+ ─ Cupcakes.jsx       # Componente para cupcakes
+─ OrderSummary.jsx       # Resumen del pedido
+
+Estructura de ManagerView:
+ - ManagementDashboard.jsx
+    - MenuTabs.jsx
+    - OrdersView.jsx
+    - CakeManagementView.jsx
+    - SaleLimitationsView.jsx
+    - CustomersView.jsx
+    - EmployeesView.jsx

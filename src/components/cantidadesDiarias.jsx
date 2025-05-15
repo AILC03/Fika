@@ -15,16 +15,16 @@ export default function ProductTable({ data }) {
     return Object.values(grouped);
   };
 
-  // Separar los productos en "hoy" y "manana"
+  // Separar los productos en "hoy" y "mañana"
   const todayProducts = groupProducts(data.today || []);
   const tomorrowProducts = groupProducts(data.tomorrow || []);
 
   const [activeTab, setActiveTab] = useState("today");
 
   return (
-    <div className="w-full">
+    <div className="w-full p-4">
       {/* Tabs */}
-      <div className="flex justify-end mb-2">
+      <div className="flex justify-center md:justify-end mb-4">
         <div className="flex">
           <button
             onClick={() => setActiveTab("today")}
@@ -59,7 +59,7 @@ export default function ProductTable({ data }) {
 
         {/* Contenedor con scroll si hay más de 4 filas */}
         <div className="max-h-48 overflow-y-auto">
-          <table className="w-full border-collapse">
+          <table className="w-full border-collapse text-sm md:text-base">
             <thead className="sticky top-0 bg-amber-100">
               <tr>
                 <th className="py-2 px-4 text-left bg-amber-100 border border-amber-300 text-amber-900 font-medium">

@@ -1,15 +1,14 @@
-import NavigationMenu from "../../components/adminMenu";
+// import NavigationMenu from "../../components/adminMenu";
+import ManagementDashboard from "../../components/managerView/ManagementDashboard";
 
 const General = () => {
   return (
-    <div className="  m-10 flex">
-      {/* Contenido principal con margen igual al ancho del menú */}
-      <main className="flex-grow">
-        <div className="p-10">
-          <NavigationMenu />
-        </div>
-      </main>
+    <div className="p-4 sm:p-6 md:p-7 w-full max-h-2/3">
+      <div className="w-full max-w-screen-3xl max-h-2/3">
+        <ManagementDashboard />
+      </div>
     </div>
   );
 };
+
 export default General;

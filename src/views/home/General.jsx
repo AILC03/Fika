@@ -6,49 +6,54 @@ import BuscadorPedidos from "../../components/buscadorPedidos"; // Tabla de busq
 import ProductTable from "../../components/cantidadesDiarias"; // Tabla de cantidades
 
 // Datos simulados para la tabla de eventos
+const today = new Date();
+const formattedToday = `${today.getFullYear()}-${String(
+  today.getMonth() + 1
+).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+
 const eventosData = [
   {
-    fecha: "2025-04-24",
+    fecha: formattedToday,
     cliente: "Juan Pérez",
     texto: "Feliz cumpleaños, Juan",
   },
   {
-    fecha: "2025-04-24",
+    fecha: formattedToday,
     cliente: "María López",
     texto: "Felicidades por tu graduación",
   },
   {
-    fecha: "2025-04-24",
+    fecha: formattedToday,
     cliente: "Carlos García",
     texto: "Feliz aniversario",
   },
   {
-    fecha: "2025-04-01",
+    fecha: formattedToday,
     cliente: "Ana Torres",
     texto: "Bienvenida al equipo",
   },
   {
-    fecha: "2025-04-02",
+    fecha: formattedToday,
     cliente: "Luis Martínez",
     texto: "Feliz cumpleaños, Luis",
   },
   {
-    fecha: "2025-04-03",
+    fecha: formattedToday,
     cliente: "Sofía Ramírez",
     texto: "Te queremos mucho",
   },
   {
-    fecha: "2025-04-04",
+    fecha: formattedToday,
     cliente: "Pedro Sánchez",
     texto: "Feliz jubilación",
   },
   {
-    fecha: "2025-04-05",
+    fecha: formattedToday,
     cliente: "Laura Fernández",
     texto: "Feliz cumpleaños, Laura",
   },
   {
-    fecha: "2025-04-06",
+    fecha: formattedToday,
     cliente: "Diego Herrera",
     texto: "Gracias por todo",
   },
@@ -225,53 +230,59 @@ const pedidosSimulados = [
 ];
 
 const General = () => {
-  const [showBuscador, setShowBuscador] = useState(false); // Estado para controlar la visibilidad del buscador
+  const [showBuscador, setShowBuscador] = useState(false);
 
   const handleCloseBuscador = () => {
-    setShowBuscador(false); // Cierra el componente "Buscador"
+    setShowBuscador(false);
   };
 
   return (
-    <div className="h-screen flex">
+    <div className="min-h-screen flex flex-col md:flex-row  overflow-hidden">
       {/* Contenido principal */}
-      <main className="flex-grow flex">
-        {/* Columna izquierda */}
-        <div className="flex flex-col w-3/4 m-5">
+      <main className="flex-grow flex flex-col md:flex-row">
+        {/* Columna izquierda - Apila verticalmente en móvil */}
+        <div className="flex flex-col w-full md:w-2/3 p-2 md:m-5 md:p-0">
           <div
             id="Calendario"
-            className="flex-grow mb-5 rounded-xl bg-yellow-100"
+            className="flex-grow mb-2 md:mb-5 rounded-xl bg-yellow-100"
           >
             <Calendar />
           </div>
-          {/* Componente "Cantidades" para mostrar los totales de productos */}
-          <ProductTable data={productData} />
+
+          {/* Componente "Cantidades" */}
+          <div className="w-full overflow-x-auto">
+            <ProductTable data={productData} />
+          </div>
         </div>
 
-        {/* Columna derecha */}
-        <div id="eventos" className="flex flex-col flex-grow p-4">
-          <h2 className="flex items-center gap-2 text-3xl text-white bg-amber-800 p-4 rounded-sm font-bold mb-4">
+        {/* Columna derecha - Ocupa todo el ancho en móvil, 1/3 en desktop */}
+        <div
+          id="eventos"
+          className="flex flex-col w-full md:w-1/3 p-2 md:p-4 bg-amber-800 md:bg-transparent max-h-screen"
+        >
+          <h2 className="flex items-center gap-2 text-xl md:text-2xl text-white bg-amber-800 p-2 md:p-4 rounded-sm font-bold mb-2 md:mb-4">
             Eventos
             <Search
-              className="w-6 h-6 ml-auto cursor-pointer"
-              onClick={() => setShowBuscador(true)} // icono con funcion de busqueda
+              className="w-5 h-5 md:w-6 md:h-6 ml-auto cursor-pointer"
+              onClick={() => setShowBuscador(true)}
             />
           </h2>
 
-          <div className="flex-grow  overflow-y-auto">
-            <Eventos eventos={eventosData} /> {/* Cards de eventos */}
+          <div className="flex-grow overflow-y-auto max-h-[calc(100vh-7rem)]">
+            {/* Ajusta el valor restado (7rem) según el alto real de tu encabezado */}
+            <Eventos eventos={eventosData} />
           </div>
         </div>
       </main>
 
       {/* Componente "Buscador" */}
       {showBuscador && (
-        <div className="fixed inset-0 flex items-center justify-center">
-          <div className="p-6 rounded">
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className=" p-4 md:p-6 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto mx-2">
             <BuscadorPedidos
               pedidos={pedidosSimulados}
               onClose={handleCloseBuscador}
             />
-            {/* Pasa la función de cierre */}
           </div>
         </div>
       )}

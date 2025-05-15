@@ -1,4 +1,3 @@
-// filepath: d:\sopa\Frontend\Fika\src\components\sidebar.jsx
 import { Link, Outlet } from "react-router-dom";
 import Banner2 from "../Assets/Banner2.jpg";
 import Logo from "../Assets/logo1.png"; // Ruta del logo
@@ -13,7 +12,14 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="flex h-screen">
+    <div
+      className="flex h-screen"
+      style={{
+        backgroundImage: `url(${Banner2})`, // Establece la imagen de fondo
+        backgroundSize: "cover", // Asegura que la imagen cubra todo el fondo
+        backgroundPosition: "center", // Centra la imagen
+      }}
+    >
       {/* Sidebar */}
       <div className="w-24 bg-amber-900 text-white p-4 flex flex-col items-center justify-between">
         {/* Logo */}
@@ -53,10 +59,7 @@ const Sidebar = () => {
       </div>
 
       {/* Contenido dinámico de las rutas */}
-      <div
-        className="flex-1 bg-cover bg-center"
-        style={{ backgroundImage: `url(${Banner2})` }}
-      >
+      <div className="flex-1 bg-cover bg-center">
         <Outlet />
       </div>
     </div>
