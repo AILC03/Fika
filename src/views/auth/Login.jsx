@@ -2,52 +2,47 @@ import Banner from "../../Assets/Banner1.jpg";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/authContext";
 
 const Login = () => {
+  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
   const navigate = useNavigate();
 
-  // Variables de estado para manejar los campos del formulario y el mensaje de error
-  const [showPassword, setShowPassword] = useState(false);
-  const [usr, setUsr] = useState(""); // Usuario
-  const [pwd, setPwd] = useState(""); // Contraseña
-  const [error, setError] = useState(""); // Mensaje de error
-
-  // Función para manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validación de campos vacíos
-    if (!usr || !pwd) {
+    // Simular login exitoso como admin
+    login("admin@example.com", "anypassword").then(() => {
+      navigate("/home");
+    });
+
+    // Descomentar para usar la lógica real de login
+    
+    setError("");
+  
+    if (!email || !password) {
       setError("Por favor, completa todos los campos.");
       return;
     }
-
+  
     try {
-      const response = await fetch(
-        "https://api-legisconnect-production.up.railway.app/users/auth",
-        {
-          method: "POST",
-          credentials: "include", // Para cookies
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: usr,
-            password: pwd,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        console.log("Inicio de sesión exitoso.");
-        navigate("/home"); // Redirigir al home
+      setLoading(true);
+      const result = await login(email, password);
+      
+      if (result.success) {
+        navigate("/home");
       } else {
-        setError(data.message || "Error en la validación, intenta de nuevo.");
+        setError(result.message);
       }
     } catch (err) {
-      setError("El servidor no responde. Intenta más tarde.");
+      setError("Error al conectar con el servidor");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -69,35 +64,31 @@ const Login = () => {
       <div className="w-full lg:w-1/2 h-1/2 lg:h-full flex items-center justify-center">
         <div className="w-96 p-6 rounded-lg">
           <form onSubmit={handleSubmit}>
-            {/* Usuario */}
             <div className="mb-1.5">
               <label className="block text-amber-900 font-bold text-lg mb-2">
-                Usuario
+                Email
               </label>
               <input
-                id="usr"
-                type="text"
+                type="email"
                 className="w-full px-4 py-2 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-200"
-                placeholder="Ingresa tu usuario"
-                value={usr}
-                onChange={(e) => setUsr(e.target.value)}
+                placeholder="Ingresa tu email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <span className="text-gray-500">No olvides tu usuario.</span>
 
-            {/* Contraseña */}
             <div className="mb-1.5 mt-14 relative">
               <label className="block text-amber-900 font-bold text-lg mb-2">
                 Contraseña
               </label>
               <div className="relative">
                 <input
-                  id="pwd"
                   type={showPassword ? "text" : "password"}
                   className="w-full px-4 py-2 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-yellow-200 pr-10"
                   placeholder="********"
-                  value={pwd}
-                  onChange={(e) => setPwd(e.target.value)}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
                 <button
                   type="button"
@@ -114,19 +105,18 @@ const Login = () => {
             </div>
             <span className="text-gray-500">Verifica tu contraseña.</span>
 
-            {/* Mensaje de error */}
             {error && (
               <div className="mt-4 text-red-500 text-sm text-center">
                 {error}
               </div>
             )}
 
-            {/* Botón de inicio de sesión */}
             <button
               type="submit"
-              className="mt-4 w-full bg-amber-900 hover:bg-amber-700 text-white font-bold py-2 rounded-lg transition"
+              disabled={loading}
+              className="mt-4 w-full bg-amber-900 hover:bg-amber-700 text-white font-bold py-2 rounded-lg transition disabled:opacity-50"
             >
-              Iniciar sesión
+              {loading ? "Cargando..." : "Iniciar sesión"}
             </button>
           </form>
         </div>

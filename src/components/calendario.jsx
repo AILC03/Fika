@@ -7,6 +7,9 @@ const Calendar = () => {
   const [selectedDay, setSelectedDay] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState({ id: 1 });
+  const [selectedDate, setSelectedDate] = useState(null);
+  
+  let pressTimer = null;
 
   // Datos simulados de la API
   const mockApiData = {
@@ -280,6 +283,19 @@ const Calendar = () => {
     return new Date(year, month + 1, 0).getDate();
   };
 
+  const handleLongPressStart = (day, isPastDay, year, month) => {
+    if (isPastDay) return;
+    pressTimer = setTimeout(() => {
+      const selectedDate = new Date(year, month, day);
+      setSelectedDay(selectedDate);
+      setIsModalOpen(true);
+    }, 500); // 500ms para long press
+  };
+
+  const handleLongPressEnd = () => {
+    clearTimeout(pressTimer);
+  };
+
   // Maneja el envío del pedido
   const handleOrderSubmit = (orderData) => {
     console.log("Pedido enviado:", orderData);
@@ -296,6 +312,20 @@ const Calendar = () => {
   };
 
   // Genera los días del mes actual
+  const handleDateClick = (day, isPastDay) => {
+    if (isPastDay) return;
+
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const clickedDate = new Date(year, month, day);
+    setSelectedDate(clickedDate);
+
+    // Formatear fecha como YYYY-MM-DD para la API
+    const formattedDate = clickedDate.toISOString().split("T")[0];
+    onDateSelect(formattedDate);
+  };
+
+  // Modificar generateCalendarDays para incluir el manejo de clicks
   const generateCalendarDays = () => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
@@ -305,12 +335,12 @@ const Calendar = () => {
     const today = new Date();
     const days = [];
 
-    // Agregar días vacíos al inicio del mes
+    // Días vacíos al inicio
     for (let i = 0; i < firstDayOfMonth; i++) {
       days.push(<div key={`empty-${i}`} className="text-gray-300"></div>);
     }
 
-    // Agregar días del mes
+    // Días del mes
     for (let day = 1; day <= daysInMonth; day++) {
       const isPastDay =
         year < today.getFullYear() ||
@@ -324,6 +354,12 @@ const Calendar = () => {
         month === today.getMonth() &&
         day === today.getDate();
 
+      const isSelected =
+        selectedDate &&
+        year === selectedDate.getFullYear() &&
+        month === selectedDate.getMonth() &&
+        day === selectedDate.getDate();
+
       days.push(
         <div
           key={day}
@@ -332,8 +368,12 @@ const Calendar = () => {
               ? "bg-yellow-200 text-black hover:bg-yellow-400 font-bold"
               : isPastDay
               ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+              : isSelected
+              ? "bg-amber-800 text-white hover:bg-amber-900"
               : "bg-white hover:bg-yellow-400 text-inherit"
           }`}
+          onClick={() => handleDateClick(day, isPastDay)}
+          // Doble click (opcional, puedes quitarlo si solo quieres long press)
           onDoubleClick={() => {
             if (!isPastDay) {
               const selectedDate = new Date(year, month, day);
@@ -341,6 +381,13 @@ const Calendar = () => {
               setIsModalOpen(true);
             }
           }}
+          // Long press para mouse
+          onMouseDown={() => handleLongPressStart(day, isPastDay, year, month)}
+          onMouseUp={handleLongPressEnd}
+          onMouseLeave={handleLongPressEnd}
+          // Long press para touch
+          onTouchStart={() => handleLongPressStart(day, isPastDay, year, month)}
+          onTouchEnd={handleLongPressEnd}
         >
           {day}
         </div>

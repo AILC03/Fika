@@ -3,10 +3,8 @@ import ManagementDashboard from "../../components/managerView/ManagementDashboar
 
 const General = () => {
   return (
-    <div className="p-4 sm:p-6 md:p-7 w-full max-h-2/3">
-      <div className="w-full max-w-screen-3xl max-h-2/3">
-        <ManagementDashboard />
-      </div>
+    <div className="w-full max-w-screen">
+      <ManagementDashboard />
     </div>
   );
 };
