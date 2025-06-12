@@ -13,10 +13,11 @@ import {
 import DateTimePicker from "./DateTimePicker";
 
 const statusOptions = [
-  { value: "pending", label: "Pendiente" },
-  { value: "in_progress", label: "En Proceso" },
-  { value: "completed", label: "Completado" },
-  { value: "cancelled", label: "Cancelado" },
+  { value: "pending", label: "Pagar al recoger" },
+  { value: "payed", label: "Pagado" },
+  { value: "payment", label: "Abonado" },
+  { value: "complete", label: "Entregado" },
+  { value: "cancel", label: "Cancelado" },
 ];
 
 const OrderGeneralFields = ({
