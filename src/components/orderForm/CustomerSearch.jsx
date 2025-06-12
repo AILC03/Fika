@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   TextField,
   Button,
@@ -10,7 +10,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 
-const CustomerSearch = ({ onSelectCustomer, searchOnly }) => {
+const CustomerSearch = ({ onSelectCustomer }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -20,7 +20,7 @@ const CustomerSearch = ({ onSelectCustomer, searchOnly }) => {
 
     setIsSearching(true);
     try {
-      // Aquí iría tu llamada real a la API
+      // Aquí iría la llamada real a la API
       const mockResults = [
         {
           id: 1,
@@ -49,59 +49,68 @@ const CustomerSearch = ({ onSelectCustomer, searchOnly }) => {
   };
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Typography variant="h6" gutterBottom>
+    <div className="p-4">
+      <Typography variant="h6" className="mb-4 text-[#7E4300]">
         Buscar Cliente
       </Typography>
 
-      <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+      <div className="flex gap-2 mb-2">
         <TextField
           fullWidth
           label="Nombre o Teléfono"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+          className="[&_.MuiOutlinedInput-root]:border-[#7E4300] [&_.MuiOutlinedInput-root:hover]:border-[#7E4300] [&_.MuiInputLabel-root]:text-[#7E4300]"
         />
         <Button
           variant="contained"
           onClick={handleSearch}
           disabled={!searchTerm.trim() || isSearching}
-          sx={{ minWidth: 120 }}
+          className="min-w-[120px] bg-[#FFD538] text-[#7E4300] hover:bg-[#FFD538]/90 disabled:bg-[#FFF2C9] disabled:text-[#7E4300]/50"
         >
-          {isSearching ? <CircularProgress size={24} /> : "Buscar"}
+          {isSearching ? (
+            <CircularProgress size={24} className="text-[#7E4300]" />
+          ) : (
+            "Buscar"
+          )}
         </Button>
-      </Box>
+      </div>
 
       {isSearching ? (
-        <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-          <CircularProgress />
-        </Box>
+        <div className="flex justify-center p-3">
+          <CircularProgress className="text-[#7E4300]" />
+        </div>
       ) : searchResults.length > 0 ? (
-        <List sx={{ border: "1px solid #eee", borderRadius: 1 }}>
+        <div className="border border-[#7E4300] rounded bg-[#FFF2C9]">
           {searchResults.map((customer) => (
             <ListItem
               key={customer.id}
               button
               onClick={() => onSelectCustomer(customer)}
-              sx={{
-                "&:hover": { backgroundColor: "#f5f5f5" },
-              }}
+              className="hover:bg-[#FFD538] hover:text-[#7E4300]"
             >
               <ListItemText
-                primary={customer.name}
-                secondary={`${customer.phone} ${
-                  customer.email ? `• ${customer.email}` : ""
-                }`}
+                primary={
+                  <span className="text-[#7E4300]">{customer.name}</span>
+                }
+                secondary={
+                  <span className="text-[#7E4300]">
+                    {`${customer.phone} ${
+                      customer.email ? `• ${customer.email}` : ""
+                    }`}
+                  </span>
+                }
               />
             </ListItem>
           ))}
-        </List>
+        </div>
       ) : searchTerm ? (
-        <Typography color="textSecondary" sx={{ p: 2, textAlign: "center" }}>
+        <Typography className="p-2 text-center text-[#7E4300]">
           No se encontraron clientes
         </Typography>
       ) : null}
-    </Box>
+    </div>
   );
 };
 

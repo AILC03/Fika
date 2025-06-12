@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
-  Box,
   Typography,
   Stepper,
   Step,
@@ -23,15 +22,17 @@ import CupcakesForm from "./cakes/Cupcakes";
 import CustomerSearch from "./CustomerSearch";
 import OrderGeneralFields from "./OrderGeneralFields";
 
+//componente principal
+
 const steps = ["Cliente", "Pasteles", "Detalles", "Resumen"];
 
 const cakeTypes = [
+  { id: "regular", name: "Pastel Regular", description: "Pastel tradicional" },
   {
     id: "numeric",
     name: "Pastel Numérico",
     description: "Para números y cifras",
   },
-  { id: "regular", name: "Pastel Regular", description: "Pastel tradicional" },
   {
     id: "tiered",
     name: "Pastel de Pisos",
@@ -57,6 +58,7 @@ const OrderForm = ({
     notes: "",
     status: "pending",
     pickupDateTime: new Date(new Date().setHours(14, 0, 0, 0)),
+    caution: false,
   });
   const [filteredCakeData, setFilteredCakeData] = useState([]);
 
@@ -266,6 +268,7 @@ const OrderForm = ({
       notes: "",
       status: "pending",
       pickupDateTime: new Date(new Date().setHours(14, 0, 0, 0)),
+      caution: false,
     });
     onClose();
   };
@@ -332,40 +335,36 @@ const OrderForm = ({
 
       case 1: // Paso 2: Selección y formularios de pasteles
         return (
-          <Box>
-            <Typography variant="h6" gutterBottom sx={{ mb: 3 }}>
+          <div className="space-y-4">
+            <Typography variant="h6" className="mb-4 text-[#7E4300]">
               {orderItems.length > 0
                 ? "Pasteles en este pedido"
                 : "Selecciona los pasteles para tu pedido"}
             </Typography>
 
             {orderItems.map((item, index) => (
-              <Paper key={index} sx={{ p: 2, mb: 2, position: "relative" }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Box>
-                    <Typography fontWeight="bold">
+              <Paper
+                key={index}
+                className="p-4 mb-4 relative border border-[#7E4300]/30"
+              >
+                <div className="flex justify-between items-center">
+                  <div>
+                    <Typography className="font-bold text-[#7E4300]">
                       {getCakeTypeName(item.type)}
                     </Typography>
                     <Typography
                       variant="body2"
-                      style={{ whiteSpace: "pre-line" }}
+                      className="text-[#7E4300]/80 whitespace-pre-line"
                     >
                       {getCakeDetails(item)}
                     </Typography>
-                  </Box>
-                  <Box>
+                  </div>
+                  <div>
                     {expandedForm === `${item.type}-edit-${index}` ? (
                       <Button
                         size="small"
-                        color="error"
+                        className="bg-[#FFD538] text-[#7E4300] hover:bg-[#FFD538]/90 mr-2"
                         onClick={() => setExpandedForm(null)}
-                        sx={{ mr: 1 }}
                       >
                         Cancelar
                       </Button>
@@ -373,37 +372,30 @@ const OrderForm = ({
                       <>
                         <Button
                           size="small"
+                          className="bg-[#FFD538] text-[#7E4300] hover:bg-[#FFD538]/90 mr-2"
                           onClick={() => {
                             setExpandedForm(`${item.type}-edit-${index}`);
                           }}
-                          sx={{ mr: 1 }}
                         >
                           Editar
                         </Button>
                         <Button
                           size="small"
-                          color="error"
+                          className="bg-red-500 text-white hover:bg-red-600"
                           onClick={() => handleRemoveCake(index)}
                         >
                           Eliminar
                         </Button>
                       </>
                     )}
-                  </Box>
-                </Box>
+                  </div>
+                </div>
 
                 {/* Formulario de edición */}
+                {/* Formulario de edición - Ordenado por tipo de pastel */}
                 <Collapse in={expandedForm === `${item.type}-edit-${index}`}>
-                  <Box sx={{ mt: 2 }}>
-                    {item.type === "numeric" && (
-                      <NumericCakeForm
-                        cakeData={filteredCakeData}
-                        onAddCake={(updated) => handleEditCake(index, updated)}
-                        initialData={item}
-                        editMode
-                        onCancel={() => setExpandedForm(null)}
-                      />
-                    )}
+                  <div className="mt-4">
+                    {/* 1. Pastel Regular (primero por ser el más común) */}
                     {item.type === "regular" && (
                       <RegularCakeForm
                         cakeData={filteredCakeData}
@@ -413,6 +405,19 @@ const OrderForm = ({
                         onCancel={() => setExpandedForm(null)}
                       />
                     )}
+
+                    {/* 2. Pastel Numérico */}
+                    {item.type === "numeric" && (
+                      <NumericCakeForm
+                        cakeData={filteredCakeData}
+                        onAddCake={(updated) => handleEditCake(index, updated)}
+                        initialData={item}
+                        editMode
+                        onCancel={() => setExpandedForm(null)}
+                      />
+                    )}
+
+                    {/* 3. Pastel de Pisos */}
                     {item.type === "tiered" && (
                       <TieredCakeForm
                         cakeData={filteredCakeData}
@@ -422,6 +427,8 @@ const OrderForm = ({
                         onCancel={() => setExpandedForm(null)}
                       />
                     )}
+
+                    {/* 4. Cupcakes (último por ser categoría diferente) */}
                     {item.type === "cupcakes" && (
                       <CupcakesForm
                         cakeData={filteredCakeData}
@@ -431,51 +438,47 @@ const OrderForm = ({
                         onCancel={() => setExpandedForm(null)}
                       />
                     )}
-                  </Box>
+                  </div>
                 </Collapse>
               </Paper>
             ))}
 
-            <Typography variant="subtitle1" gutterBottom>
+            <Typography variant="subtitle1" className="text-[#7E4300] mb-4">
               Agregar pasteles
             </Typography>
 
             <Grid container spacing={2}>
               {cakeTypes.map((type) => (
                 <Grid item xs={12} key={type.id}>
-                  <Paper elevation={2} sx={{ overflow: "hidden" }}>
-                    <Box
-                      sx={{
-                        p: 2,
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        cursor: "pointer",
-                        backgroundColor:
-                          expandedForm === type.id
-                            ? "action.hover"
-                            : "background.paper",
-                        "&:hover": {
-                          backgroundColor: "action.hover",
-                        },
-                      }}
+                  <Paper className="overflow-hidden">
+                    <div
+                      className={`p-4 flex justify-between items-center cursor-pointer ${
+                        expandedForm === type.id
+                          ? "bg-[#FFF2C9]"
+                          : "bg-white hover:bg-[#FFF2C9]/50"
+                      }`}
                       onClick={() => handleExpandForm(type.id)}
                     >
-                      <Box>
-                        <Typography fontWeight="bold">{type.name}</Typography>
-                        <Typography variant="body2" color="text.secondary">
+                      <div>
+                        <Typography className="font-bold text-[#7E4300]">
+                          {type.name}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          className="text-[#7E4300]/80"
+                        >
                           {type.description}
                         </Typography>
-                      </Box>
+                      </div>
                       {expandedForm === type.id ? (
-                        <ChevronUp />
+                        <ChevronUp className="text-[#7E4300]" />
                       ) : (
-                        <ChevronDown />
+                        <ChevronDown className="text-[#7E4300]" />
                       )}
-                    </Box>
+                    </div>
 
                     <Collapse in={expandedForm === type.id}>
-                      <Box sx={{ p: 2 }}>
+                      <div className="p-4">
                         {type.id === "numeric" && (
                           <NumericCakeForm
                             cakeData={filteredCakeData}
@@ -500,19 +503,19 @@ const OrderForm = ({
                             onAddCake={handleAddCake}
                           />
                         )}
-                      </Box>
+                      </div>
                     </Collapse>
                   </Paper>
                 </Grid>
               ))}
             </Grid>
-          </Box>
+          </div>
         );
 
       case 2: // Paso 3: Detalles generales
         return (
-          <Box>
-            <Typography variant="h6" gutterBottom>
+          <div>
+            <Typography variant="h6" className="text-[#7E4300] mb-4">
               Detalles Generales
             </Typography>
             <OrderGeneralFields
@@ -526,75 +529,78 @@ const OrderForm = ({
                 handleGeneralChange("pickupDateTime", value)
               }
               onStatusChange={(value) => handleGeneralChange("status", value)}
+              caution={orderGeneral.caution} // <-- ¡Agrega esta línea!
+              onCautionChange={(value) => handleGeneralChange("caution", value)}
             />
-          </Box>
+          </div>
         );
 
       case 3: // Paso 4: Resumen
         return (
-          <Box>
-            <Typography variant="h6" gutterBottom>
+          <div>
+            <Typography variant="h6" className="text-[#7E4300] mb-4">
               Resumen del Pedido
             </Typography>
 
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle1">Cliente</Typography>
-              <Typography>
+            <div className="mb-6">
+              <Typography variant="subtitle1" className="text-[#7E4300]">
+                Cliente
+              </Typography>
+              <Typography className="text-[#7E4300]">
                 {customer?.name} - {customer?.phone}
                 {customer?.email && ` (${customer.email})`}
               </Typography>
-            </Box>
+            </div>
 
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle1">
+            <div className="mb-6">
+              <Typography variant="subtitle1" className="text-[#7E4300]">
                 Pasteles ({orderItems.length})
               </Typography>
               {orderItems.map((item, index) => (
-                <Box
+                <div
                   key={index}
-                  sx={{
-                    mb: 2,
-                    p: 2,
-                    border: "1px solid #eee",
-                    borderRadius: 1,
-                  }}
+                  className="mb-4 p-4 border border-[#7E4300]/30 rounded-lg"
                 >
-                  <Typography fontWeight="bold">
+                  <Typography className="font-bold text-[#7E4300]">
                     {index + 1}. {getCakeTypeName(item.type)}
                   </Typography>
                   <Typography
                     variant="body2"
-                    style={{ whiteSpace: "pre-line" }}
+                    className="text-[#7E4300]/80 whitespace-pre-line"
                   >
                     {getCakeDetails(item)}
                   </Typography>
-                </Box>
+                </div>
               ))}
-            </Box>
+            </div>
 
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle1">Detalles Adicionales</Typography>
-              <Typography>
+            <div className="mb-6">
+              <Typography variant="subtitle1" className="text-[#7E4300]">
+                Detalles Adicionales
+              </Typography>
+              <Typography className="text-[#7E4300]">
                 <strong>Texto en el pastel:</strong>{" "}
                 {orderGeneral.writing || "Ninguno"}
               </Typography>
-              <Typography>
+              <Typography className="text-[#7E4300]">
                 <strong>Notas:</strong> {orderGeneral.notes || "Ninguna"}
               </Typography>
-              <Typography>
+              <Typography className="text-[#7E4300]">
                 <strong>Fecha de recolección:</strong>{" "}
                 {orderGeneral.pickupDateTime.toLocaleString()}
               </Typography>
-              <Typography>
+              <Typography className="text-[#7E4300]">
                 <strong>Estado:</strong>{" "}
                 {orderGeneral.status === "pending" ? "Pendiente" : "Confirmado"}
               </Typography>
-            </Box>
-          </Box>
+            </div>
+          </div>
         );
 
       default:
-        return <Typography>Paso desconocido</Typography>;
+        return (
+          <Typography className="text-[#7E4300]">Paso desconocido</Typography>
+        );
     }
   };
 
@@ -605,38 +611,36 @@ const OrderForm = ({
       maxWidth="md"
       fullWidth
       scroll="body"
+      PaperProps={{
+        className: "bg-[#FFF2C9]/20",
+      }}
     >
-      <DialogContent sx={{ p: 0 }}>
+      <DialogContent className="p-0 bg-yellow-100">
         <IconButton
           aria-label="close"
           onClick={handleClose}
-          sx={{
-            position: "absolute",
-            right: 8,
-            top: 8,
-            color: (theme) => theme.palette.grey[500],
-            zIndex: 1,
-          }}
+          className="absolute right-2 top-2 text-[#7E4300] z-10"
         >
           <X />
         </IconButton>
 
-        <Box sx={{ p: 3 }}>
-          <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+        <div className="p-6">
+          <Stepper activeStep={activeStep} className="mb-6">
             {steps.map((label, index) => (
               <Step key={label} completed={activeStep > index}>
-                <StepLabel>{label}</StepLabel>
+                <StepLabel className="text-[#7E4300]">{label}</StepLabel>
               </Step>
             ))}
           </Stepper>
 
-          <Box sx={{ mb: 4 }}>{renderStepContent(activeStep)}</Box>
+          <div className="mb-6">{renderStepContent(activeStep)}</div>
 
-          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+          <div className="flex justify-between">
             <Button
               disabled={activeStep === 0}
               onClick={handleBack}
-              startIcon={<ChevronLeft size={16} />}
+              startIcon={<ChevronLeft size={16} className="text-[#7E4300]" />}
+              className="text-[#7E4300] hover:bg-[#FFF2C9]/50"
             >
               Atrás
             </Button>
@@ -646,6 +650,7 @@ const OrderForm = ({
                 variant="contained"
                 onClick={handleSubmitOrder}
                 disabled={orderItems.length === 0 || !customer}
+                className="bg-[#FFD538] text-[#7E4300] hover:bg-[#FFD538]/90 disabled:bg-[#FFF2C9] disabled:text-[#7E4300]/50"
               >
                 Confirmar Pedido
               </Button>
@@ -657,12 +662,13 @@ const OrderForm = ({
                   (activeStep === 0 && !customer) ||
                   (activeStep === 1 && orderItems.length === 0)
                 }
+                className="bg-[#FFD538] text-[#7E4300] hover:bg-[#FFD538]/90 disabled:bg-[#FFF2C9] disabled:text-[#7E4300]/50"
               >
                 Siguiente
               </Button>
             )}
-          </Box>
-        </Box>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -184,26 +184,43 @@ const TieredCakeForm = ({ cakeData, onAddCake }) => {
   };
 
   return (
-    <Box>
-      <Typography variant="h6" gutterBottom>
+    <Box sx={{ backgroundColor: "#FFF2C9", p: 3, borderRadius: 2 }}>
+      <Typography variant="h6" gutterBottom sx={{ color: "#7E4300" }}>
         Pastel de Pisos
       </Typography>
-      <Typography variant="body2" color="text.secondary" gutterBottom>
+      <Typography variant="body2" sx={{ color: "#7E4300", mb: 2 }} gutterBottom>
         Mínimo 2 pisos, máximo 4 pisos. Cada piso debe ser más pequeño que el
         anterior.
       </Typography>
 
       {/* Selector de línea */}
       <FormControl fullWidth sx={{ mb: 3 }}>
-        <InputLabel>Línea del Pastel</InputLabel>
+        <InputLabel sx={{ color: "#7E4300" }}>Línea del Pastel</InputLabel>
         <Select
           value={selectedLine}
           onChange={(e) => handleLineChange(e.target.value)}
           label="Línea del Pastel"
           disabled={!availableLines.length}
+          sx={{
+            backgroundColor: "#FFF2C9",
+            color: "#7E4300",
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#7E4300",
+            },
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#7E4300",
+            },
+          }}
         >
           {availableLines.map((line) => (
-            <MenuItem key={line.id} value={line.type}>
+            <MenuItem
+              key={line.id}
+              value={line.type}
+              sx={{
+                color: "#7E4300",
+                "&:hover": { backgroundColor: "#FFD538" },
+              }}
+            >
               {line.type}
             </MenuItem>
           ))}
@@ -217,8 +234,21 @@ const TieredCakeForm = ({ cakeData, onAddCake }) => {
             const flavorIngredients = getFlavorIngredients(tier.flavor);
 
             return (
-              <Paper key={index} sx={{ p: 2, mb: 2, position: "relative" }}>
-                <Typography variant="subtitle1" gutterBottom>
+              <Paper
+                key={index}
+                sx={{
+                  p: 2,
+                  mb: 2,
+                  position: "relative",
+                  backgroundColor: "#FFF2C9",
+                  border: "1px solid #7E4300",
+                }}
+              >
+                <Typography
+                  variant="subtitle1"
+                  gutterBottom
+                  sx={{ color: "#7E4300" }}
+                >
                   Piso {index + 1}
                 </Typography>
 
@@ -226,8 +256,13 @@ const TieredCakeForm = ({ cakeData, onAddCake }) => {
                   <IconButton
                     size="small"
                     onClick={() => handleRemoveTier(index)}
-                    sx={{ position: "absolute", top: 8, right: 8 }}
-                    color="error"
+                    sx={{
+                      position: "absolute",
+                      top: 8,
+                      right: 8,
+                      color: "#7E4300",
+                      "&:hover": { backgroundColor: "#FFD538" },
+                    }}
                   >
                     <Trash2 size={16} />
                   </IconButton>
@@ -237,16 +272,33 @@ const TieredCakeForm = ({ cakeData, onAddCake }) => {
                   {/* Selector de tamaño */}
                   <Grid item xs={12} sm={6}>
                     <FormControl fullWidth>
-                      <InputLabel>Tamaño</InputLabel>
+                      <InputLabel sx={{ color: "#7E4300" }}>Tamaño</InputLabel>
                       <Select
                         value={tier.size}
                         onChange={(e) =>
                           handleTierChange(index, "size", e.target.value)
                         }
                         label="Tamaño"
+                        sx={{
+                          backgroundColor: "#FFF2C9",
+                          color: "#7E4300",
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#7E4300",
+                          },
+                          "&:hover .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#7E4300",
+                          },
+                        }}
                       >
                         {lineData.sizes.map((size) => (
-                          <MenuItem key={size.id} value={size.id}>
+                          <MenuItem
+                            key={size.id}
+                            value={size.id}
+                            sx={{
+                              color: "#7E4300",
+                              "&:hover": { backgroundColor: "#FFD538" },
+                            }}
+                          >
                             {size.size}
                           </MenuItem>
                         ))}
@@ -257,16 +309,33 @@ const TieredCakeForm = ({ cakeData, onAddCake }) => {
                   {/* Selector de sabor */}
                   <Grid item xs={12} sm={6}>
                     <FormControl fullWidth>
-                      <InputLabel>Sabor</InputLabel>
+                      <InputLabel sx={{ color: "#7E4300" }}>Sabor</InputLabel>
                       <Select
                         value={tier.flavor}
                         onChange={(e) =>
                           handleTierChange(index, "flavor", e.target.value)
                         }
                         label="Sabor"
+                        sx={{
+                          backgroundColor: "#FFF2C9",
+                          color: "#7E4300",
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#7E4300",
+                          },
+                          "&:hover .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#7E4300",
+                          },
+                        }}
                       >
                         {lineData.flavors.map((flavor) => (
-                          <MenuItem key={flavor.id} value={flavor.id}>
+                          <MenuItem
+                            key={flavor.id}
+                            value={flavor.id}
+                            sx={{
+                              color: "#7E4300",
+                              "&:hover": { backgroundColor: "#FFD538" },
+                            }}
+                          >
                             {flavor.name}
                           </MenuItem>
                         ))}
@@ -277,7 +346,11 @@ const TieredCakeForm = ({ cakeData, onAddCake }) => {
                   {/* Ingredientes del sabor seleccionado */}
                   {tier.flavor && flavorIngredients.length > 0 && (
                     <Grid item xs={12}>
-                      <Typography variant="subtitle2" gutterBottom>
+                      <Typography
+                        variant="subtitle2"
+                        gutterBottom
+                        sx={{ color: "#7E4300" }}
+                      >
                         Ingredientes Adicionales
                       </Typography>
                       <Grid container spacing={1}>
@@ -292,9 +365,19 @@ const TieredCakeForm = ({ cakeData, onAddCake }) => {
                                   onChange={() =>
                                     handleIngredientToggle(index, ingredient.id)
                                   }
+                                  sx={{
+                                    color: "#7E4300",
+                                    "&.Mui-checked": {
+                                      color: "#7E4300",
+                                    },
+                                  }}
                                 />
                               }
-                              label={ingredient.name}
+                              label={
+                                <Typography sx={{ color: "#7E4300" }}>
+                                  {ingredient.name}
+                                </Typography>
+                              }
                             />
                           </Grid>
                         ))}
@@ -313,7 +396,15 @@ const TieredCakeForm = ({ cakeData, onAddCake }) => {
               startIcon={<Plus size={16} />}
               onClick={handleAddTier}
               fullWidth
-              sx={{ mb: 3 }}
+              sx={{
+                mb: 3,
+                color: "#7E4300",
+                borderColor: "#7E4300",
+                "&:hover": {
+                  backgroundColor: "#FFD538",
+                  borderColor: "#7E4300",
+                },
+              }}
             >
               Agregar Piso (Máximo 4)
             </Button>
@@ -321,20 +412,43 @@ const TieredCakeForm = ({ cakeData, onAddCake }) => {
 
           {/* Validación visual */}
           {tiers.length > 1 && !validateSizes() && (
-            <Typography color="error" variant="body2" sx={{ mb: 2 }}>
+            <Typography sx={{ color: "#7E4300", mb: 2 }}>
               ❌ Cada piso debe ser más pequeño que el anterior
             </Typography>
           )}
 
           {/* Botones de acción */}
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-            <Button onClick={handleClearForm} variant="outlined">
+            <Button
+              onClick={handleClearForm}
+              variant="outlined"
+              sx={{
+                color: "#7E4300",
+                borderColor: "#7E4300",
+                "&:hover": {
+                  backgroundColor: "#FFD538",
+                  borderColor: "#7E4300",
+                },
+              }}
+            >
               Limpiar
             </Button>
             <Button
               onClick={handleSubmit}
               variant="contained"
               disabled={!isFormComplete()}
+              sx={{
+                backgroundColor: "#FFD538",
+                color: "#7E4300",
+                "&:hover": {
+                  backgroundColor: "#7E4300",
+                  color: "#FFD538",
+                },
+                "&:disabled": {
+                  backgroundColor: "#cccccc",
+                  color: "#666666",
+                },
+              }}
             >
               Agregar al Pedido
             </Button>

@@ -130,21 +130,38 @@ const RegularCakeForm = ({ cakeData, onAddCake }) => {
   };
 
   return (
-    <Box>
-      <Typography variant="h6" gutterBottom>
+    <Box sx={{ backgroundColor: "#FFF2C9", p: 3, borderRadius: 2 }}>
+      <Typography variant="h6" gutterBottom sx={{ color: "#7E4300" }}>
         Pastel Regular
       </Typography>
 
       {/* Selector de línea */}
       <FormControl fullWidth sx={{ mb: 3 }}>
-        <InputLabel>Línea del Pastel</InputLabel>
+        <InputLabel sx={{ color: "#7E4300" }}>Línea del Pastel</InputLabel>
         <Select
           value={selectedLine}
           onChange={(e) => handleLineChange(e.target.value)}
           label="Línea del Pastel"
+          sx={{
+            backgroundColor: "#FFF2C9",
+            color: "#7E4300",
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#7E4300",
+            },
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#7E4300",
+            },
+          }}
         >
           {availableLines.map((line) => (
-            <MenuItem key={line.id} value={line.type}>
+            <MenuItem
+              key={line.id}
+              value={line.type}
+              sx={{
+                color: "#7E4300",
+                "&:hover": { backgroundColor: "#FFD538" },
+              }}
+            >
               {line.type}
             </MenuItem>
           ))}
@@ -155,14 +172,31 @@ const RegularCakeForm = ({ cakeData, onAddCake }) => {
         <>
           {/* Selector de sabor */}
           <FormControl fullWidth sx={{ mb: 3 }}>
-            <InputLabel>Sabor</InputLabel>
+            <InputLabel sx={{ color: "#7E4300" }}>Sabor</InputLabel>
             <Select
               value={selectedFlavor}
               onChange={(e) => handleFlavorChange(e.target.value)}
               label="Sabor"
+              sx={{
+                backgroundColor: "#FFF2C9",
+                color: "#7E4300",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#7E4300",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#7E4300",
+                },
+              }}
             >
               {lineData.flavors.map((flavor) => (
-                <MenuItem key={flavor.id} value={flavor.id}>
+                <MenuItem
+                  key={flavor.id}
+                  value={flavor.id}
+                  sx={{
+                    color: "#7E4300",
+                    "&:hover": { backgroundColor: "#FFD538" },
+                  }}
+                >
                   {flavor.name}
                 </MenuItem>
               ))}
@@ -173,14 +207,31 @@ const RegularCakeForm = ({ cakeData, onAddCake }) => {
             <>
               {/* Selector de tamaño */}
               <FormControl fullWidth sx={{ mb: 3 }}>
-                <InputLabel>Tamaño</InputLabel>
+                <InputLabel sx={{ color: "#7E4300" }}>Tamaño</InputLabel>
                 <Select
                   value={selectedSize}
                   onChange={(e) => setSelectedSize(e.target.value)}
                   label="Tamaño"
+                  sx={{
+                    backgroundColor: "#FFF2C9",
+                    color: "#7E4300",
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#7E4300",
+                    },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#7E4300",
+                    },
+                  }}
                 >
                   {lineData.sizes.map((size) => (
-                    <MenuItem key={size.id} value={size.id}>
+                    <MenuItem
+                      key={size.id}
+                      value={size.id}
+                      sx={{
+                        color: "#7E4300",
+                        "&:hover": { backgroundColor: "#FFD538" },
+                      }}
+                    >
                       {size.size}
                     </MenuItem>
                   ))}
@@ -190,12 +241,16 @@ const RegularCakeForm = ({ cakeData, onAddCake }) => {
               {/* Selector de ingredientes (si el sabor tiene ingredientes) */}
               {flavorData.ingredients.length > 0 && (
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="subtitle1" gutterBottom>
+                  <Typography
+                    variant="subtitle1"
+                    gutterBottom
+                    sx={{ color: "#7E4300" }}
+                  >
                     Ingredientes Adicionales
                   </Typography>
                   <Typography
                     variant="body2"
-                    color="text.secondary"
+                    sx={{ color: "#7E4300", mb: 2 }}
                     gutterBottom
                   >
                     Selecciona los ingredientes que deseas incluir
@@ -212,9 +267,19 @@ const RegularCakeForm = ({ cakeData, onAddCake }) => {
                               onChange={() =>
                                 handleIngredientToggle(ingredient.id)
                               }
+                              sx={{
+                                color: "#7E4300",
+                                "&.Mui-checked": {
+                                  color: "#7E4300",
+                                },
+                              }}
                             />
                           }
-                          label={ingredient.name}
+                          label={
+                            <Typography sx={{ color: "#7E4300" }}>
+                              {ingredient.name}
+                            </Typography>
+                          }
                         />
                       </Grid>
                     ))}
@@ -228,13 +293,36 @@ const RegularCakeForm = ({ cakeData, onAddCake }) => {
 
       {/* Botones de acción */}
       <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Button onClick={handleClearForm} variant="outlined">
+        <Button
+          onClick={handleClearForm}
+          variant="outlined"
+          sx={{
+            color: "#7E4300",
+            borderColor: "#7E4300",
+            "&:hover": {
+              backgroundColor: "#FFD538",
+              borderColor: "#7E4300",
+            },
+          }}
+        >
           Limpiar
         </Button>
         <Button
           onClick={handleSubmit}
           variant="contained"
           disabled={!isFormComplete()}
+          sx={{
+            backgroundColor: "#FFD538",
+            color: "#7E4300",
+            "&:hover": {
+              backgroundColor: "#7E4300",
+              color: "#FFD538",
+            },
+            "&:disabled": {
+              backgroundColor: "#cccccc",
+              color: "#666666",
+            },
+          }}
         >
           Agregar al Pedido
         </Button>

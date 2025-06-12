@@ -67,10 +67,10 @@ const OrdersView = ({ orders, onRefresh, onUpdateOrder, loading }) => {
   });
 
   const statusColors = {
-    in_progress: "warning",
-    completed: "success",
-    cancelled: "error",
-    pending: "info",
+    in_progress: { backgroundColor: "#FFD538", color: "#000000" }, // yellow-400
+    completed: { backgroundColor: "#7E4300", color: "#FFFFFF" }, // amber-800
+    cancelled: { backgroundColor: "#d32f2f", color: "#FFFFFF" }, // rojo (mantenido)
+    pending: { backgroundColor: "#FFF2C9", color: "#000000" }, // yellow-100
   };
 
   const handleEditOrder = (order) => {
@@ -107,7 +107,10 @@ const OrdersView = ({ orders, onRefresh, onUpdateOrder, loading }) => {
             value={searchType}
             onChange={(e) => setSearchType(e.target.value)}
             size="small"
-            sx={{ minWidth: isMobile ? "100%" : 180 }}
+            sx={{
+              minWidth: isMobile ? "100%" : 180,
+              backgroundColor: "#FFF2C9", // yellow-100
+            }}
           >
             <MenuItem value="customerName">Nombre</MenuItem>
             <MenuItem value="phone">Teléfono</MenuItem>
@@ -126,6 +129,9 @@ const OrdersView = ({ orders, onRefresh, onUpdateOrder, loading }) => {
                   <Search />
                 </InputAdornment>
               ),
+              sx: {
+                backgroundColor: "#FFF2C9", // yellow-100
+              },
             }}
             sx={{ flexGrow: 1 }}
           />
@@ -135,17 +141,31 @@ const OrdersView = ({ orders, onRefresh, onUpdateOrder, loading }) => {
             value={dateFilter}
             onChange={(newValue) => setDateFilter(newValue)}
             textField={(params) => (
-              <TextField {...params} size="small" fullWidth={isMobile} />
+              <TextField
+                {...params}
+                size="small"
+                fullWidth={isMobile}
+                sx={{
+                  backgroundColor: "#FFF2C9", // yellow-100
+                }}
+              />
             )}
             sx={{ minWidth: isMobile ? "100%" : 200 }}
           />
 
           <Button
-            variant="outlined"
+            variant="contained"
             startIcon={<Refresh />}
             onClick={onRefresh}
             disabled={loading}
             fullWidth={isMobile}
+            sx={{
+              backgroundColor: "#FFD538", // yellow-400
+              color: "#000000",
+              "&:hover": {
+                backgroundColor: "#e6c032",
+              },
+            }}
           >
             {isMobile ? "Actualizar" : "Actualizar lista"}
           </Button>
@@ -153,16 +173,29 @@ const OrdersView = ({ orders, onRefresh, onUpdateOrder, loading }) => {
 
         <TableContainer
           component={Paper}
-          sx={{ maxWidth: "100%", overflowX: "auto" }}
+          sx={{
+            maxWidth: "100%",
+            overflowX: "auto",
+            backgroundColor: "#FFF2C9", // yellow-100
+          }}
         >
           <Table size={isMobile ? "small" : "medium"}>
             <TableHead>
-              <TableRow>
-                <TableCell sx={{ display: isMobile ? "none" : "table-cell" }}>
+              <TableRow sx={{ backgroundColor: "#7E4300" }}>
+                {" "}
+                {/* amber-800 */}
+                <TableCell
+                  sx={{
+                    display: isMobile ? "none" : "table-cell",
+                    color: "#FFFFFF",
+                  }}
+                >
                   ID
                 </TableCell>
-                <TableCell>Cliente</TableCell>
-                {!isMobile && <TableCell>Contacto</TableCell>}
+                <TableCell sx={{ color: "#FFFFFF" }}>Cliente</TableCell>
+                {!isMobile && (
+                  <TableCell sx={{ color: "#FFFFFF" }}>Contacto</TableCell>
+                )}
                 <TableCell
                   sx={{
                     display: isTablet
@@ -170,17 +203,28 @@ const OrdersView = ({ orders, onRefresh, onUpdateOrder, loading }) => {
                       : isMobile
                       ? "none"
                       : "table-cell",
+                    color: "#FFFFFF",
                   }}
                 >
                   Fecha
                 </TableCell>
-                <TableCell>Estado</TableCell>
-                <TableCell>Acciones</TableCell>
+                <TableCell sx={{ color: "#FFFFFF" }}>Estado</TableCell>
+                <TableCell sx={{ color: "#FFFFFF" }}>Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {filteredOrders.map((order) => (
-                <TableRow key={order.id}>
+                <TableRow
+                  key={order.id}
+                  sx={{
+                    "&:nth-of-type(odd)": {
+                      backgroundColor: "#FFF2C9", // yellow-100
+                    },
+                    "&:nth-of-type(even)": {
+                      backgroundColor: "#FFD53833", // yellow-400 con 20% de opacidad
+                    },
+                  }}
+                >
                   <TableCell sx={{ display: isMobile ? "none" : "table-cell" }}>
                     #{order.id}
                   </TableCell>
@@ -226,7 +270,11 @@ const OrdersView = ({ orders, onRefresh, onUpdateOrder, loading }) => {
                       label={
                         isMobile ? order.status.substring(0, 3) : order.status
                       }
-                      color={statusColors[order.status] || "default"}
+                      sx={{
+                        backgroundColor:
+                          statusColors[order.status]?.backgroundColor,
+                        color: statusColors[order.status]?.color,
+                      }}
                       size="small"
                     />
                   </TableCell>
@@ -234,6 +282,9 @@ const OrdersView = ({ orders, onRefresh, onUpdateOrder, loading }) => {
                     <IconButton
                       onClick={() => handleEditOrder(order)}
                       size="small"
+                      sx={{
+                        color: "#7E4300", // amber-800
+                      }}
                     >
                       <Edit fontSize="small" />
                     </IconButton>
@@ -250,8 +301,17 @@ const OrdersView = ({ orders, onRefresh, onUpdateOrder, loading }) => {
           onClose={() => setOpenEditDialog(false)}
           fullWidth
           maxWidth={isMobile ? "xs" : "sm"}
+          PaperProps={{
+            sx: {
+              backgroundColor: "#FFF2C9", // yellow-100
+            },
+          }}
         >
-          <DialogTitle>Editar Pedido</DialogTitle>
+          <DialogTitle sx={{ backgroundColor: "#7E4300", color: "#FFFFFF" }}>
+            {" "}
+            {/* amber-800 */}
+            Editar Pedido
+          </DialogTitle>
           <DialogContent sx={{ pt: 2 }}>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
               <TextField
@@ -262,6 +322,9 @@ const OrdersView = ({ orders, onRefresh, onUpdateOrder, loading }) => {
                 fullWidth
                 multiline
                 rows={2}
+                sx={{
+                  backgroundColor: "#FFFFFF",
+                }}
               />
 
               <TextField
@@ -272,6 +335,9 @@ const OrdersView = ({ orders, onRefresh, onUpdateOrder, loading }) => {
                 fullWidth
                 multiline
                 rows={3}
+                sx={{
+                  backgroundColor: "#FFFFFF",
+                }}
               />
 
               <DatePicker
@@ -282,7 +348,15 @@ const OrdersView = ({ orders, onRefresh, onUpdateOrder, loading }) => {
                     target: { name: "pickupDateTime", value: date },
                   })
                 }
-                textField={(params) => <TextField {...params} fullWidth />}
+                textField={(params) => (
+                  <TextField
+                    {...params}
+                    fullWidth
+                    sx={{
+                      backgroundColor: "#FFFFFF",
+                    }}
+                  />
+                )}
               />
 
               <Select
@@ -291,6 +365,9 @@ const OrdersView = ({ orders, onRefresh, onUpdateOrder, loading }) => {
                 value={editingOrder?.status || ""}
                 onChange={handleChange}
                 fullWidth
+                sx={{
+                  backgroundColor: "#FFFFFF",
+                }}
               >
                 <MenuItem value="in_progress">En progreso</MenuItem>
                 <MenuItem value="completed">Completado</MenuItem>
@@ -299,12 +376,26 @@ const OrdersView = ({ orders, onRefresh, onUpdateOrder, loading }) => {
               </Select>
             </Box>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setOpenEditDialog(false)}>Cancelar</Button>
+          <DialogActions sx={{ backgroundColor: "#FFF2C9" }}>
+            {" "}
+            {/* yellow-100 */}
+            <Button
+              onClick={() => setOpenEditDialog(false)}
+              sx={{
+                color: "#7E4300", // amber-800
+              }}
+            >
+              Cancelar
+            </Button>
             <Button
               onClick={handleSaveOrder}
-              color="primary"
-              variant="contained"
+              sx={{
+                backgroundColor: "#FFD538", // yellow-400
+                color: "#000000",
+                "&:hover": {
+                  backgroundColor: "#e6c032",
+                },
+              }}
             >
               Guardar
             </Button>

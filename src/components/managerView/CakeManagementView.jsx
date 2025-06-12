@@ -24,7 +24,7 @@ const CakeManagementView = ({
 }) => {
   const [expanded, setExpanded] = useState(null);
   const [editingItem, setEditingItem] = useState(null);
-  const [editDate, setEditDate] = useState(dayjs()); // Inicializa con dayjs
+  const [editDate, setEditDate] = useState(dayjs());
   const [editType, setEditType] = useState("");
 
   const handleChange = (panel) => (event, isExpanded) => {
@@ -45,132 +45,250 @@ const CakeManagementView = ({
 
   const renderFlavors = (flavors) => {
     return flavors.map((flavor) => (
-      <div key={flavor.id} className="ml-6 mb-4 border-l-2 pl-4">
-        <div className="flex items-center justify-between mb-2">
+      <Box
+        key={flavor.id}
+        sx={{ ml: 3, mb: 2, pl: 2, borderLeft: "2px solid #7E4300" }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            mb: 1,
+          }}
+        >
           <Typography variant="subtitle1">
             {flavor.name}
             {editingItem?.id === flavor.id && editType === "flavor" ? (
-              <div className="flex items-center gap-2 ml-2">
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 1, ml: 1 }}
+              >
                 <DatePicker
-                  value={editDate} // Asegúrate de que sea una instancia de dayjs
-                  onChange={(newValue) => setEditDate(newValue)} // `newValue` ya es una instancia de dayjs
-                  textField={(params) => <TextField {...params} size="small" />}
+                  value={editDate}
+                  onChange={(newValue) => setEditDate(newValue)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      size="small"
+                      sx={{ backgroundColor: "#FFF2C9" }}
+                    />
+                  )}
                 />
-                <IconButton onClick={saveEdit} color="primary">
+                <IconButton
+                  onClick={saveEdit}
+                  sx={{
+                    color: "#7E4300",
+                    "&:hover": { backgroundColor: "#FFD538" },
+                  }}
+                >
                   <Save />
                 </IconButton>
-              </div>
+              </Box>
             ) : (
               <Chip
                 label={dayjs(flavor.date).format("DD/MM/YYYY")}
                 size="small"
-                className="ml-2"
+                sx={{
+                  ml: 1,
+                  backgroundColor: "#FFD538",
+                  color: "#000000",
+                  "&:hover": { backgroundColor: "#e6c032" },
+                }}
                 onClick={() => startEditing(flavor, "flavor")}
               />
             )}
           </Typography>
-        </div>
-      </div>
+        </Box>
+      </Box>
     ));
   };
 
   const renderSizes = (sizes) => {
     return sizes.map((size) => (
-      <div key={size.id} className="ml-6 mb-2">
+      <Box key={size.id} sx={{ ml: 3, mb: 1 }}>
         <Typography variant="body2">
           {size.size}
           {editingItem?.id === size.id && editType === "size" ? (
-            <span className="flex items-center gap-2 ml-2">
+            <Box
+              component="span"
+              sx={{ display: "flex", alignItems: "center", gap: 1, ml: 1 }}
+            >
               <DatePicker
-                value={editDate} // Asegúrate de que sea una instancia de dayjs
-                onChange={(newValue) => setEditDate(newValue)} // `newValue` ya es una instancia de dayjs
-                textField={(params) => <TextField {...params} size="small" />}
+                value={editDate}
+                onChange={(newValue) => setEditDate(newValue)}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    size="small"
+                    sx={{ backgroundColor: "#FFF2C9" }}
+                  />
+                )}
               />
-              <IconButton onClick={saveEdit} size="small" color="primary">
+              <IconButton
+                onClick={saveEdit}
+                size="small"
+                sx={{
+                  color: "#7E4300",
+                  "&:hover": { backgroundColor: "#FFD538" },
+                }}
+              >
                 <Save />
               </IconButton>
-            </span>
+            </Box>
           ) : (
             <Chip
               label={dayjs(size.date).format("DD/MM/YYYY")}
               size="small"
-              className="ml-2"
+              sx={{
+                ml: 1,
+                backgroundColor: "#FFD538",
+                color: "#000000",
+                "&:hover": { backgroundColor: "#e6c032" },
+              }}
               onClick={() => startEditing(size, "size")}
             />
           )}
         </Typography>
-      </div>
+      </Box>
     ));
   };
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <div className="space-y-4">
-        <div className="flex justify-between items-center mb-4">
-          <Typography variant="h6">Gestión de Pasteles</Typography>
+      <Box sx={{ p: 2, backgroundColor: "#FFF2C9", minHeight: "100vh" }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 3,
+          }}
+        >
+          <Typography variant="h6" sx={{ color: "#7E4300" }}>
+            Gestión de Pasteles
+          </Typography>
           <Button
-            variant="outlined"
+            variant="contained"
             startIcon={<Refresh />}
             onClick={onRefresh}
             disabled={loading}
+            sx={{
+              backgroundColor: "#FFD538",
+              color: "#000000",
+              "&:hover": {
+                backgroundColor: "#e6c032",
+              },
+            }}
           >
             Actualizar
           </Button>
-        </div>
+        </Box>
 
         {cakesData.map((cake) => (
           <Accordion
             key={cake.id}
             expanded={expanded === `cake-${cake.id}`}
             onChange={handleChange(`cake-${cake.id}`)}
+            sx={{
+              mb: 2,
+              "&:before": {
+                backgroundColor: "transparent",
+              },
+            }}
           >
-            <AccordionSummary expandIcon={<ExpandMore />}>
-              <div className="flex items-center justify-between w-full">
+            <AccordionSummary
+              expandIcon={<ExpandMore sx={{ color: "#7E4300" }} />}
+              sx={{
+                backgroundColor: "#7E4300",
+                color: "#FFFFFF",
+                "&:hover": {
+                  backgroundColor: "#5a3000",
+                },
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  width: "100%",
+                }}
+              >
                 <Typography>{cake.type}</Typography>
                 {editingItem?.id === cake.id && editType === "cake" ? (
-                  <div className="flex items-center gap-2">
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <DatePicker
-                      value={editDate} // Asegúrate de que sea una instancia de dayjs
-                      onChange={(newValue) => setEditDate(newValue)} // `newValue` ya es una instancia de dayjs
-                      textField={(params) => (
-                        <TextField {...params} size="small" />
+                      value={editDate}
+                      onChange={(newValue) => setEditDate(newValue)}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          size="small"
+                          sx={{ backgroundColor: "#FFF2C9" }}
+                        />
                       )}
                     />
-                    <IconButton onClick={saveEdit} size="small" color="primary">
+                    <IconButton
+                      onClick={saveEdit}
+                      size="small"
+                      sx={{
+                        color: "#FFFFFF",
+                        "&:hover": { backgroundColor: "#FFD538" },
+                      }}
+                    >
                       <Save />
                     </IconButton>
-                  </div>
+                  </Box>
                 ) : (
                   <Chip
                     label={dayjs(cake.date).format("DD/MM/YYYY")}
                     size="small"
+                    sx={{
+                      backgroundColor: "#FFD538",
+                      color: "#000000",
+                      "&:hover": { backgroundColor: "#e6c032" },
+                    }}
                     onClick={(e) => {
                       e.stopPropagation();
                       startEditing(cake, "cake");
                     }}
                   />
                 )}
-              </div>
+              </Box>
             </AccordionSummary>
-            <AccordionDetails>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Typography variant="subtitle2" gutterBottom>
+            <AccordionDetails sx={{ backgroundColor: "#FFF2C9" }}>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                  gap: 2,
+                }}
+              >
+                <Box>
+                  <Typography
+                    variant="subtitle2"
+                    gutterBottom
+                    sx={{ color: "#7E4300" }}
+                  >
                     Sabores:
                   </Typography>
                   {renderFlavors(cake.flavors)}
-                </div>
-                <div>
-                  <Typography variant="subtitle2" gutterBottom>
+                </Box>
+                <Box>
+                  <Typography
+                    variant="subtitle2"
+                    gutterBottom
+                    sx={{ color: "#7E4300" }}
+                  >
                     Tamaños:
                   </Typography>
                   {renderSizes(cake.sizes)}
-                </div>
-              </div>
+                </Box>
+              </Box>
             </AccordionDetails>
           </Accordion>
         ))}
-      </div>
+      </Box>
     </LocalizationProvider>
   );
 };

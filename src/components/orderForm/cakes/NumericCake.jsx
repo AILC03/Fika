@@ -127,20 +127,29 @@ const NumericCakeForm = ({ cakeData, onAddCake, onCancel }) => {
   };
 
   return (
-    <Box>
-      <Typography variant="h6" gutterBottom>
+    <Box sx={{ backgroundColor: "#FFF2C9", p: 3, borderRadius: 2 }}>
+      <Typography variant="h6" gutterBottom sx={{ color: "#7E4300" }}>
         Pastel Numérico
       </Typography>
 
       <FormControl fullWidth sx={{ mb: 3 }}>
-        <InputLabel>Línea del Pastel</InputLabel>
+        <InputLabel sx={{ color: "#7E4300" }}>Línea del Pastel</InputLabel>
         <Select
           value={selectedLine}
           onChange={(e) => setSelectedLine(e.target.value)}
           label="Línea del Pastel"
+          sx={{
+            backgroundColor: "#FFF2C9",
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#7E4300",
+            },
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#7E4300",
+            },
+          }}
         >
           {availableLines.map((line) => (
-            <MenuItem key={line.id} value={line.type}>
+            <MenuItem key={line.id} value={line.type} sx={{ color: "#7E4300" }}>
               {line.type}
             </MenuItem>
           ))}
@@ -148,12 +157,25 @@ const NumericCakeForm = ({ cakeData, onAddCake, onCancel }) => {
       </FormControl>
 
       <Box sx={{ mb: 3 }}>
-        <Typography gutterBottom>Número:</Typography>
+        <Typography gutterBottom sx={{ color: "#7E4300" }}>
+          Número:
+        </Typography>
         <TextField
           fullWidth
           value={number}
           onChange={(e) => setNumber(e.target.value.replace(/[^0-9]/g, ""))}
           inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+          sx={{
+            backgroundColor: "#FFF2C9",
+            "& .MuiOutlinedInput-root": {
+              "& fieldset": {
+                borderColor: "#7E4300",
+              },
+              "&:hover fieldset": {
+                borderColor: "#7E4300",
+              },
+            },
+          }}
         />
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((digit) => (
@@ -161,16 +183,31 @@ const NumericCakeForm = ({ cakeData, onAddCake, onCancel }) => {
               key={digit}
               variant="outlined"
               onClick={() => handleAddDigit(digit)}
-              sx={{ minWidth: "40px" }}
+              sx={{
+                minWidth: "40px",
+                color: "#7E4300",
+                borderColor: "#7E4300",
+                "&:hover": {
+                  backgroundColor: "#FFD538",
+                  borderColor: "#7E4300",
+                },
+              }}
             >
               {digit}
             </Button>
           ))}
           <Button
             variant="outlined"
-            color="error"
             onClick={() => setNumber("")}
-            sx={{ minWidth: "40px" }}
+            sx={{
+              minWidth: "40px",
+              color: "#7E4300",
+              borderColor: "#7E4300",
+              "&:hover": {
+                backgroundColor: "#FFD538",
+                borderColor: "#7E4300",
+              },
+            }}
           >
             C
           </Button>
@@ -179,7 +216,11 @@ const NumericCakeForm = ({ cakeData, onAddCake, onCancel }) => {
 
       {number.length > 0 && selectedLine && (
         <Box sx={{ mt: 3 }}>
-          <Typography variant="subtitle1" gutterBottom>
+          <Typography
+            variant="subtitle1"
+            gutterBottom
+            sx={{ color: "#7E4300" }}
+          >
             Configuración por dígito
           </Typography>
 
@@ -188,13 +229,23 @@ const NumericCakeForm = ({ cakeData, onAddCake, onCancel }) => {
             const flavorIngredients = getFlavorIngredients(config.flavor);
 
             return (
-              <Paper key={index} sx={{ p: 2, mb: 2 }}>
-                <Typography gutterBottom>Dígito: {digit}</Typography>
+              <Paper
+                key={index}
+                sx={{
+                  p: 2,
+                  mb: 2,
+                  backgroundColor: "#FFF2C9",
+                  border: "1px solid #7E4300",
+                }}
+              >
+                <Typography gutterBottom sx={{ color: "#7E4300" }}>
+                  Dígito: {digit}
+                </Typography>
 
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={4}>
                     <FormControl fullWidth>
-                      <InputLabel>Sabor</InputLabel>
+                      <InputLabel sx={{ color: "#7E4300" }}>Sabor</InputLabel>
                       <Select
                         value={config.flavor || ""}
                         onChange={(e) =>
@@ -205,9 +256,22 @@ const NumericCakeForm = ({ cakeData, onAddCake, onCancel }) => {
                           )
                         }
                         label="Sabor"
+                        sx={{
+                          backgroundColor: "#FFF2C9",
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#7E4300",
+                          },
+                          "&:hover .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#7E4300",
+                          },
+                        }}
                       >
                         {lineData.flavors?.map((flavor) => (
-                          <MenuItem key={flavor.id} value={flavor.id}>
+                          <MenuItem
+                            key={flavor.id}
+                            value={flavor.id}
+                            sx={{ color: "#7E4300" }}
+                          >
                             {flavor.name}
                           </MenuItem>
                         ))}
@@ -217,16 +281,29 @@ const NumericCakeForm = ({ cakeData, onAddCake, onCancel }) => {
 
                   <Grid item xs={12} sm={4}>
                     <FormControl fullWidth>
-                      <InputLabel>Tamaño</InputLabel>
+                      <InputLabel sx={{ color: "#7E4300" }}>Tamaño</InputLabel>
                       <Select
                         value={config.size || ""}
                         onChange={(e) =>
                           handleDigitConfigChange(index, "size", e.target.value)
                         }
                         label="Tamaño"
+                        sx={{
+                          backgroundColor: "#FFF2C9",
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#7E4300",
+                          },
+                          "&:hover .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#7E4300",
+                          },
+                        }}
                       >
                         {lineData.sizes.map((size) => (
-                          <MenuItem key={size.id} value={size.id}>
+                          <MenuItem
+                            key={size.id}
+                            value={size.id}
+                            sx={{ color: "#7E4300" }}
+                          >
                             {size.size}
                           </MenuItem>
                         ))}
@@ -236,7 +313,11 @@ const NumericCakeForm = ({ cakeData, onAddCake, onCancel }) => {
 
                   {config.flavor && flavorIngredients.length > 0 && (
                     <Grid item xs={12}>
-                      <Typography variant="subtitle2" gutterBottom>
+                      <Typography
+                        variant="subtitle2"
+                        gutterBottom
+                        sx={{ color: "#7E4300" }}
+                      >
                         Ingredientes Adicionales
                       </Typography>
                       <Grid container spacing={1}>
@@ -251,9 +332,19 @@ const NumericCakeForm = ({ cakeData, onAddCake, onCancel }) => {
                                   onChange={() =>
                                     handleIngredientToggle(index, ingredient.id)
                                   }
+                                  sx={{
+                                    color: "#7E4300",
+                                    "&.Mui-checked": {
+                                      color: "#7E4300",
+                                    },
+                                  }}
                                 />
                               }
-                              label={ingredient.name}
+                              label={
+                                <Typography sx={{ color: "#7E4300" }}>
+                                  {ingredient.name}
+                                </Typography>
+                              }
                             />
                           </Grid>
                         ))}
@@ -268,13 +359,37 @@ const NumericCakeForm = ({ cakeData, onAddCake, onCancel }) => {
       )}
 
       <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
-        <Button onClick={handleClearForm} variant="outlined">
+        <Button
+          onClick={handleClearForm}
+          variant="outlined"
+          sx={{
+            color: "#7E4300",
+            borderColor: "#7E4300",
+            "&:hover": {
+              backgroundColor: "#FFD538",
+              borderColor: "#7E4300",
+            },
+          }}
+        >
           Limpiar
         </Button>
         <Button
           onClick={handleSubmit}
           variant="contained"
           disabled={!number || !selectedLine}
+          sx={{
+            backgroundColor: "#FFD538",
+            color: "#7E4300",
+            "&:hover": {
+              backgroundColor: "#7E4300", // Color oscuro en hover
+              color: "#FFD538",
+              opacity: 1,
+            },
+            "&.Mui-disabled": {
+              backgroundColor: "#f5f5f5",
+              color: "#bdbdbd",
+            },
+          }}
         >
           Agregar al Pedido
         </Button>

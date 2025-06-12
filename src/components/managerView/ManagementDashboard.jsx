@@ -653,11 +653,11 @@ const ManagementDashboard = () => {
         <CssBaseline />
         <Box
           sx={{
-            height: "100vh", // Altura fija
-            backgroundColor: "background.default",
+            height: "100vh",
+            backgroundColor: "#FFF2C9", // Fondo crema claro
             display: "flex",
             flexDirection: "column",
-            overflow: "hidden", // Previene desbordamiento general
+            overflow: "hidden",
           }}
         >
           {/* Tab menu */}
@@ -672,7 +672,8 @@ const ManagementDashboard = () => {
             sx={{
               flex: 1,
               p: isMobile ? 1 : isTablet ? 3 : 4,
-              overflow: "auto", // Scroll solo aquí
+              overflow: "auto",
+              backgroundColor: "#FFF2C9", // Fondo crema claro
             }}
           >
             {loading && activeTab !== "orders" ? (
@@ -681,10 +682,11 @@ const ManagementDashboard = () => {
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
-                  height: "100%", // Usa toda la altura disponible
+                  height: "100%",
                 }}
               >
-                <CircularProgress />
+                <CircularProgress sx={{ color: "#7E4300" }} />{" "}
+                {/* Marrón oscuro */}
               </Box>
             ) : (
               renderActiveView()
@@ -698,7 +700,17 @@ const ManagementDashboard = () => {
             anchorOrigin={{ vertical: "top", horizontal: "center" }}
             sx={{ mt: isMobile ? 7 : 0 }}
           >
-            <Alert severity="error" onClose={() => setError(null)}>
+            <Alert
+              severity="error"
+              onClose={() => setError(null)}
+              sx={{
+                backgroundColor: "#FFD538", // Amarillo brillante
+                color: "#7E4300", // Marrón oscuro
+                "& .MuiAlert-icon": {
+                  color: "#7E4300", // Marrón oscuro para el ícono
+                },
+              }}
+            >
               {error}
             </Alert>
           </Snackbar>
@@ -710,7 +722,17 @@ const ManagementDashboard = () => {
             anchorOrigin={{ vertical: "top", horizontal: "center" }}
             sx={{ mt: isMobile ? 7 : 0 }}
           >
-            <Alert severity="success" onClose={() => setSuccess(null)}>
+            <Alert
+              severity="success"
+              onClose={() => setSuccess(null)}
+              sx={{
+                backgroundColor: "#7E4300", // Marrón oscuro
+                color: "#FFD538", // Amarillo brillante
+                "& .MuiAlert-icon": {
+                  color: "#FFD538", // Amarillo brillante para el ícono
+                },
+              }}
+            >
               {success}
             </Alert>
           </Snackbar>

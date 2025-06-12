@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { TextField, Typography, Box } from "@mui/material";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider, DateTimePicker } from "@mui/x-date-pickers";
 import es from "date-fns/locale/es";
+
+//parece que tampoco se usa xd
 
 const DateTimePickerComponent = ({ value, onChange, label }) => {
   const [open, setOpen] = useState(false);

@@ -18,6 +18,7 @@ import {
   Select,
   MenuItem,
   InputAdornment,
+  Box,
 } from "@mui/material";
 import { Refresh, Edit, Delete, Search } from "@mui/icons-material";
 import { format } from "date-fns";
@@ -80,13 +81,27 @@ const EmployeesView = ({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-4 mb-6">
+    <Box sx={{ p: 2, backgroundColor: "#FFF2C9", minHeight: "100vh" }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          gap: 2,
+          mb: 3,
+        }}
+      >
         <Select
           value={searchType}
           onChange={(e) => setSearchType(e.target.value)}
           size="small"
-          className="min-w-[180px]"
+          sx={{
+            minWidth: 180,
+            backgroundColor: "#FFF2C9",
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#7E4300",
+            },
+          }}
         >
           <MenuItem value="name">Nombre</MenuItem>
           <MenuItem value="employeeNumber">Número de empleado</MenuItem>
@@ -103,38 +118,72 @@ const EmployeesView = ({
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <Search />
+                <Search sx={{ color: "#7E4300" }} />
               </InputAdornment>
             ),
+            sx: {
+              backgroundColor: "#FFF2C9",
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderColor: "#7E4300",
+              },
+            },
           }}
-          className="flex-grow max-w-md"
+          sx={{ flexGrow: 1, maxWidth: "md" }}
         />
 
         <Button
-          variant="outlined"
+          variant="contained"
           startIcon={<Refresh />}
           onClick={onRefresh}
           disabled={loading}
+          sx={{
+            backgroundColor: "#FFD538",
+            color: "#000000",
+            "&:hover": {
+              backgroundColor: "#e6c032",
+            },
+          }}
         >
           Actualizar
         </Button>
-      </div>
+      </Box>
 
-      <TableContainer component={Paper}>
+      <TableContainer
+        component={Paper}
+        sx={{
+          backgroundColor: "#FFF2C9",
+          "& .MuiTableCell-root": {
+            borderColor: "#7E430055",
+          },
+        }}
+      >
         <Table>
           <TableHead>
-            <TableRow>
-              <TableCell>Nombre</TableCell>
-              <TableCell>Número</TableCell>
-              <TableCell>Puesto</TableCell>
-              <TableCell>Turno</TableCell>
-              <TableCell>Registro</TableCell>
-              <TableCell>Acciones</TableCell>
+            <TableRow sx={{ backgroundColor: "#7E4300" }}>
+              <TableCell sx={{ color: "#FFFFFF" }}>Nombre</TableCell>
+              <TableCell sx={{ color: "#FFFFFF" }}>Número</TableCell>
+              <TableCell sx={{ color: "#FFFFFF" }}>Puesto</TableCell>
+              <TableCell sx={{ color: "#FFFFFF" }}>Turno</TableCell>
+              <TableCell sx={{ color: "#FFFFFF" }}>Registro</TableCell>
+              <TableCell sx={{ color: "#FFFFFF" }}>Acciones</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {filteredEmployees.map((employee) => (
-              <TableRow key={employee.id}>
+              <TableRow
+                key={employee.id}
+                sx={{
+                  "&:nth-of-type(odd)": {
+                    backgroundColor: "#FFF2C9",
+                  },
+                  "&:nth-of-type(even)": {
+                    backgroundColor: "#FFD53833",
+                  },
+                  "&:hover": {
+                    backgroundColor: "#FFD53866",
+                  },
+                }}
+              >
                 <TableCell>{employee.name}</TableCell>
                 <TableCell>{employee.employeeNumber}</TableCell>
                 <TableCell>{employee.position}</TableCell>
@@ -146,13 +195,14 @@ const EmployeesView = ({
                   <IconButton
                     size="small"
                     onClick={() => handleEditEmployee(employee)}
+                    sx={{ color: "#7E4300" }}
                   >
                     <Edit fontSize="small" />
                   </IconButton>
                   <IconButton
                     size="small"
                     onClick={() => handleDeleteClick(employee)}
-                    color="error"
+                    sx={{ color: "#d32f2f" }}
                   >
                     <Delete fontSize="small" />
                   </IconButton>
@@ -164,9 +214,19 @@ const EmployeesView = ({
       </TableContainer>
 
       {/* Dialog para editar empleado */}
-      <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
-        <DialogTitle>Editar Empleado</DialogTitle>
-        <DialogContent className="space-y-4 min-w-[400px]">
+      <Dialog
+        open={openEditDialog}
+        onClose={() => setOpenEditDialog(false)}
+        PaperProps={{
+          sx: {
+            backgroundColor: "#FFF2C9",
+          },
+        }}
+      >
+        <DialogTitle sx={{ backgroundColor: "#7E4300", color: "#FFFFFF" }}>
+          Editar Empleado
+        </DialogTitle>
+        <DialogContent sx={{ minWidth: 400, pt: 3 }}>
           <TextField
             label="Nombre completo"
             name="name"
@@ -174,6 +234,7 @@ const EmployeesView = ({
             onChange={handleChange}
             fullWidth
             margin="normal"
+            sx={{ mb: 2, backgroundColor: "#FFFFFF" }}
           />
 
           <TextField
@@ -183,6 +244,7 @@ const EmployeesView = ({
             onChange={handleChange}
             fullWidth
             margin="normal"
+            sx={{ mb: 2, backgroundColor: "#FFFFFF" }}
           />
 
           <TextField
@@ -192,6 +254,7 @@ const EmployeesView = ({
             onChange={handleChange}
             fullWidth
             margin="normal"
+            sx={{ mb: 2, backgroundColor: "#FFFFFF" }}
           />
 
           <Select
@@ -201,6 +264,7 @@ const EmployeesView = ({
             onChange={handleChange}
             fullWidth
             margin="normal"
+            sx={{ mb: 2, backgroundColor: "#FFFFFF" }}
           >
             <MenuItem value="matutino">Matutino</MenuItem>
             <MenuItem value="vespertino">Vespertino</MenuItem>
@@ -208,12 +272,25 @@ const EmployeesView = ({
             <MenuItem value="completo">Tiempo completo</MenuItem>
           </Select>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenEditDialog(false)}>Cancelar</Button>
+        <DialogActions sx={{ backgroundColor: "#FFF2C9" }}>
+          <Button
+            onClick={() => setOpenEditDialog(false)}
+            sx={{ color: "#7E4300" }}
+          >
+            Cancelar
+          </Button>
           <Button
             onClick={handleSaveEmployee}
-            color="primary"
-            variant="contained"
+            sx={{
+              backgroundColor: "#FFD538",
+              color: "#000000",
+              "&:hover": {
+                backgroundColor: "#e6c032",
+              },
+              "&:disabled": {
+                backgroundColor: "#CCCCCC",
+              },
+            }}
             disabled={
               !editingEmployee?.name ||
               !editingEmployee?.employeeNumber ||
@@ -232,22 +309,43 @@ const EmployeesView = ({
         onClose={() => setOpenDeleteDialog(false)}
         maxWidth="xs"
         fullWidth
+        PaperProps={{
+          sx: {
+            backgroundColor: "#FFF2C9",
+          },
+        }}
       >
-        <DialogTitle>Confirmar Eliminación</DialogTitle>
-        <DialogContent>
+        <DialogTitle sx={{ backgroundColor: "#7E4300", color: "#FFFFFF" }}>
+          Confirmar Eliminación
+        </DialogTitle>
+        <DialogContent sx={{ pt: 3 }}>
           <Typography>
             ¿Estás seguro que deseas eliminar al empleado{" "}
             {employeeToDelete?.name}?
           </Typography>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDeleteDialog(false)}>Cancelar</Button>
-          <Button onClick={confirmDelete} color="error" variant="contained">
+        <DialogActions sx={{ backgroundColor: "#FFF2C9" }}>
+          <Button
+            onClick={() => setOpenDeleteDialog(false)}
+            sx={{ color: "#7E4300" }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={confirmDelete}
+            sx={{
+              backgroundColor: "#d32f2f",
+              color: "#FFFFFF",
+              "&:hover": {
+                backgroundColor: "#b71c1c",
+              },
+            }}
+          >
             Eliminar
           </Button>
         </DialogActions>
       </Dialog>
-    </div>
+    </Box>
   );
 };
 

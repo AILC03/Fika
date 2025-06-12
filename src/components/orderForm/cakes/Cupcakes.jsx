@@ -14,7 +14,7 @@ import { Plus, Minus } from "lucide-react";
 
 const CupcakesForm = ({ cakeData, onAddCake }) => {
   // Estados del formulario
-  const [quantity, setQuantity] = useState(6); // Mínimo 6 cupcakes
+  const [quantity, setQuantity] = useState(12); // Mínimo 12 cupcakes
   const [selectedFlavor, setSelectedFlavor] = useState("");
   const [selectedIngredients, setSelectedIngredients] = useState([]);
 
@@ -43,8 +43,7 @@ const CupcakesForm = ({ cakeData, onAddCake }) => {
   // Ajustar cantidad (múltiplos de 6)
   const adjustQuantity = (change) => {
     const newQuantity = quantity + change;
-    if (newQuantity >= 6 && newQuantity <= 120) {
-      // Máximo 120 cupcakes
+    if (newQuantity >= 12) {
       setQuantity(newQuantity);
     }
   };
@@ -96,39 +95,50 @@ const CupcakesForm = ({ cakeData, onAddCake }) => {
 
   // Verificar si el formulario está completo
   const isFormComplete = () => {
-    return selectedFlavor && quantity >= 6;
+    return selectedFlavor && quantity >= 12;
   };
 
   return (
-    <Box>
-      <Typography variant="h6" gutterBottom>
+    <Box sx={{ backgroundColor: "#FFF2C9", p: 3, borderRadius: 2 }}>
+      <Typography variant="h6" gutterBottom sx={{ color: "#7E4300" }}>
         Cupcakes
       </Typography>
-      <Typography variant="body2" color="text.secondary" gutterBottom>
-        Se venden en paquetes de 6. Mínimo 6, máximo 120.
+      <Typography variant="body2" sx={{ color: "#7E4300", mb: 2 }} gutterBottom>
+        Se venden por mínimo de 12.
       </Typography>
 
       {/* Selector de cantidad */}
       <Box sx={{ mb: 3 }}>
-        <Typography gutterBottom>Cantidad</Typography>
+        <Typography sx={{ color: "#7E4300" }} gutterBottom>
+          Cantidad
+        </Typography>
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <IconButton
-            onClick={() => adjustQuantity(-6)}
-            disabled={quantity <= 6}
-            color="primary"
+            onClick={() => adjustQuantity(-1)}
+            disabled={quantity <= 12}
+            sx={{
+              color: "#7E4300",
+              "&:hover": { backgroundColor: "#FFD538" },
+            }}
           >
             <Minus />
           </IconButton>
           <Typography
             variant="h6"
-            sx={{ minWidth: "3rem", textAlign: "center" }}
+            sx={{
+              minWidth: "3rem",
+              textAlign: "center",
+              color: "#7E4300",
+            }}
           >
             {quantity}
           </Typography>
           <IconButton
-            onClick={() => adjustQuantity(6)}
-            disabled={quantity >= 120}
-            color="primary"
+            onClick={() => adjustQuantity(1)}
+            sx={{
+              color: "#7E4300",
+              "&:hover": { backgroundColor: "#FFD538" },
+            }}
           >
             <Plus />
           </IconButton>
@@ -137,14 +147,31 @@ const CupcakesForm = ({ cakeData, onAddCake }) => {
 
       {/* Selector de sabor */}
       <FormControl fullWidth sx={{ mb: 3 }}>
-        <InputLabel>Sabor</InputLabel>
+        <InputLabel sx={{ color: "#7E4300" }}>Sabor</InputLabel>
         <Select
           value={selectedFlavor}
           onChange={(e) => handleFlavorChange(e.target.value)}
           label="Sabor"
+          sx={{
+            backgroundColor: "#FFF2C9",
+            color: "#7E4300",
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#7E4300",
+            },
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#7E4300",
+            },
+          }}
         >
           {availableFlavors.map((flavor) => (
-            <MenuItem key={flavor.id} value={flavor.id}>
+            <MenuItem
+              key={flavor.id}
+              value={flavor.id}
+              sx={{
+                color: "#7E4300",
+                "&:hover": { backgroundColor: "#FFD538" },
+              }}
+            >
               {flavor.name}
             </MenuItem>
           ))}
@@ -156,7 +183,9 @@ const CupcakesForm = ({ cakeData, onAddCake }) => {
         availableFlavors.find((f) => f.id === selectedFlavor)?.ingredients
           ?.length > 0 && (
           <Box sx={{ mb: 3 }}>
-            <Typography gutterBottom>Ingredientes Adicionales</Typography>
+            <Typography sx={{ color: "#7E4300" }} gutterBottom>
+              Ingredientes Adicionales
+            </Typography>
             <Grid container spacing={1}>
               {availableFlavors
                 .find((f) => f.id === selectedFlavor)
@@ -171,6 +200,25 @@ const CupcakesForm = ({ cakeData, onAddCake }) => {
                       }
                       onClick={() => handleIngredientToggle(ingredient.id)}
                       size="small"
+                      sx={{
+                        color: selectedIngredients.includes(ingredient.id)
+                          ? "#FFF2C9"
+                          : "#7E4300",
+                        backgroundColor: selectedIngredients.includes(
+                          ingredient.id
+                        )
+                          ? "#7E4300"
+                          : "transparent",
+                        borderColor: "#7E4300",
+                        "&:hover": {
+                          backgroundColor: selectedIngredients.includes(
+                            ingredient.id
+                          )
+                            ? "#7E4300"
+                            : "#FFD538",
+                          borderColor: "#7E4300",
+                        },
+                      }}
                     >
                       {ingredient.name}
                     </Button>
@@ -182,13 +230,36 @@ const CupcakesForm = ({ cakeData, onAddCake }) => {
 
       {/* Botones de acción */}
       <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
-        <Button onClick={handleClearForm} variant="outlined">
+        <Button
+          onClick={handleClearForm}
+          variant="outlined"
+          sx={{
+            color: "#7E4300",
+            borderColor: "#7E4300",
+            "&:hover": {
+              backgroundColor: "#FFD538",
+              borderColor: "#7E4300",
+            },
+          }}
+        >
           Limpiar
         </Button>
         <Button
           onClick={handleSubmit}
           variant="contained"
           disabled={!isFormComplete()}
+          sx={{
+            backgroundColor: "#FFD538",
+            color: "#7E4300",
+            "&:hover": {
+              backgroundColor: "#7E4300",
+              color: "#FFD538",
+            },
+            "&:disabled": {
+              backgroundColor: "#cccccc",
+              color: "#666666",
+            },
+          }}
         >
           Agregar al Pedido
         </Button>

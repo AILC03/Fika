@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  Box,
   Button,
   TextField,
   Card,
@@ -74,17 +75,40 @@ const CustomersView = ({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-4 mb-6">
+    <Box sx={{ backgroundColor: "#FFF2C9", p: 3, borderRadius: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          gap: 2,
+          mb: 3,
+        }}
+      >
         <Select
           value={searchType}
           onChange={(e) => setSearchType(e.target.value)}
           size="small"
-          className="min-w-[180px]"
+          sx={{
+            minWidth: 180,
+            backgroundColor: "#FFF2C9",
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#7E4300",
+            },
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#7E4300",
+            },
+          }}
         >
-          <MenuItem value="name">Nombre</MenuItem>
-          <MenuItem value="phone">Celular</MenuItem>
-          <MenuItem value="email">Correo</MenuItem>
+          <MenuItem value="name" sx={{ color: "#7E4300" }}>
+            Nombre
+          </MenuItem>
+          <MenuItem value="phone" sx={{ color: "#7E4300" }}>
+            Celular
+          </MenuItem>
+          <MenuItem value="email" sx={{ color: "#7E4300" }}>
+            Correo
+          </MenuItem>
         </Select>
 
         <TextField
@@ -96,64 +120,108 @@ const CustomersView = ({
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <Search />
+                <Search sx={{ color: "#7E4300" }} />
               </InputAdornment>
             ),
+            sx: {
+              backgroundColor: "#FFF2C9",
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderColor: "#7E4300",
+              },
+              "&:hover .MuiOutlinedInput-notchedOutline": {
+                borderColor: "#7E4300",
+              },
+            },
           }}
-          className="flex-grow max-w-md"
+          sx={{ flexGrow: 1, maxWidth: "md" }}
         />
 
         <Button
           variant="outlined"
-          startIcon={<Refresh />}
+          startIcon={<Refresh sx={{ color: "#7E4300" }} />}
           onClick={onRefresh}
           disabled={loading}
+          sx={{
+            color: "#7E4300",
+            borderColor: "#7E4300",
+            "&:hover": {
+              backgroundColor: "#FFD538",
+              borderColor: "#7E4300",
+            },
+            "&.Mui-disabled": {
+              borderColor: "#bdbdbd",
+              color: "#bdbdbd",
+            },
+          }}
         >
           Actualizar
         </Button>
-      </div>
+      </Box>
 
       <Grid container spacing={3}>
         {filteredCustomers.map((customer) => (
           <Grid item xs={12} sm={6} md={4} key={customer.id}>
-            <Card>
+            <Card
+              sx={{
+                backgroundColor: "#FFF2C9",
+                border: "1px solid #7E4300",
+                "&:hover": {
+                  boxShadow: "0 4px 8px rgba(126, 67, 0, 0.2)",
+                },
+              }}
+            >
               <CardContent>
-                <div className="flex justify-between items-start">
-                  <Typography variant="h6" gutterBottom>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <Typography
+                    variant="h6"
+                    gutterBottom
+                    sx={{ color: "#7E4300" }}
+                  >
                     {customer.name}
                   </Typography>
-                  <div>
+                  <Box>
                     <IconButton
                       size="small"
                       onClick={() => handleEditCustomer(customer)}
+                      sx={{ color: "#7E4300" }}
                     >
                       <Edit fontSize="small" />
                     </IconButton>
                     <IconButton
                       size="small"
                       onClick={() => handleDeleteClick(customer)}
-                      color="error"
+                      sx={{ color: "#7E4300" }}
                     >
                       <Delete fontSize="small" />
                     </IconButton>
-                  </div>
-                </div>
+                  </Box>
+                </Box>
 
-                <Typography variant="body2" color="textSecondary" gutterBottom>
+                <Typography
+                  variant="body2"
+                  gutterBottom
+                  sx={{ color: "#7E4300" }}
+                >
                   <strong>Celular:</strong> {customer.phone}
                 </Typography>
 
                 {customer.email && (
                   <Typography
                     variant="body2"
-                    color="textSecondary"
                     gutterBottom
+                    sx={{ color: "#7E4300" }}
                   >
                     <strong>Email:</strong> {customer.email}
                   </Typography>
                 )}
 
-                <Typography variant="caption" color="textSecondary">
+                <Typography variant="caption" sx={{ color: "#7E4300" }}>
                   Registrado el:{" "}
                   {format(new Date(customer.createdAt), "dd/MM/yyyy")}
                 </Typography>
@@ -164,9 +232,18 @@ const CustomersView = ({
       </Grid>
 
       {/* Dialog para editar cliente */}
-      <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
-        <DialogTitle>Editar Cliente</DialogTitle>
-        <DialogContent className="space-y-4 min-w-[400px]">
+      <Dialog
+        open={openEditDialog}
+        onClose={() => setOpenEditDialog(false)}
+        PaperProps={{
+          sx: {
+            backgroundColor: "#FFF2C9",
+            border: "1px solid #7E4300",
+          },
+        }}
+      >
+        <DialogTitle sx={{ color: "#7E4300" }}>Editar Cliente</DialogTitle>
+        <DialogContent sx={{ minWidth: 400 }}>
           <TextField
             label="Nombre"
             name="name"
@@ -174,6 +251,15 @@ const CustomersView = ({
             onChange={handleChange}
             fullWidth
             margin="normal"
+            sx={{
+              "& .MuiInputLabel-root": { color: "#7E4300" },
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": { borderColor: "#7E4300" },
+                "&:hover fieldset": { borderColor: "#7E4300" },
+                "&.Mui-focused fieldset": { borderColor: "#7E4300" },
+              },
+              "& .MuiInputBase-input": { color: "#7E4300" },
+            }}
           />
 
           <TextField
@@ -183,6 +269,15 @@ const CustomersView = ({
             onChange={handleChange}
             fullWidth
             margin="normal"
+            sx={{
+              "& .MuiInputLabel-root": { color: "#7E4300" },
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": { borderColor: "#7E4300" },
+                "&:hover fieldset": { borderColor: "#7E4300" },
+                "&.Mui-focused fieldset": { borderColor: "#7E4300" },
+              },
+              "& .MuiInputBase-input": { color: "#7E4300" },
+            }}
           />
 
           <TextField
@@ -192,15 +287,40 @@ const CustomersView = ({
             onChange={handleChange}
             fullWidth
             margin="normal"
+            sx={{
+              "& .MuiInputLabel-root": { color: "#7E4300" },
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": { borderColor: "#7E4300" },
+                "&:hover fieldset": { borderColor: "#7E4300" },
+                "&.Mui-focused fieldset": { borderColor: "#7E4300" },
+              },
+              "& .MuiInputBase-input": { color: "#7E4300" },
+            }}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenEditDialog(false)}>Cancelar</Button>
+          <Button
+            onClick={() => setOpenEditDialog(false)}
+            sx={{ color: "#7E4300" }}
+          >
+            Cancelar
+          </Button>
           <Button
             onClick={handleSaveCustomer}
-            color="primary"
             variant="contained"
             disabled={!editingCustomer?.name || !editingCustomer?.phone}
+            sx={{
+              backgroundColor: "#FFD538",
+              color: "#7E4300",
+              "&:hover": {
+                backgroundColor: "#FFD538",
+                opacity: 0.9,
+              },
+              "&.Mui-disabled": {
+                backgroundColor: "#f5f5f5",
+                color: "#bdbdbd",
+              },
+            }}
           >
             Guardar
           </Button>
@@ -213,22 +333,46 @@ const CustomersView = ({
         onClose={() => setOpenDeleteDialog(false)}
         maxWidth="xs"
         fullWidth
+        PaperProps={{
+          sx: {
+            backgroundColor: "#FFF2C9",
+            border: "1px solid #7E4300",
+          },
+        }}
       >
-        <DialogTitle>Confirmar Eliminación</DialogTitle>
+        <DialogTitle sx={{ color: "#7E4300" }}>
+          Confirmar Eliminación
+        </DialogTitle>
         <DialogContent>
-          <Typography>
+          <Typography sx={{ color: "#7E4300" }}>
             ¿Estás seguro que deseas eliminar al cliente{" "}
             {customerToDelete?.name}?
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDeleteDialog(false)}>Cancelar</Button>
-          <Button onClick={confirmDelete} color="error" variant="contained">
+          <Button
+            onClick={() => setOpenDeleteDialog(false)}
+            sx={{ color: "#7E4300" }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={confirmDelete}
+            variant="contained"
+            sx={{
+              backgroundColor: "#FFD538",
+              color: "#7E4300",
+              "&:hover": {
+                backgroundColor: "#FFD538",
+                opacity: 0.9,
+              },
+            }}
+          >
             Eliminar
           </Button>
         </DialogActions>
       </Dialog>
-    </div>
+    </Box>
   );
 };
 
