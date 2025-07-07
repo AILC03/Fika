@@ -1,3 +1,5 @@
+import { setSession } from "../context/setUser";
+
 const loginUser = async (user, password) => {
   const API = import.meta.env.VITE_URI;
 
@@ -7,23 +9,26 @@ const loginUser = async (user, password) => {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include", // importante para que guarde cookie httpOnly
       body: JSON.stringify({ user, password }),
     });
 
-    const text = await response.text();
-    const data = text ? JSON.parse(text) : {};
+    const data = await response.json();
 
     if (!response.ok) {
-      return { success: false, message: data.message || "Login failed" };
+      return { success: false, message: data.message || "Login fallido" };
     }
-    return { success: true, ...data };
+
+    // Guardar sesión en localStorage (sencillo)
+    setSession(data.user, data.token);
+
+    return { success: true, user: data.user };
   } catch (error) {
     return {
       success: false,
-      message: "Error during login",
+      message: "Error durante login",
       error: error.message,
     };
   }
 };
-
 export default loginUser;

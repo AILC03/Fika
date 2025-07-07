@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Button,
   TextField,
@@ -20,23 +20,107 @@ import {
   InputAdornment,
   Box,
 } from "@mui/material";
-import { Refresh, Edit, Delete, Search } from "@mui/icons-material";
+import { Refresh, Delete, Search, Add } from "@mui/icons-material";
 import { format } from "date-fns";
 
-const EmployeesView = ({
-  employees,
-  onRefresh,
-  onUpdateEmployee,
-  onDeleteEmployee,
-  loading,
-}) => {
+const EmployeesView = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchType, setSearchType] = useState("name");
-  const [editingEmployee, setEditingEmployee] = useState(null);
-  const [openEditDialog, setOpenEditDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState(null);
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [openCreateDialog, setOpenCreateDialog] = useState(false);
+  const [newEmployee, setNewEmployee] = useState({
+    name: "",
+    user: "",
+    password: "",
+    shift: "MATUTINO",
+    rol: "CAJA",
+  });
 
+  const API = import.meta.env.VITE_URI;
+
+  // Función para obtener todos los usuarios
+  const getAllUsers = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${API}/users/auth/users`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Error fetching users");
+      }
+
+      const data = await response.json();
+      setEmployees(data.users || []);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Función para crear un nuevo usuario
+  const createUser = async () => {
+    try {
+      const response = await fetch(`${API}/users/auth/createUser`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(newEmployee),
+      });
+
+      if (!response.ok) {
+        throw new Error("Error creating user");
+      }
+
+      await getAllUsers(); // Actualizar la lista después de crear
+      setOpenCreateDialog(false);
+      setNewEmployee({
+        name: "",
+        user: "",
+        password: "",
+        shift: "MATUTINO",
+        rol: "CAJA",
+      });
+    } catch (error) {
+      console.error("Error creating user:", error);
+    }
+  };
+
+  // Función para eliminar un usuario
+  const deleteUser = async (userId) => {
+    try {
+      const response = await fetch(`${API}/users/auth/deleteUser/${userId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Error deleting user");
+      }
+
+      await getAllUsers(); // Actualizar la lista después de eliminar
+      setOpenDeleteDialog(false);
+    } catch (error) {
+      console.error("Error deleting user:", error);
+    }
+  };
+
+  // Cargar usuarios al montar el componente
+  useEffect(() => {
+    getAllUsers();
+  }, []);
+
+  // Filtrar empleados según búsqueda
   const filteredEmployees = employees.filter((employee) => {
     if (!searchTerm) return true;
 
@@ -44,10 +128,10 @@ const EmployeesView = ({
     switch (searchType) {
       case "name":
         return employee.name.toLowerCase().includes(term);
-      case "employeeNumber":
-        return employee.employeeNumber.includes(term);
-      case "position":
-        return employee.position.toLowerCase().includes(term);
+      case "user":
+        return employee.user.toLowerCase().includes(term);
+      case "rol":
+        return employee.rol.toLowerCase().includes(term);
       case "shift":
         return employee.shift.toLowerCase().includes(term);
       default:
@@ -55,29 +139,20 @@ const EmployeesView = ({
     }
   });
 
-  const handleEditEmployee = (employee) => {
-    setEditingEmployee({ ...employee });
-    setOpenEditDialog(true);
-  };
-
-  const handleSaveEmployee = () => {
-    onUpdateEmployee(editingEmployee);
-    setOpenEditDialog(false);
-  };
-
   const handleDeleteClick = (employee) => {
     setEmployeeToDelete(employee);
     setOpenDeleteDialog(true);
   };
 
   const confirmDelete = () => {
-    onDeleteEmployee(employeeToDelete.id);
-    setOpenDeleteDialog(false);
+    if (employeeToDelete) {
+      deleteUser(employeeToDelete.Id);
+    }
   };
 
-  const handleChange = (e) => {
+  const handleCreateChange = (e) => {
     const { name, value } = e.target;
-    setEditingEmployee((prev) => ({ ...prev, [name]: value }));
+    setNewEmployee((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
@@ -104,8 +179,8 @@ const EmployeesView = ({
           }}
         >
           <MenuItem value="name">Nombre</MenuItem>
-          <MenuItem value="employeeNumber">Número de empleado</MenuItem>
-          <MenuItem value="position">Puesto</MenuItem>
+          <MenuItem value="user">Usuario</MenuItem>
+          <MenuItem value="rol">Rol</MenuItem>
           <MenuItem value="shift">Turno</MenuItem>
         </Select>
 
@@ -134,7 +209,7 @@ const EmployeesView = ({
         <Button
           variant="contained"
           startIcon={<Refresh />}
-          onClick={onRefresh}
+          onClick={getAllUsers}
           disabled={loading}
           sx={{
             backgroundColor: "#FFD538",
@@ -145,6 +220,21 @@ const EmployeesView = ({
           }}
         >
           Actualizar
+        </Button>
+
+        <Button
+          variant="contained"
+          startIcon={<Add />}
+          onClick={() => setOpenCreateDialog(true)}
+          sx={{
+            backgroundColor: "#4CAF50",
+            color: "#FFFFFF",
+            "&:hover": {
+              backgroundColor: "#388E3C",
+            },
+          }}
+        >
+          Nuevo
         </Button>
       </Box>
 
@@ -161,8 +251,8 @@ const EmployeesView = ({
           <TableHead>
             <TableRow sx={{ backgroundColor: "#7E4300" }}>
               <TableCell sx={{ color: "#FFFFFF" }}>Nombre</TableCell>
-              <TableCell sx={{ color: "#FFFFFF" }}>Número</TableCell>
-              <TableCell sx={{ color: "#FFFFFF" }}>Puesto</TableCell>
+              <TableCell sx={{ color: "#FFFFFF" }}>Usuario</TableCell>
+              <TableCell sx={{ color: "#FFFFFF" }}>Rol</TableCell>
               <TableCell sx={{ color: "#FFFFFF" }}>Turno</TableCell>
               <TableCell sx={{ color: "#FFFFFF" }}>Registro</TableCell>
               <TableCell sx={{ color: "#FFFFFF" }}>Acciones</TableCell>
@@ -171,7 +261,7 @@ const EmployeesView = ({
           <TableBody>
             {filteredEmployees.map((employee) => (
               <TableRow
-                key={employee.id}
+                key={employee.Id}
                 sx={{
                   "&:nth-of-type(odd)": {
                     backgroundColor: "#FFF2C9",
@@ -185,20 +275,13 @@ const EmployeesView = ({
                 }}
               >
                 <TableCell>{employee.name}</TableCell>
-                <TableCell>{employee.employeeNumber}</TableCell>
-                <TableCell>{employee.position}</TableCell>
+                <TableCell>{employee.user}</TableCell>
+                <TableCell>{employee.rol}</TableCell>
                 <TableCell>{employee.shift}</TableCell>
                 <TableCell>
                   {format(new Date(employee.createdAt), "dd/MM/yyyy")}
                 </TableCell>
                 <TableCell>
-                  <IconButton
-                    size="small"
-                    onClick={() => handleEditEmployee(employee)}
-                    sx={{ color: "#7E4300" }}
-                  >
-                    <Edit fontSize="small" />
-                  </IconButton>
                   <IconButton
                     size="small"
                     onClick={() => handleDeleteClick(employee)}
@@ -213,10 +296,10 @@ const EmployeesView = ({
         </Table>
       </TableContainer>
 
-      {/* Dialog para editar empleado */}
+      {/* Dialog para crear nuevo usuario */}
       <Dialog
-        open={openEditDialog}
-        onClose={() => setOpenEditDialog(false)}
+        open={openCreateDialog}
+        onClose={() => setOpenCreateDialog(false)}
         PaperProps={{
           sx: {
             backgroundColor: "#FFF2C9",
@@ -224,81 +307,95 @@ const EmployeesView = ({
         }}
       >
         <DialogTitle sx={{ backgroundColor: "#7E4300", color: "#FFFFFF" }}>
-          Editar Empleado
+          Crear Nuevo Usuario
         </DialogTitle>
         <DialogContent sx={{ minWidth: 400, pt: 3 }}>
           <TextField
             label="Nombre completo"
             name="name"
-            value={editingEmployee?.name || ""}
-            onChange={handleChange}
+            value={newEmployee.name}
+            onChange={handleCreateChange}
             fullWidth
             margin="normal"
             sx={{ mb: 2, backgroundColor: "#FFFFFF" }}
           />
 
           <TextField
-            label="Número de empleado"
-            name="employeeNumber"
-            value={editingEmployee?.employeeNumber || ""}
-            onChange={handleChange}
+            label="Usuario"
+            name="user"
+            value={newEmployee.user}
+            onChange={handleCreateChange}
             fullWidth
             margin="normal"
             sx={{ mb: 2, backgroundColor: "#FFFFFF" }}
           />
 
           <TextField
-            label="Puesto"
-            name="position"
-            value={editingEmployee?.position || ""}
-            onChange={handleChange}
+            label="Contraseña"
+            name="password"
+            type="password"
+            value={newEmployee.password}
+            onChange={handleCreateChange}
             fullWidth
             margin="normal"
             sx={{ mb: 2, backgroundColor: "#FFFFFF" }}
           />
 
           <Select
-            label="Turno"
-            name="shift"
-            value={editingEmployee?.shift || ""}
-            onChange={handleChange}
+            label="Rol"
+            name="rol"
+            value={newEmployee.rol}
+            onChange={handleCreateChange}
             fullWidth
             margin="normal"
             sx={{ mb: 2, backgroundColor: "#FFFFFF" }}
           >
-            <MenuItem value="matutino">Matutino</MenuItem>
-            <MenuItem value="vespertino">Vespertino</MenuItem>
-            <MenuItem value="nocturno">Nocturno</MenuItem>
-            <MenuItem value="completo">Tiempo completo</MenuItem>
+            <MenuItem value="ADMIN">Administrador</MenuItem>
+            <MenuItem value="CAJA">Caja</MenuItem>
+          </Select>
+
+          <Select
+            label="Turno"
+            name="shift"
+            value={newEmployee.shift}
+            onChange={handleCreateChange}
+            fullWidth
+            margin="normal"
+            sx={{ mb: 2, backgroundColor: "#FFFFFF" }}
+          >
+            <MenuItem value="MATUTINO">Matutino</MenuItem>
+            <MenuItem value="INTERMEDIO">Intermedio</MenuItem>
+            <MenuItem value="VESPERTINO">Vespertino</MenuItem>
           </Select>
         </DialogContent>
         <DialogActions sx={{ backgroundColor: "#FFF2C9" }}>
           <Button
-            onClick={() => setOpenEditDialog(false)}
+            onClick={() => setOpenCreateDialog(false)}
             sx={{ color: "#7E4300" }}
           >
             Cancelar
           </Button>
           <Button
-            onClick={handleSaveEmployee}
+            onClick={createUser}
             sx={{
-              backgroundColor: "#FFD538",
-              color: "#000000",
+              backgroundColor: "#4CAF50",
+              color: "#FFFFFF",
               "&:hover": {
-                backgroundColor: "#e6c032",
+                backgroundColor: "#388E3C",
               },
               "&:disabled": {
                 backgroundColor: "#CCCCCC",
               },
             }}
             disabled={
-              !editingEmployee?.name ||
-              !editingEmployee?.employeeNumber ||
-              !editingEmployee?.position ||
-              !editingEmployee?.shift
+              !newEmployee.name ||
+              !newEmployee.user ||
+              !newEmployee.password ||
+              !newEmployee.rol ||
+              !newEmployee.shift
             }
           >
-            Guardar
+            Crear
           </Button>
         </DialogActions>
       </Dialog>
@@ -320,7 +417,7 @@ const EmployeesView = ({
         </DialogTitle>
         <DialogContent sx={{ pt: 3 }}>
           <Typography>
-            ¿Estás seguro que deseas eliminar al empleado{" "}
+            ¿Estás seguro que deseas eliminar al usuario{" "}
             {employeeToDelete?.name}?
           </Typography>
         </DialogContent>
