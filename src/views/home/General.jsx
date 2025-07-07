@@ -4,7 +4,7 @@ import Eventos from "../../components/pedidosXDia"; // Componente de eventos
 import CantidadesDiarias from "../../components/cantidadesDiarias"; // Tabla de cantidades
 
 const General = () => {
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(null); //recibe la fecha que se selecciono
 
   const handleDateSelect = (date) => {
     setSelectedDate(date);

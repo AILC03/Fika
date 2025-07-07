@@ -3,33 +3,17 @@ import Login from "../views/auth/Login";
 import Sidebar from "../components/sidebar";
 import Home from "../views/home/General";
 import Admin from "../views/home/Admin";
-import { AuthProvider } from "../context/authContext";
-import { useAuth } from "../context/authContext";
-
-const ProtectedRoute = ({ children, allowedRoles }) => {
-  const { user } = useAuth();
-
-  if (!user) {
-    return <Navigate to="/" replace />;
-  }
-
-  if (allowedRoles && !allowedRoles.includes(user.rol)) {
-    return <Navigate to="/home" replace />;
-  }
-
-  return children;
-};
+import Report from "../views/home/Reports";
 
 const AppRouter = () => {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          {/* Ruta pública */}
-          <Route path="/" element={<Login />} />
+      <Routes>
+        {/* Ruta pública */}
+        <Route path="/" element={<Login />} />
 
-          {/* Rutas protegidas */}
-          {/* <Route
+        {/* Rutas protegidas */}
+        {/* <Route
             element={
               <ProtectedRoute allowedRoles={["admin", "caja"]}>
                 <Sidebar />
@@ -53,20 +37,13 @@ const AppRouter = () => {
               }
             />
           </Route> */}
-          {/* Rutas protegidas sin roles específicos */}
-          <Route
-            element={
-              <ProtectedRoute>
-                {" "}
-                <Sidebar />
-              </ProtectedRoute>
-            }
-          >
-            <Route path="/home" element={<Home />} />
-            <Route path="/admin" element={<Admin />} />
-          </Route>
-        </Routes>
-      </AuthProvider>
+        {/* Rutas protegidas sin roles específicos */}
+        <Route element={<Sidebar />}>
+          <Route path="/home" element={<Home />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/report" element={<Report />} />
+        </Route>
+      </Routes>
     </BrowserRouter>
   );
 };

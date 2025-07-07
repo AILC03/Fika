@@ -2,38 +2,28 @@ import Banner from "../../Assets/Banner1.jpg";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/authContext";
+import loginUser from "../../helpers/userAuth";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
+  const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Simular login exitoso como admin
-    login("admin@example.com", "anypassword").then(() => {
-      navigate("/home");
-    });
-
-    // Descomentar para usar la lógica real de login
-    
-    setError("");
-  
-    if (!email || !password) {
+    if (!user || !password) {
       setError("Por favor, completa todos los campos.");
       return;
     }
-  
+
     try {
       setLoading(true);
-      const result = await login(email, password);
-      
+      const result = await loginUser(user, password);
+
       if (result.success) {
         navigate("/home");
       } else {
@@ -66,14 +56,14 @@ const Login = () => {
           <form onSubmit={handleSubmit}>
             <div className="mb-1.5">
               <label className="block text-amber-900 font-bold text-lg mb-2">
-                Email
+                Usuario
               </label>
               <input
-                type="email"
+                type="text"
                 className="w-full px-4 py-2 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-200"
-                placeholder="Ingresa tu email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Ingresa tu usuario"
+                value={user}
+                onChange={(e) => setUser(e.target.value)}
               />
             </div>
             <span className="text-gray-500">No olvides tu usuario.</span>

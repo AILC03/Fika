@@ -11,24 +11,21 @@ import {
   Paper,
   Chip,
   IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  MenuItem,
-  Select,
-  InputAdornment,
   Box,
   useMediaQuery,
   useTheme,
+  InputAdornment,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { Refresh, Edit, Search } from "@mui/icons-material";
 import { DatePicker } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
+import EditOrderDialog from "./EditOrder";
 
-const OrdersView = ({ orders, onRefresh, onUpdateOrder, loading }) => {
+const OrdersList = ({ orders, onRefresh, onUpdateOrder, loading }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
@@ -38,6 +35,13 @@ const OrdersView = ({ orders, onRefresh, onUpdateOrder, loading }) => {
   const [dateFilter, setDateFilter] = useState(null);
   const [editingOrder, setEditingOrder] = useState(null);
   const [openEditDialog, setOpenEditDialog] = useState(false);
+
+  const statusColors = {
+    in_progress: { backgroundColor: "#FFD538", color: "#000000" },
+    completed: { backgroundColor: "#7E4300", color: "#FFFFFF" },
+    cancelled: { backgroundColor: "#d32f2f", color: "#FFFFFF" },
+    pending: { backgroundColor: "#FFF2C9", color: "#000000" },
+  };
 
   const filteredOrders = orders.filter((order) => {
     if (
@@ -66,29 +70,17 @@ const OrdersView = ({ orders, onRefresh, onUpdateOrder, loading }) => {
     return true;
   });
 
-  const statusColors = {
-    in_progress: { backgroundColor: "#FFD538", color: "#000000" }, // yellow-400
-    completed: { backgroundColor: "#7E4300", color: "#FFFFFF" }, // amber-800
-    cancelled: { backgroundColor: "#d32f2f", color: "#FFFFFF" }, // rojo (mantenido)
-    pending: { backgroundColor: "#FFF2C9", color: "#000000" }, // yellow-100
-  };
-
   const handleEditOrder = (order) => {
     setEditingOrder({ ...order, pickupDateTime: dayjs(order.pickupDateTime) });
     setOpenEditDialog(true);
   };
 
-  const handleSaveOrder = () => {
+  const handleSaveOrder = (updatedOrder) => {
     onUpdateOrder({
-      ...editingOrder,
-      pickupDateTime: editingOrder.pickupDateTime.toISOString(),
+      ...updatedOrder,
+      pickupDateTime: updatedOrder.pickupDateTime.toISOString(),
     });
     setOpenEditDialog(false);
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setEditingOrder((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
@@ -109,7 +101,7 @@ const OrdersView = ({ orders, onRefresh, onUpdateOrder, loading }) => {
             size="small"
             sx={{
               minWidth: isMobile ? "100%" : 180,
-              backgroundColor: "#FFF2C9", // yellow-100
+              backgroundColor: "#FFF2C9",
             }}
           >
             <MenuItem value="customerName">Nombre</MenuItem>
@@ -130,7 +122,7 @@ const OrdersView = ({ orders, onRefresh, onUpdateOrder, loading }) => {
                 </InputAdornment>
               ),
               sx: {
-                backgroundColor: "#FFF2C9", // yellow-100
+                backgroundColor: "#FFF2C9",
               },
             }}
             sx={{ flexGrow: 1 }}
@@ -146,7 +138,7 @@ const OrdersView = ({ orders, onRefresh, onUpdateOrder, loading }) => {
                 size="small"
                 fullWidth={isMobile}
                 sx={{
-                  backgroundColor: "#FFF2C9", // yellow-100
+                  backgroundColor: "#FFF2C9",
                 }}
               />
             )}
@@ -160,7 +152,7 @@ const OrdersView = ({ orders, onRefresh, onUpdateOrder, loading }) => {
             disabled={loading}
             fullWidth={isMobile}
             sx={{
-              backgroundColor: "#FFD538", // yellow-400
+              backgroundColor: "#FFD538",
               color: "#000000",
               "&:hover": {
                 backgroundColor: "#e6c032",
@@ -176,14 +168,12 @@ const OrdersView = ({ orders, onRefresh, onUpdateOrder, loading }) => {
           sx={{
             maxWidth: "100%",
             overflowX: "auto",
-            backgroundColor: "#FFF2C9", // yellow-100
+            backgroundColor: "#FFF2C9",
           }}
         >
           <Table size={isMobile ? "small" : "medium"}>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#7E4300" }}>
-                {" "}
-                {/* amber-800 */}
                 <TableCell
                   sx={{
                     display: isMobile ? "none" : "table-cell",
@@ -218,10 +208,10 @@ const OrdersView = ({ orders, onRefresh, onUpdateOrder, loading }) => {
                   key={order.id}
                   sx={{
                     "&:nth-of-type(odd)": {
-                      backgroundColor: "#FFF2C9", // yellow-100
+                      backgroundColor: "#FFF2C9",
                     },
                     "&:nth-of-type(even)": {
-                      backgroundColor: "#FFD53833", // yellow-400 con 20% de opacidad
+                      backgroundColor: "#FFD53833",
                     },
                   }}
                 >
@@ -283,7 +273,7 @@ const OrdersView = ({ orders, onRefresh, onUpdateOrder, loading }) => {
                       onClick={() => handleEditOrder(order)}
                       size="small"
                       sx={{
-                        color: "#7E4300", // amber-800
+                        color: "#7E4300",
                       }}
                     >
                       <Edit fontSize="small" />
@@ -295,115 +285,16 @@ const OrdersView = ({ orders, onRefresh, onUpdateOrder, loading }) => {
           </Table>
         </TableContainer>
 
-        {/* Edit Dialog */}
-        <Dialog
+        <EditOrderDialog
           open={openEditDialog}
           onClose={() => setOpenEditDialog(false)}
-          fullWidth
-          maxWidth={isMobile ? "xs" : "sm"}
-          PaperProps={{
-            sx: {
-              backgroundColor: "#FFF2C9", // yellow-100
-            },
-          }}
-        >
-          <DialogTitle sx={{ backgroundColor: "#7E4300", color: "#FFFFFF" }}>
-            {" "}
-            {/* amber-800 */}
-            Editar Pedido
-          </DialogTitle>
-          <DialogContent sx={{ pt: 2 }}>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-              <TextField
-                label="Dedicatoria"
-                name="writing"
-                value={editingOrder?.writing || ""}
-                onChange={handleChange}
-                fullWidth
-                multiline
-                rows={2}
-                sx={{
-                  backgroundColor: "#FFFFFF",
-                }}
-              />
-
-              <TextField
-                label="Notas"
-                name="notes"
-                value={editingOrder?.notes || ""}
-                onChange={handleChange}
-                fullWidth
-                multiline
-                rows={3}
-                sx={{
-                  backgroundColor: "#FFFFFF",
-                }}
-              />
-
-              <DatePicker
-                label="Fecha de recogida"
-                value={editingOrder?.pickupDateTime || null}
-                onChange={(date) =>
-                  handleChange({
-                    target: { name: "pickupDateTime", value: date },
-                  })
-                }
-                textField={(params) => (
-                  <TextField
-                    {...params}
-                    fullWidth
-                    sx={{
-                      backgroundColor: "#FFFFFF",
-                    }}
-                  />
-                )}
-              />
-
-              <Select
-                label="Estado"
-                name="status"
-                value={editingOrder?.status || ""}
-                onChange={handleChange}
-                fullWidth
-                sx={{
-                  backgroundColor: "#FFFFFF",
-                }}
-              >
-                <MenuItem value="in_progress">En progreso</MenuItem>
-                <MenuItem value="completed">Completado</MenuItem>
-                <MenuItem value="cancelled">Cancelado</MenuItem>
-                <MenuItem value="pending">Pendiente</MenuItem>
-              </Select>
-            </Box>
-          </DialogContent>
-          <DialogActions sx={{ backgroundColor: "#FFF2C9" }}>
-            {" "}
-            {/* yellow-100 */}
-            <Button
-              onClick={() => setOpenEditDialog(false)}
-              sx={{
-                color: "#7E4300", // amber-800
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleSaveOrder}
-              sx={{
-                backgroundColor: "#FFD538", // yellow-400
-                color: "#000000",
-                "&:hover": {
-                  backgroundColor: "#e6c032",
-                },
-              }}
-            >
-              Guardar
-            </Button>
-          </DialogActions>
-        </Dialog>
+          order={editingOrder}
+          onSave={handleSaveOrder}
+          isMobile={isMobile}
+        />
       </Box>
     </LocalizationProvider>
   );
 };
 
-export default OrdersView;
+export default OrdersList;

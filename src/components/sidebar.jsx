@@ -1,19 +1,18 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { useAuth } from "../context/authContext";
 import Banner2 from "../Assets/Banner2.jpg";
 import Logo from "../Assets/logo1.png";
 import adm from "../Assets/agenda_icon_129512.png";
 import can from "../Assets/32422shortcake_98853.png";
+import rep from "../Assets/report_102120.png";
 import AccountIcon from "../Assets/account_avatar_face_man_people_profile_user_icon_123197.png";
-import { Home, Settings, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useState } from "react";
 
 const Sidebar = () => {
-  const { user, logout } = useAuth();
   const location = useLocation();
   const [showLogout, setShowLogout] = useState(false);
 
-  const commonRoutes = [
+  const allRoutes = [
     {
       path: "/home",
       icon: (
@@ -24,11 +23,18 @@ const Sidebar = () => {
         />
       ),
       label: "Inicio",
-      roles: ["admin", "caja"],
     },
-  ];
-
-  const adminRoutes = [
+    {
+      path: "/report",
+      icon: (
+        <img
+          src={rep}
+          alt="Reportes"
+          className="w-8 h-8 md:w-10 md:h-10 object-contain"
+        />
+      ),
+      label: "Reportes",
+    },
     {
       path: "/admin",
       icon: (
@@ -39,18 +45,8 @@ const Sidebar = () => {
         />
       ),
       label: "Admin",
-      roles: ["admin"],
     },
   ];
-
-  const allRoutes = [...commonRoutes, ...adminRoutes];
-  //sin validacion, eliminar
-  //const filteredRoutes = allRoutes;
-
-  // Con validación de roles, descomentar
-  const filteredRoutes = allRoutes.filter((route) =>
-    route.roles.includes(user?.rol)
-  );
 
   return (
     <div
@@ -74,7 +70,7 @@ const Sidebar = () => {
 
         {/* Links de navegación */}
         <div className="flex flex-col space-y-8 w-full">
-          {filteredRoutes.map((route) => (
+          {allRoutes.map((route) => (
             <Link
               key={route.path}
               to={route.path}
@@ -105,7 +101,7 @@ const Sidebar = () => {
 
           {showLogout && (
             <button
-              onClick={logout}
+              onClick={() => alert("Cerrar sesión (no implementado)")}
               className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 flex items-center bg-amber-700 text-white px-3 py-1 rounded-lg whitespace-nowrap"
             >
               <LogOut className="w-4 h-4 mr-1" />
