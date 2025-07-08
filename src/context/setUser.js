@@ -1,6 +1,5 @@
-export const setSession = (user, token) => {
+export const setSession = (user) => {
   localStorage.setItem("user", JSON.stringify(user));
-  localStorage.setItem("token", token);
 };
 
 export const getUser = () => {

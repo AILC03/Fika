@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
-  Button,
   TextField,
   Card,
   CardContent,
@@ -15,23 +14,134 @@ import {
   InputAdornment,
   Select,
   MenuItem,
+  Button,
 } from "@mui/material";
-import { Refresh, Edit, Delete, Search } from "@mui/icons-material";
+import { Edit, Search, Add } from "@mui/icons-material";
 import { format } from "date-fns";
 
-const CustomersView = ({
-  customers,
-  onRefresh,
-  onUpdateCustomer,
-  onDeleteCustomer,
-  loading,
-}) => {
+const CustomersView = () => {
+  const API = import.meta.env.VITE_URI;
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchType, setSearchType] = useState("name");
   const [editingCustomer, setEditingCustomer] = useState(null);
   const [openEditDialog, setOpenEditDialog] = useState(false);
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [customerToDelete, setCustomerToDelete] = useState(null);
+  const [openCreateDialog, setOpenCreateDialog] = useState(false);
+  const [newCustomer, setNewCustomer] = useState({
+    name: "",
+    phone: "",
+    email: "",
+    company: "Fika",
+    observation: "",
+  });
+
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
+
+  const fetchCustomers = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${API}/clients/client/getClients`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+      const data = await response.json();
+      if (response.ok) {
+        const formattedCustomers = data.map((customer) => ({
+          id: customer.id,
+          name: customer.fullName,
+          phone: customer.phone,
+          email: customer.email,
+          company: customer.company,
+          observation: customer.observation,
+          createdAt: customer.createdAt,
+        }));
+        setCustomers(formattedCustomers);
+      } else {
+        console.error("Error al obtener clientes:", data.message);
+      }
+    } catch (error) {
+      console.error("Error al obtener clientes:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateCustomer = async (updatedCustomer) => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `${API}/clients/client/updateClient/${updatedCustomer.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            fullName: updatedCustomer.name,
+            phone: updatedCustomer.phone,
+            email: updatedCustomer.email || "",
+            company: updatedCustomer.company || "Fika",
+            observation: updatedCustomer.observation || "",
+          }),
+          credentials: "include",
+        }
+      );
+      const data = await response.json();
+      if (response.ok) {
+        fetchCustomers();
+      } else {
+        console.error("Error al actualizar cliente:", data.message);
+      }
+    } catch (error) {
+      console.error("Error al actualizar cliente:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createCustomer = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${API}/clients/client/createClient`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName: newCustomer.name,
+          phone: newCustomer.phone,
+          email: newCustomer.email,
+          company: newCustomer.company,
+          observation: newCustomer.observation,
+        }),
+        credentials: "include",
+      });
+      const data = await response.json();
+      if (response.ok) {
+        fetchCustomers();
+        setOpenCreateDialog(false);
+        setNewCustomer({
+          name: "",
+          phone: "",
+          email: "",
+          company: "Fika",
+          observation: "",
+        });
+      } else {
+        console.error("Error al crear cliente:", data.message);
+      }
+    } catch (error) {
+      console.error("Error al crear cliente:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredCustomers = customers.filter((customer) => {
     if (!searchTerm) return true;
@@ -55,23 +165,26 @@ const CustomersView = ({
   };
 
   const handleSaveCustomer = () => {
-    onUpdateCustomer(editingCustomer);
+    updateCustomer(editingCustomer);
     setOpenEditDialog(false);
   };
 
-  const handleDeleteClick = (customer) => {
-    setCustomerToDelete(customer);
-    setOpenDeleteDialog(true);
+  const handleCreateCustomer = () => {
+    setOpenCreateDialog(true);
   };
 
-  const confirmDelete = () => {
-    onDeleteCustomer(customerToDelete.id);
-    setOpenDeleteDialog(false);
+  const handleSaveNewCustomer = () => {
+    createCustomer();
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setEditingCustomer((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleNewCustomerChange = (e) => {
+    const { name, value } = e.target;
+    setNewCustomer((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
@@ -137,24 +250,19 @@ const CustomersView = ({
         />
 
         <Button
-          variant="outlined"
-          startIcon={<Refresh sx={{ color: "#7E4300" }} />}
-          onClick={onRefresh}
-          disabled={loading}
+          variant="contained"
+          startIcon={<Add />}
+          onClick={handleCreateCustomer}
           sx={{
+            backgroundColor: "#FFD538",
             color: "#7E4300",
-            borderColor: "#7E4300",
             "&:hover": {
               backgroundColor: "#FFD538",
-              borderColor: "#7E4300",
-            },
-            "&.Mui-disabled": {
-              borderColor: "#bdbdbd",
-              color: "#bdbdbd",
+              opacity: 0.9,
             },
           }}
         >
-          Actualizar
+          Nuevo Cliente
         </Button>
       </Box>
 
@@ -185,22 +293,13 @@ const CustomersView = ({
                   >
                     {customer.name}
                   </Typography>
-                  <Box>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleEditCustomer(customer)}
-                      sx={{ color: "#7E4300" }}
-                    >
-                      <Edit fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDeleteClick(customer)}
-                      sx={{ color: "#7E4300" }}
-                    >
-                      <Delete fontSize="small" />
-                    </IconButton>
-                  </Box>
+                  <IconButton
+                    size="small"
+                    onClick={() => handleEditCustomer(customer)}
+                    sx={{ color: "#7E4300" }}
+                  >
+                    <Edit fontSize="small" />
+                  </IconButton>
                 </Box>
 
                 <Typography
@@ -218,6 +317,25 @@ const CustomersView = ({
                     sx={{ color: "#7E4300" }}
                   >
                     <strong>Email:</strong> {customer.email}
+                  </Typography>
+                )}
+
+                {customer.company && (
+                  <Typography
+                    variant="body2"
+                    gutterBottom
+                    sx={{ color: "#7E4300" }}
+                  >
+                    <strong>Empresa:</strong> {customer.company}
+                  </Typography>
+                )}
+
+                {customer.observation && (
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "#7E4300", fontStyle: "italic" }}
+                  >
+                    <strong>Observación:</strong> {customer.observation}
                   </Typography>
                 )}
 
@@ -297,6 +415,44 @@ const CustomersView = ({
               "& .MuiInputBase-input": { color: "#7E4300" },
             }}
           />
+
+          <TextField
+            label="Empresa"
+            name="company"
+            value={editingCustomer?.company || ""}
+            onChange={handleChange}
+            fullWidth
+            margin="normal"
+            sx={{
+              "& .MuiInputLabel-root": { color: "#7E4300" },
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": { borderColor: "#7E4300" },
+                "&:hover fieldset": { borderColor: "#7E4300" },
+                "&.Mui-focused fieldset": { borderColor: "#7E4300" },
+              },
+              "& .MuiInputBase-input": { color: "#7E4300" },
+            }}
+          />
+
+          <TextField
+            label="Observaciones"
+            name="observation"
+            value={editingCustomer?.observation || ""}
+            onChange={handleChange}
+            fullWidth
+            margin="normal"
+            multiline
+            rows={3}
+            sx={{
+              "& .MuiInputLabel-root": { color: "#7E4300" },
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": { borderColor: "#7E4300" },
+                "&:hover fieldset": { borderColor: "#7E4300" },
+                "&.Mui-focused fieldset": { borderColor: "#7E4300" },
+              },
+              "& .MuiInputBase-input": { color: "#7E4300" },
+            }}
+          />
         </DialogContent>
         <DialogActions>
           <Button
@@ -327,12 +483,10 @@ const CustomersView = ({
         </DialogActions>
       </Dialog>
 
-      {/* Dialog para confirmar eliminación */}
+      {/* Dialog para crear nuevo cliente */}
       <Dialog
-        open={openDeleteDialog}
-        onClose={() => setOpenDeleteDialog(false)}
-        maxWidth="xs"
-        fullWidth
+        open={openCreateDialog}
+        onClose={() => setOpenCreateDialog(false)}
         PaperProps={{
           sx: {
             backgroundColor: "#FFF2C9",
@@ -340,25 +494,111 @@ const CustomersView = ({
           },
         }}
       >
-        <DialogTitle sx={{ color: "#7E4300" }}>
-          Confirmar Eliminación
-        </DialogTitle>
-        <DialogContent>
-          <Typography sx={{ color: "#7E4300" }}>
-            ¿Estás seguro que deseas eliminar al cliente{" "}
-            {customerToDelete?.name}?
-          </Typography>
+        <DialogTitle sx={{ color: "#7E4300" }}>Nuevo Cliente</DialogTitle>
+        <DialogContent sx={{ minWidth: 400 }}>
+          <TextField
+            label="Nombre"
+            name="name"
+            value={newCustomer.name}
+            onChange={handleNewCustomerChange}
+            fullWidth
+            margin="normal"
+            sx={{
+              "& .MuiInputLabel-root": { color: "#7E4300" },
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": { borderColor: "#7E4300" },
+                "&:hover fieldset": { borderColor: "#7E4300" },
+                "&.Mui-focused fieldset": { borderColor: "#7E4300" },
+              },
+              "& .MuiInputBase-input": { color: "#7E4300" },
+            }}
+          />
+
+          <TextField
+            label="Celular"
+            name="phone"
+            value={newCustomer.phone}
+            onChange={handleNewCustomerChange}
+            fullWidth
+            margin="normal"
+            sx={{
+              "& .MuiInputLabel-root": { color: "#7E4300" },
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": { borderColor: "#7E4300" },
+                "&:hover fieldset": { borderColor: "#7E4300" },
+                "&.Mui-focused fieldset": { borderColor: "#7E4300" },
+              },
+              "& .MuiInputBase-input": { color: "#7E4300" },
+            }}
+          />
+
+          <TextField
+            label="Correo electrónico (opcional)"
+            name="email"
+            value={newCustomer.email}
+            onChange={handleNewCustomerChange}
+            fullWidth
+            margin="normal"
+            sx={{
+              "& .MuiInputLabel-root": { color: "#7E4300" },
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": { borderColor: "#7E4300" },
+                "&:hover fieldset": { borderColor: "#7E4300" },
+                "&.Mui-focused fieldset": { borderColor: "#7E4300" },
+              },
+              "& .MuiInputBase-input": { color: "#7E4300" },
+            }}
+          />
+
+          <TextField
+            label="Empresa"
+            name="company"
+            value={newCustomer.company}
+            onChange={handleNewCustomerChange}
+            fullWidth
+            margin="normal"
+            sx={{
+              "& .MuiInputLabel-root": { color: "#7E4300" },
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": { borderColor: "#7E4300" },
+                "&:hover fieldset": { borderColor: "#7E4300" },
+                "&.Mui-focused fieldset": { borderColor: "#7E4300" },
+              },
+              "& .MuiInputBase-input": { color: "#7E4300" },
+            }}
+          />
+
+          <TextField
+            label="Observaciones"
+            name="observation"
+            value={newCustomer.observation}
+            onChange={handleNewCustomerChange}
+            fullWidth
+            margin="normal"
+            multiline
+            rows={3}
+            sx={{
+              "& .MuiInputLabel-root": { color: "#7E4300" },
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": { borderColor: "#7E4300" },
+                "&:hover fieldset": { borderColor: "#7E4300" },
+                "&.Mui-focused fieldset": { borderColor: "#7E4300" },
+              },
+              "& .MuiInputBase-input": { color: "#7E4300" },
+            }}
+          />
         </DialogContent>
         <DialogActions>
           <Button
-            onClick={() => setOpenDeleteDialog(false)}
+            onClick={() => setOpenCreateDialog(false)}
             sx={{ color: "#7E4300" }}
           >
             Cancelar
           </Button>
           <Button
-            onClick={confirmDelete}
+            onClick={handleSaveNewCustomer}
             variant="contained"
+            disabled={!newCustomer.name || !newCustomer.phone}
             sx={{
               backgroundColor: "#FFD538",
               color: "#7E4300",
@@ -366,9 +606,13 @@ const CustomersView = ({
                 backgroundColor: "#FFD538",
                 opacity: 0.9,
               },
+              "&.Mui-disabled": {
+                backgroundColor: "#f5f5f5",
+                color: "#bdbdbd",
+              },
             }}
           >
-            Eliminar
+            Crear
           </Button>
         </DialogActions>
       </Dialog>

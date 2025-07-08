@@ -20,7 +20,7 @@ const loginUser = async (user, password) => {
     }
 
     // Guardar sesión en localStorage (sencillo)
-    setSession(data.user, data.token);
+    setSession(data.user);
 
     return { success: true, user: data.user };
   } catch (error) {
