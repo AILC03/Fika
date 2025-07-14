@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import OrderForm from "./orderForm/OrderForm";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import OrderForm from "./OrderManager/OrderForm";
 
 const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState({ id: 1 });
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
 
   let pressTimer = null;
 
@@ -43,36 +44,17 @@ const Calendar = () => {
     clearTimeout(pressTimer);
   };
 
-  // Maneja el envío del pedido
-  const handleOrderSubmit = (orderData) => {
-    console.log("Pedido enviado:", orderData);
+  // Maneja el cierre del modal
+  const handleCloseModal = (success) => {
     setIsModalOpen(false);
-
-    // Aquí puedes hacer el envío real a tu API
-    // fetch('/api/orders', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify(orderData)
-    // })
+    if (success) {
+      // Aquí puedes agregar lógica adicional si el pedido se guardó exitosamente
+      console.log("Pedido guardado exitosamente");
+      // Opcional: Recargar datos o actualizar UI
+    }
   };
 
   // Genera los días del mes actual
-  const handleDateClick = (day, isPastDay) => {
-    if (isPastDay) return;
-
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    const clickedDate = new Date(year, month, day);
-    setSelectedDate(clickedDate);
-
-    // Formatear fecha como YYYY-MM-DD para la API
-    const formattedDate = clickedDate.toISOString().split("T")[0];
-    onDateSelect(formattedDate);
-  };
-
-  // Modificar generateCalendarDays para incluir el manejo de clicks
   const generateCalendarDays = () => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
@@ -102,10 +84,10 @@ const Calendar = () => {
         day === today.getDate();
 
       const isSelected =
-        selectedDate &&
-        year === selectedDate.getFullYear() &&
-        month === selectedDate.getMonth() &&
-        day === selectedDate.getDate();
+        selectedDay &&
+        year === selectedDay.getFullYear() &&
+        month === selectedDay.getMonth() &&
+        day === selectedDay.getDate();
 
       days.push(
         <div
@@ -119,8 +101,12 @@ const Calendar = () => {
               ? "bg-amber-800 text-white hover:bg-amber-900"
               : "bg-white hover:bg-yellow-400 text-inherit"
           }`}
-          onClick={() => handleDateClick(day, isPastDay)}
-          // Doble click (opcional, puedes quitarlo si solo quieres long press)
+          onClick={() => {
+            if (!isPastDay) {
+              const clickedDate = new Date(year, month, day);
+              setSelectedDay(clickedDate);
+            }
+          }}
           onDoubleClick={() => {
             if (!isPastDay) {
               const selectedDate = new Date(year, month, day);
@@ -146,55 +132,61 @@ const Calendar = () => {
 
   // Obtener userId del localStorage al cargar el componente
   useEffect(() => {
-    const userId = localStorage.getItem("userId");
-    if (userId) {
-      setCurrentUser({ id: Number(userId) });
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user) {
+      setCurrentUser(user);
     }
   }, []);
 
   return (
-    <div className="w-full h-full p-2 sm:p-4 flex flex-col">
-      {/* Encabezado del calendario */}
-      <div className="flex justify-between items-center mb-2 sm:mb-4">
-        <button
-          onClick={handlePrevMonth}
-          className="text-amber-900 px-2 py-1 sm:py-2 rounded border border-amber-800 hover:bg-yellow-400 flex items-center"
-        >
-          <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-        </button>
-        <h2 className="text-lg sm:text-xl font-bold">
-          {`${currentDate.toLocaleString("default", {
-            month: "long",
-          })} ${currentDate.getFullYear()}`}
-        </h2>
-        <button
-          onClick={handleNextMonth}
-          className="text-amber-900 px-2 py-1 sm:py-2 rounded border border-amber-800 hover:bg-yellow-400 flex items-center"
-        >
-          <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-        </button>
-      </div>
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <div className="w-full h-full p-2 sm:p-4 flex flex-col">
+        {/* Encabezado del calendario */}
+        <div className="flex justify-between items-center mb-2 sm:mb-4">
+          <button
+            onClick={handlePrevMonth}
+            className="text-amber-900 px-2 py-1 sm:py-2 rounded border border-amber-800 hover:bg-yellow-400 flex items-center"
+          >
+            <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+          </button>
+          <h2 className="text-lg sm:text-xl font-bold">
+            {`${currentDate.toLocaleString("default", {
+              month: "long",
+            })} ${currentDate.getFullYear()}`}
+          </h2>
+          <button
+            onClick={handleNextMonth}
+            className="text-amber-900 px-2 py-1 sm:py-2 rounded border border-amber-800 hover:bg-yellow-400 flex items-center"
+          >
+            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+          </button>
+        </div>
 
-      {/* Días de la semana */}
-      <div className="grid grid-cols-7 gap-1 sm:gap-2 text-center text-xs sm:text-base font-bold">
-        {["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"].map((day) => (
-          <div key={day}>{day}</div>
-        ))}
-      </div>
+        {/* Días de la semana */}
+        <div className="grid grid-cols-7 gap-1 sm:gap-2 text-center text-xs sm:text-base font-bold">
+          {["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"].map((day) => (
+            <div key={day}>{day}</div>
+          ))}
+        </div>
 
-      {/* Días del mes */}
-      <div className="grid grid-cols-7 gap-0.5 mt-1 sm:mt-2 flex-grow">
-        {generateCalendarDays()}
-      </div>
+        {/* Días del mes */}
+        <div className="grid grid-cols-7 gap-0.5 mt-1 sm:mt-2 flex-grow">
+          {generateCalendarDays()}
+        </div>
 
-      {/* Formulario de pedido (permanece igual) */}
-      <OrderForm
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onOrderSubmit={handleOrderSubmit}
-        orderDate={selectedDay ? selectedDay.toISOString().split("T")[0] : null}
-      />
-    </div>
+        {/* Formulario de pedido */}
+        <OrderForm
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          orderDate={
+            selectedDay
+              ? selectedDay.toISOString().split("T")[0]
+              : new Date().toISOString().split("T")[0]
+          }
+          orderToEdit={null} // No manejamos edición desde el calendario aún
+        />
+      </div>
+    </LocalizationProvider>
   );
 };
 
