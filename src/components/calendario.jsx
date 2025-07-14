@@ -183,7 +183,7 @@ const Calendar = () => {
               ? selectedDay.toISOString().split("T")[0]
               : new Date().toISOString().split("T")[0]
           }
-          orderToEdit={null} // No manejamos edición desde el calendario aún
+          orderToEdit={null}
         />
       </div>
     </LocalizationProvider>

@@ -46,7 +46,7 @@ const SummaryStep = ({ order, onChange }) => {
               onChange={(e) => onChange("caution", e.target.checked)}
             />
           }
-          label="Pedido urgente"
+          label="Alergias / Atencion Especial"
         />
 
         <TextField

@@ -27,7 +27,7 @@ const OrderSummary = ({ order, lines }) => {
           Fecha recolección: {new Date(order.pickupDate).toLocaleString()}
         </Typography>
         <Chip
-          label={order.caution ? "URGENTE" : "Normal"}
+          label={order.caution ? "Atencion" : "Normal"}
           color={order.caution ? "error" : "default"}
           size="small"
         />
