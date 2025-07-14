@@ -36,6 +36,61 @@ const OrderForm = ({
   const [successMessage, setSuccessMessage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Función para transformar items al formato que espera la API
+  const transformItemForAPI = (item) => {
+    const baseItem = {
+      lineId: item.lineId,
+      itemType: item.itemType,
+      flavorId: item.flavorId || null,
+      sizeId: item.sizeId || null,
+      cupcakeQty: item.cupcakeQty || null,
+      numberShape: item.numberShape || null,
+    };
+
+    // Para ingredientes: convertir de objetos a array de IDs
+    if (item.ingredients && item.ingredients.length > 0) {
+      baseItem.ingredients = item.ingredients.map((ing) => ing.id || ing.Id);
+    }
+
+    // Para MULTIFLOOR: simplificar pisos
+    if (item.itemType === "MULTIFLOOR" && item.floors) {
+      baseItem.floors = item.floors.map((floor) => ({
+        floorNumber: floor.floorNumber,
+        flavorId: floor.flavorId,
+        sizeId: floor.sizeId,
+      }));
+    }
+
+    // Eliminar campos nulos o undefined
+    Object.keys(baseItem).forEach((key) => {
+      if (baseItem[key] === null || baseItem[key] === undefined) {
+        delete baseItem[key];
+      }
+    });
+
+    return baseItem;
+  };
+
+  // Función para transformar items para edición (cuando se carga un pedido existente)
+  const transformItemForEdit = (item) => {
+    return {
+      lineId: item.lineId,
+      itemType: item.itemType,
+      flavorId: item.flavorId || null,
+      sizeId: item.sizeId || null,
+      cupcakeQty: item.cupcakeQty || null,
+      numberShape: item.numberShape || null,
+      ingredients: item.ingredients || [],
+      floors:
+        item.floors?.map((floor) => ({
+          floorNumber: floor.floorNumber,
+          flavorId: floor.flavorId,
+          sizeId: floor.sizeId,
+          ingredients: floor.ingredients || [],
+        })) || [],
+    };
+  };
+
   // Estado del pedido
   const [order, setOrder] = useState({
     clientId: orderToEdit?.clientId || null,
@@ -47,19 +102,6 @@ const OrderForm = ({
     pickupDate: orderToEdit?.pickupDate || `${orderDate}T12:00:00Z`,
     items: orderToEdit?.items?.map(transformItemForEdit) || [],
   });
-
-  // Función para transformar items para edición
-  function transformItemForEdit(item) {
-    return {
-      ...item,
-      ingredients: item.ingredients || [],
-      floors:
-        item.floors?.map((floor) => ({
-          ...floor,
-          ingredients: floor.ingredients || [],
-        })) || [],
-    };
-  }
 
   // Resetear el formulario cuando se abre/cierra
   useEffect(() => {
@@ -122,7 +164,7 @@ const OrderForm = ({
   // Helper para verificar disponibilidad
   const isAvailableForDate = (item, date) => {
     return (
-      item.avilable !== false &&
+      item.available !== false &&
       (!item.expDate || new Date(item.expDate) <= date)
     );
   };
@@ -144,6 +186,15 @@ const OrderForm = ({
   const handleSubmit = async () => {
     try {
       setIsSubmitting(true);
+
+      // Preparar el payload final transformando los items
+      const payload = {
+        ...order,
+        items: order.items.map(transformItemForAPI),
+      };
+
+      console.log("Payload a enviar:", payload); // Para depuración
+
       const url = orderToEdit
         ? `${API}/orders/order/updateOrder/${orderToEdit.id}`
         : `${API}/orders/order/createOrder`;
@@ -152,7 +203,7 @@ const OrderForm = ({
         method: orderToEdit ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(order),
+        body: JSON.stringify(payload),
       };
 
       const response = await fetch(url, options);
