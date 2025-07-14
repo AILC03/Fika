@@ -14,13 +14,14 @@ import {
   FormControlLabel,
 } from "@mui/material";
 
-const NumericCakeForm = ({ cakeData, onAddCake, onCancel }) => {
+const NumericCakeForm = ({ cakeData, onAddCake }) => {
   const [number, setNumber] = useState("");
   const [selectedLine, setSelectedLine] = useState("");
   const [digitConfigs, setDigitConfigs] = useState([]);
+  console.log(cakeData);
 
   const availableLines = (cakeData || []).filter((cake) =>
-    ["DELUXE", "SPONGE_CAKE", "TRADITIONAL", "CLASIC"].includes(cake.type)
+      [("Deluxe", "Bizcocho", "Tradicional", "Clasico")].includes(cake.type)
   );
 
   const lineData = availableLines.find(
@@ -39,7 +40,9 @@ const NumericCakeForm = ({ cakeData, onAddCake, onCancel }) => {
   }, [number]);
 
   const handleAddDigit = (digit) => {
-    setNumber((prev) => prev + digit);
+    if (number.length < 1) {
+      setNumber(digit.toString());
+    }
   };
 
   const handleClearForm = () => {
@@ -163,8 +166,17 @@ const NumericCakeForm = ({ cakeData, onAddCake, onCancel }) => {
         <TextField
           fullWidth
           value={number}
-          onChange={(e) => setNumber(e.target.value.replace(/[^0-9]/g, ""))}
-          inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+          onChange={(e) => {
+            const input = e.target.value.replace(/[^0-9]/g, ""); // Solo números
+            if (input.length <= 1) {
+              setNumber(input); // Solo permitir 1 dígito
+            }
+          }}
+          inputProps={{
+            inputMode: "numeric",
+            pattern: "[0-9]*",
+            maxLength: 1, // No evita la entrada, pero sugiere a algunos navegadores
+          }}
           sx={{
             backgroundColor: "#FFF2C9",
             "& .MuiOutlinedInput-root": {
@@ -177,6 +189,7 @@ const NumericCakeForm = ({ cakeData, onAddCake, onCancel }) => {
             },
           }}
         />
+
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((digit) => (
             <Button

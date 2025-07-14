@@ -1,7 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  TextField,
-  Button,
   Table,
   TableBody,
   TableCell,
@@ -14,287 +12,325 @@ import {
   Box,
   useMediaQuery,
   useTheme,
+  Tooltip,
+  Typography,
+  Avatar,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  CircularProgress,
+  TextField,
   InputAdornment,
-  Select,
-  MenuItem,
+  Button,
 } from "@mui/material";
-import { Refresh, Edit, Search } from "@mui/icons-material";
-import { DatePicker } from "@mui/x-date-pickers";
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import dayjs from "dayjs";
-import EditOrderDialog from "./EditOrder";
+import {
+  Edit,
+  Search,
+  Person,
+  Refresh,
+} from "@mui/icons-material";
 
-const OrdersList = ({ orders, onRefresh, onUpdateOrder, loading }) => {
+const OrdersTable = () => {
+  const API = import.meta.env.VITE_URI;
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchType, setSearchType] = useState("customerName");
-  const [dateFilter, setDateFilter] = useState(null);
-  const [editingOrder, setEditingOrder] = useState(null);
-  const [openEditDialog, setOpenEditDialog] = useState(false);
+  // Función para obtener las órdenes
+  const getAllOrders = async () => {
+    setLoading(true);
+    try {
+      console.log("API URL:", API);
 
-  const statusColors = {
-    in_progress: { backgroundColor: "#FFD538", color: "#000000" },
-    completed: { backgroundColor: "#7E4300", color: "#FFFFFF" },
-    cancelled: { backgroundColor: "#d32f2f", color: "#FFFFFF" },
-    pending: { backgroundColor: "#FFF2C9", color: "#000000" },
+      const response = await fetch(`${API}/orders/order/getAllorders`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+      console.log("Fetching orders from API...");
+      const data = await response.json();
+      console.log("Response data:", data);
+      if (!response.ok) {
+        console.error("Server returned an error:", errorText);
+      }
+      setOrders(data);
+      console.log("Órdenes obtenidas:", data);
+    } catch (error) {
+      console.error("Error al obtener las órdenes:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  useEffect(() => {
+    getAllOrders();
+  }, []);
+
+  // Filtrar órdenes basado en el término de búsqueda
   const filteredOrders = orders.filter((order) => {
-    if (
-      dateFilter &&
-      !dayjs(order.pickupDateTime).isSame(dayjs(dateFilter), "day")
-    ) {
-      return false;
-    }
-
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      const customer = order.customer || {};
-
-      switch (searchType) {
-        case "customerName":
-          return customer.name?.toLowerCase().includes(term);
-        case "phone":
-          return customer.phone?.includes(term);
-        case "email":
-          return customer.email?.toLowerCase().includes(term);
-        default:
-          return true;
-      }
-    }
-
-    return true;
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      order.client.fullName.toLowerCase().includes(searchLower) ||
+      order.writing.toLowerCase().includes(searchLower) ||
+      order.status.toLowerCase().includes(searchLower) ||
+      order.client.company.toLowerCase().includes(searchLower)
+    );
   });
 
-  const handleEditOrder = (order) => {
-    setEditingOrder({ ...order, pickupDateTime: dayjs(order.pickupDateTime) });
-    setOpenEditDialog(true);
+  // Función para mostrar el estado como Chip con color
+  const renderStatusChip = (status) => {
+    let color;
+    switch (status) {
+      case "Agendado":
+        color = "default";
+        break;
+      case "En proceso":
+        color = "primary";
+        break;
+      case "Completado":
+        color = "success";
+        break;
+      case "Cancelado":
+        color = "error";
+        break;
+      default:
+        color = "default";
+    }
+    return <Chip label={status} color={color} size="small" />;
   };
 
-  const handleSaveOrder = (updatedOrder) => {
-    onUpdateOrder({
-      ...updatedOrder,
-      pickupDateTime: updatedOrder.pickupDateTime.toISOString(),
+  // Función para mostrar los items de la orden de forma resumida
+  const renderOrderItemsSummary = (items) => {
+    const itemTypes = items.map((item) => {
+      switch (item.itemType) {
+        case "MULTIFLOOR":
+          return "Pastel Multinivel";
+        case "NUMERIC":
+          return `Número ${item.numberShape}`;
+        case "CUPCAKE":
+          return `${item.cupcakeQty} Cupcakes`;
+        case "REGULAR":
+          return "Pastel Regular";
+        default:
+          return "Otro";
+      }
     });
-    setOpenEditDialog(false);
+
+    return (
+      itemTypes.slice(0, 2).join(", ") + (itemTypes.length > 2 ? "..." : "")
+    );
   };
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Box sx={{ p: isMobile ? 1 : 2 }}>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: isMobile ? "column" : "row",
-            gap: 2,
-            mb: 3,
-            alignItems: isMobile ? "stretch" : "center",
-          }}
+    <Box sx={{ p: isMobile ? 1 : 3 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+          flexDirection: isMobile ? "column" : "row",
+          gap: isMobile ? 2 : 0,
+        }}
+      >
+        <Typography
+          variant="h5"
+          component="h1"
+          sx={{ color: "#7E4300", fontWeight: "bold" }}
         >
-          <Select
-            value={searchType}
-            onChange={(e) => setSearchType(e.target.value)}
-            size="small"
-            sx={{
-              minWidth: isMobile ? "100%" : 180,
-              backgroundColor: "#FFF2C9",
-            }}
-          >
-            <MenuItem value="customerName">Nombre</MenuItem>
-            <MenuItem value="phone">Teléfono</MenuItem>
-            <MenuItem value="email">Email</MenuItem>
-          </Select>
+          Lista de Órdenes
+        </Typography>
 
+        <Box
+          sx={{ display: "flex", gap: 2, width: isMobile ? "100%" : "auto" }}
+        >
           <TextField
-            placeholder="Buscar..."
-            variant="outlined"
             size="small"
+            placeholder="Buscar órdenes..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            sx={{
+              backgroundColor: "#FFF2C9",
+              borderRadius: 1,
+              minWidth: isMobile ? "100%" : 300,
+            }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <Search />
+                  <Search sx={{ color: "#7E4300" }} />
                 </InputAdornment>
               ),
-              sx: {
-                backgroundColor: "#FFF2C9",
-              },
             }}
-            sx={{ flexGrow: 1 }}
-          />
-
-          <DatePicker
-            label="Filtrar por fecha"
-            value={dateFilter}
-            onChange={(newValue) => setDateFilter(newValue)}
-            textField={(params) => (
-              <TextField
-                {...params}
-                size="small"
-                fullWidth={isMobile}
-                sx={{
-                  backgroundColor: "#FFF2C9",
-                }}
-              />
-            )}
-            sx={{ minWidth: isMobile ? "100%" : 200 }}
           />
 
           <Button
             variant="contained"
+            onClick={getAllOrders}
             startIcon={<Refresh />}
-            onClick={onRefresh}
-            disabled={loading}
-            fullWidth={isMobile}
             sx={{
               backgroundColor: "#FFD538",
-              color: "#000000",
+              color: "#7E4300",
               "&:hover": {
-                backgroundColor: "#e6c032",
+                backgroundColor: "#FFC107",
               },
             }}
           >
-            {isMobile ? "Actualizar" : "Actualizar lista"}
+            Actualizar
           </Button>
         </Box>
+      </Box>
 
+      {loading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+          <CircularProgress sx={{ color: "#FFD538" }} />
+        </Box>
+      ) : (
         <TableContainer
           component={Paper}
           sx={{
-            maxWidth: "100%",
-            overflowX: "auto",
-            backgroundColor: "#FFF2C9",
+            boxShadow: "none",
+            border: "1px solid #e0e0e0",
+            borderRadius: 2,
           }}
         >
-          <Table size={isMobile ? "small" : "medium"}>
+          <Table>
             <TableHead>
-              <TableRow sx={{ backgroundColor: "#7E4300" }}>
-                <TableCell
-                  sx={{
-                    display: isMobile ? "none" : "table-cell",
-                    color: "#FFFFFF",
-                  }}
-                >
+              <TableRow sx={{ backgroundColor: "#FFF2C9" }}>
+                <TableCell sx={{ color: "#7E4300", fontWeight: "bold" }}>
                   ID
                 </TableCell>
-                <TableCell sx={{ color: "#FFFFFF" }}>Cliente</TableCell>
-                {!isMobile && (
-                  <TableCell sx={{ color: "#FFFFFF" }}>Contacto</TableCell>
-                )}
-                <TableCell
-                  sx={{
-                    display: isTablet
-                      ? "table-cell"
-                      : isMobile
-                      ? "none"
-                      : "table-cell",
-                    color: "#FFFFFF",
-                  }}
-                >
-                  Fecha
+                <TableCell sx={{ color: "#7E4300", fontWeight: "bold" }}>
+                  Cliente
                 </TableCell>
-                <TableCell sx={{ color: "#FFFFFF" }}>Estado</TableCell>
-                <TableCell sx={{ color: "#FFFFFF" }}>Acciones</TableCell>
+                <TableCell sx={{ color: "#7E4300", fontWeight: "bold" }}>
+                  Escrito
+                </TableCell>
+                <TableCell sx={{ color: "#7E4300", fontWeight: "bold" }}>
+                  Items
+                </TableCell>
+                <TableCell sx={{ color: "#7E4300", fontWeight: "bold" }}>
+                  Estado
+                </TableCell>
+                <TableCell sx={{ color: "#7E4300", fontWeight: "bold" }}>
+                  Acciones
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredOrders.map((order) => (
-                <TableRow
-                  key={order.id}
-                  sx={{
-                    "&:nth-of-type(odd)": {
-                      backgroundColor: "#FFF2C9",
-                    },
-                    "&:nth-of-type(even)": {
-                      backgroundColor: "#FFD53833",
-                    },
-                  }}
-                >
-                  <TableCell sx={{ display: isMobile ? "none" : "table-cell" }}>
-                    #{order.id}
-                  </TableCell>
-                  <TableCell>
-                    <Box>
-                      {order.customer?.name || "N/A"}
-                      {isMobile && order.customer?.phone && (
-                        <Box
-                          sx={{ fontSize: "0.75rem", color: "text.secondary" }}
-                        >
-                          {order.customer.phone}
-                        </Box>
-                      )}
-                    </Box>
-                  </TableCell>
-                  {!isMobile && (
-                    <TableCell>
-                      <Box>{order.customer?.phone || "N/A"}</Box>
-                      {order.customer?.email && (
-                        <Box
-                          sx={{ fontSize: "0.75rem", color: "text.secondary" }}
-                        >
-                          {order.customer.email}
-                        </Box>
-                      )}
-                    </TableCell>
-                  )}
-                  <TableCell
+              {filteredOrders.length > 0 ? (
+                filteredOrders.map((order, index) => (
+                  <TableRow
+                    key={order.id}
                     sx={{
-                      display: isTablet
-                        ? "table-cell"
-                        : isMobile
-                        ? "none"
-                        : "table-cell",
+                      backgroundColor: index % 2 === 0 ? "#FFD53833" : "white",
+                      "&:hover": {
+                        backgroundColor: "#FFF2C9",
+                      },
                     }}
                   >
-                    {dayjs(order.pickupDateTime).format(
-                      isMobile ? "DD/MM" : "DD/MM/YYYY HH:mm"
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={
-                        isMobile ? order.status.substring(0, 3) : order.status
-                      }
-                      sx={{
-                        backgroundColor:
-                          statusColors[order.status]?.backgroundColor,
-                        color: statusColors[order.status]?.color,
-                      }}
-                      size="small"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <IconButton
-                      onClick={() => handleEditOrder(order)}
-                      size="small"
-                      sx={{
-                        color: "#7E4300",
-                      }}
-                    >
-                      <Edit fontSize="small" />
-                    </IconButton>
+                    <TableCell>#{order.id}</TableCell>
+                    <TableCell>
+                      <Box>
+                        <Typography variant="body2" fontWeight="bold">
+                          {order.client.fullName}
+                        </Typography>
+                        <Typography variant="caption" color="textSecondary">
+                          {order.client.company}
+                        </Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Typography noWrap sx={{ maxWidth: 150 }}>
+                        {order.writing}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">
+                        {renderOrderItemsSummary(order.items)}
+                      </Typography>
+                      <Typography variant="caption" color="textSecondary">
+                        {order.items.length} items
+                      </Typography>
+                    </TableCell>
+                    <TableCell>{renderStatusChip(order.status)}</TableCell>
+                    <TableCell>
+                      <Tooltip
+                        title={
+                          <Box sx={{ p: 1 }}>
+                            <Typography variant="subtitle2" gutterBottom>
+                              Responsable(s)
+                            </Typography>
+                            <List dense>
+                              {order.orderUser.map((orderUser) => (
+                                <ListItem key={orderUser.id} disablePadding>
+                                  <ListItemAvatar>
+                                    <Avatar sx={{ width: 24, height: 24 }}>
+                                      <Person sx={{ fontSize: 14 }} />
+                                    </Avatar>
+                                  </ListItemAvatar>
+                                  <ListItemText
+                                    primary={orderUser.user.name}
+                                    secondary={
+                                      <>
+                                        <Typography
+                                          component="span"
+                                          variant="caption"
+                                          display="block"
+                                        >
+                                          {orderUser.user.rol} •{" "}
+                                          {orderUser.user.shift}
+                                        </Typography>
+                                        <Typography
+                                          component="span"
+                                          variant="caption"
+                                          display="block"
+                                        >
+                                          {orderUser.user.user}
+                                        </Typography>
+                                      </>
+                                    }
+                                  />
+                                </ListItem>
+                              ))}
+                            </List>
+                          </Box>
+                        }
+                        arrow
+                        placement="left"
+                      >
+                        <IconButton
+                          size="small"
+                          sx={{ color: "#7E4300", mr: 1 }}
+                        >
+                          <Person />
+                        </IconButton>
+                      </Tooltip>
+                      <IconButton size="small" sx={{ color: "#7E4300" }}>
+                        <Edit />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                    <Typography variant="body1" color="textSecondary">
+                      No se encontraron órdenes
+                    </Typography>
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </TableContainer>
-
-        <EditOrderDialog
-          open={openEditDialog}
-          onClose={() => setOpenEditDialog(false)}
-          order={editingOrder}
-          onSave={handleSaveOrder}
-          isMobile={isMobile}
-        />
-      </Box>
-    </LocalizationProvider>
+      )}
+    </Box>
   );
 };
 
-export default OrdersList;
+export default OrdersTable;
