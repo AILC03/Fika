@@ -36,24 +36,65 @@ const OrderForm = ({
   const [successMessage, setSuccessMessage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Función para transformar items al formato que espera la API
-  const transformItemForAPI = (item) => {
+  // Función para transformar items al formato de creación (POST)
+  const transformItemForCreation = (item) => {
     const baseItem = {
       lineId: item.lineId,
       itemType: item.itemType,
-      flavorId: item.flavorId || null,
-      sizeId: item.sizeId || null,
-      cupcakeQty: item.cupcakeQty || null,
-      numberShape: item.numberShape || null,
     };
 
-    // Para ingredientes: convertir de objetos a array de IDs
-    if (item.ingredients && item.ingredients.length > 0) {
-      baseItem.ingredients = item.ingredients.map((ing) => ing.id || ing.Id);
+    // Campos específicos por tipo de item
+    if (item.itemType === "REGULAR") {
+      baseItem.flavorId = item.flavorId;
+      baseItem.sizeId = item.sizeId;
+      if (item.ingredients?.length > 0) {
+        baseItem.ingredients = item.ingredients.map((ing) => ing.id || ing.Id);
+      }
+    } else if (item.itemType === "NUMERIC") {
+      baseItem.flavorId = item.flavorId;
+      baseItem.sizeId = item.sizeId;
+      baseItem.numberShape = item.numberShape;
+    } else if (item.itemType === "CUPCAKE") {
+      baseItem.flavorId = item.flavorId;
+      baseItem.cupcakeQty = item.cupcakeQty;
+      if (item.ingredients?.length > 0) {
+        baseItem.ingredients = item.ingredients.map((ing) => ing.id || ing.Id);
+      }
+    } else if (item.itemType === "MULTIFLOOR") {
+      baseItem.floors = item.floors.map((floor) => ({
+        floorNumber: floor.floorNumber,
+        flavorId: floor.flavorId,
+        sizeId: floor.sizeId,
+        ingredients: floor.ingredients?.map((ing) => ing.id || ing.Id) || [],
+      }));
     }
 
-    // Para MULTIFLOOR: simplificar pisos
-    if (item.itemType === "MULTIFLOOR" && item.floors) {
+    return baseItem;
+  };
+
+  // Función para transformar items al formato de actualización (PUT)
+  const transformItemForUpdate = (item) => {
+    const baseItem = {
+      lineId: item.lineId,
+      itemType: item.itemType,
+    };
+
+    // Campos específicos por tipo de item
+    if (item.itemType === "REGULAR") {
+      baseItem.flavorId = item.flavorId;
+      baseItem.sizeId = item.sizeId;
+      baseItem.ingredients =
+        item.ingredients?.map((ing) => ing.id || ing.Id) || [];
+    } else if (item.itemType === "NUMERIC") {
+      baseItem.flavorId = item.flavorId;
+      baseItem.sizeId = item.sizeId;
+      baseItem.numberShape = item.numberShape;
+    } else if (item.itemType === "CUPCAKE") {
+      baseItem.flavorId = item.flavorId;
+      baseItem.cupcakeQty = item.cupcakeQty;
+      baseItem.ingredients =
+        item.ingredients?.map((ing) => ing.id || ing.Id) || [];
+    } else if (item.itemType === "MULTIFLOOR") {
       baseItem.floors = item.floors.map((floor) => ({
         floorNumber: floor.floorNumber,
         flavorId: floor.flavorId,
@@ -61,31 +102,17 @@ const OrderForm = ({
       }));
     }
 
-    // Eliminar campos nulos o undefined
-    Object.keys(baseItem).forEach((key) => {
-      if (baseItem[key] === null || baseItem[key] === undefined) {
-        delete baseItem[key];
-      }
-    });
-
     return baseItem;
   };
 
   // Función para transformar items para edición (cuando se carga un pedido existente)
   const transformItemForEdit = (item) => {
     return {
-      lineId: item.lineId,
-      itemType: item.itemType,
-      flavorId: item.flavorId || null,
-      sizeId: item.sizeId || null,
-      cupcakeQty: item.cupcakeQty || null,
-      numberShape: item.numberShape || null,
+      ...item,
       ingredients: item.ingredients || [],
       floors:
         item.floors?.map((floor) => ({
-          floorNumber: floor.floorNumber,
-          flavorId: floor.flavorId,
-          sizeId: floor.sizeId,
+          ...floor,
           ingredients: floor.ingredients || [],
         })) || [],
     };
@@ -164,7 +191,7 @@ const OrderForm = ({
   // Helper para verificar disponibilidad
   const isAvailableForDate = (item, date) => {
     return (
-      item.available !== false &&
+      item.avilable !== false &&
       (!item.expDate || new Date(item.expDate) <= date)
     );
   };
@@ -187,10 +214,15 @@ const OrderForm = ({
     try {
       setIsSubmitting(true);
 
-      // Preparar el payload final transformando los items
-      const payload = {
-        ...order,
-        items: order.items.map(transformItemForAPI),
+      let payload = {
+        clientId: order.clientId,
+        userId: order.userId,
+        writing: order.writing,
+        caution: order.caution,
+        notes: order.notes,
+        status: order.status,
+        pickupDate: order.pickupDate,
+        items: order.items.map(transformItemForCreation),
       };
 
       console.log("Payload a enviar:", payload); // Para depuración
