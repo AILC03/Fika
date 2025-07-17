@@ -9,7 +9,7 @@ const loginUser = async (user, password) => {
       headers: {
         "Content-Type": "application/json",
       },
-      credentials: "include", // importante para que guarde cookie httpOnly
+      credentials: "include",
       body: JSON.stringify({ user, password }),
     });
 
@@ -22,8 +22,11 @@ const loginUser = async (user, password) => {
     // Guardar sesión en localStorage (sencillo)
     setSession(data.user);
 
+    console.log("XD no falle");
+
     return { success: true, user: data.user };
   } catch (error) {
+    console.log("ERROR:", error);
     return {
       success: false,
       message: "Error durante login",

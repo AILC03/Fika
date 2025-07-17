@@ -7,6 +7,7 @@ import rep from "../Assets/report_102120.png";
 import AccountIcon from "../Assets/account_avatar_face_man_people_profile_user_icon_123197.png";
 import { LogOut } from "lucide-react";
 import { useState } from "react";
+import { clearSession } from "../context/setUser";
 
 const Sidebar = () => {
   const location = useLocation();
@@ -69,29 +70,35 @@ const Sidebar = () => {
         </div>
 
         {/* Links de navegación */}
-        <div className="flex flex-col space-y-8 w-full">
-          {allRoutes.map((route) => (
-            <Link
-              key={route.path}
-              to={route.path}
-              className={`flex justify-center items-center w-14 h-14 md:w-16 md:h-16 rounded-full transition mx-auto ${
-                location.pathname === route.path
-                  ? "bg-amber-300"
-                  : "bg-amber-100 hover:bg-amber-300"
-              }`}
-            >
-              {route.icon}
-            </Link>
-          ))}
-        </div>
+        {JSON.parse(localStorage.getItem("user"))?.rol && (
+          <div className="flex flex-col space-y-8 w-full">
+            {allRoutes
+              .filter((route) => {
+                const userRole = JSON.parse(localStorage.getItem("user"))?.rol;
+                return (
+                  userRole === "ADMIN" ||
+                  (userRole === "CAJA" &&
+                    ["/home", "/report"].includes(route.path))
+                );
+              })
+              .map((route) => (
+                <Link
+                  key={route.path}
+                  to={route.path}
+                  className={`flex justify-center items-center w-14 h-14 md:w-16 md:h-16 rounded-full transition mx-auto ${
+                    location.pathname === route.path
+                      ? "bg-amber-300"
+                      : "bg-amber-100 hover:bg-amber-300"
+                  }`}
+                >
+                  {route.icon}
+                </Link>
+              ))}
+          </div>
+        )}
 
         {/* Ícono de cuenta con hover para logout */}
-        <div
-          className="relative flex justify-center mt-4 bg-amber-100 p-1 w-12 md:w-14 rounded-full transition cursor-pointer"
-          onClick={() => setShowLogout((prev) => !prev)}
-          tabIndex={0}
-          onBlur={() => setShowLogout(false)}
-        >
+        <div className="relative flex justify-center mt-4 bg-amber-100 p-1 w-12 md:w-14 rounded-full transition cursor-pointer">
           {/* Ícono de usuario */}
           <img
             src={AccountIcon}
@@ -101,13 +108,19 @@ const Sidebar = () => {
 
           {showLogout && (
             <button
-              onClick={() => alert("Cerrar sesión (no implementado)")}
+              onClick={clearSession}
               className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 flex items-center bg-amber-700 text-white px-3 py-1 rounded-lg whitespace-nowrap"
             >
               <LogOut className="w-4 h-4 mr-1" />
-              Cerrar sesión
+              Salir
             </button>
           )}
+          <div
+            className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center"
+            onClick={() => setShowLogout((prev) => !prev)}
+          >
+            {" "}
+          </div>
         </div>
       </div>
 

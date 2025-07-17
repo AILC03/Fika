@@ -1,17 +1,18 @@
+const API = import.meta.env.VITE_URI;
+
+const logout = async () => {
+  const out = await fetch(`${API}/users/auth/logout`, {
+    method: "POST",
+    credentials: "include",
+  });
+};
+
 export const setSession = (user) => {
+  console.log("Sesion iniciada:", user);
   localStorage.setItem("user", JSON.stringify(user));
-};
-
-export const getUser = () => {
-  const user = localStorage.getItem("user");
-  return user ? JSON.parse(user) : null;
-};
-
-export const getToken = () => {
-  return localStorage.getItem("token");
 };
 
 export const clearSession = () => {
   localStorage.removeItem("user");
-  localStorage.removeItem("token");
+  logout();
 };

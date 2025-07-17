@@ -1,4 +1,10 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  Outlet,
+} from "react-router-dom";
 import Login from "../views/auth/Login";
 import Sidebar from "../components/sidebar";
 import Home from "../views/home/General";
@@ -13,39 +19,48 @@ const AppRouter = () => {
         <Route path="/" element={<Login />} />
 
         {/* Rutas protegidas */}
-        {/* <Route
-            element={
-              <ProtectedRoute allowedRoles={["admin", "caja"]}>
-                <Sidebar />
-              </ProtectedRoute>
-            }
-          >
-            <Route
-              path="/home"
-              element={
-                <ProtectedRoute allowedRoles={["admin", "caja"]}>
-                  <Home />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <Admin />
-                </ProtectedRoute>
-              }
-            />
-          </Route> */}
-        {/* Rutas protegidas sin roles específicos */}
-        <Route element={<Sidebar />}>
-          <Route path="/home" element={<Home />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/report" element={<Report />} />
+        <Route element={<ProtectedRoute />}>
+          <Route element={<Sidebar />}>
+            <Route path="/home" element={<Home />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/report" element={<Report />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>
   );
+};
+
+const ProtectedRoute = () => {
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+  if (!user || !user.rol) {
+    return <Navigate to="/" />;
+  }
+
+  const allowedRoutes = {
+    ADMIN: ["/home", "/admin", "/report"],
+    CAJA: ["/home", "/report"],
+  };
+
+  const isAllowed = (path) => {
+    if (user.rol === "ADMIN") {
+      return true;
+    }
+    return allowedRoutes[user.rol]?.includes(path);
+  };
+
+  const currentPath = window.location.pathname;
+
+  if (!isAllowed(currentPath) && currentPath !== "/") {
+    return <Navigate to="/home" />;
+  }
+
+  if (currentPath !== "/" && !isAllowed(currentPath)) {
+    return <Navigate to="/home" />;
+  }
+
+  return <Outlet />;
 };
 
 export default AppRouter;
