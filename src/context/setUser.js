@@ -5,10 +5,12 @@ const logout = async () => {
     method: "POST",
     credentials: "include",
   });
+  if (out.ok) {
+    window.location.href= ("/")
+  }
 };
 
 export const setSession = (user) => {
-  console.log("Sesion iniciada:", user);
   localStorage.setItem("user", JSON.stringify(user));
 };
 
