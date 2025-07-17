@@ -4,11 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
-  },
+  "start": "serve -s build",
+  "dev": "react-scripts start",
+  "build": "react-scripts build"
+},
   "dependencies": {
     "@date-io/date-fns": "^3.2.1",
     "@date-io/dayjs": "^3.2.0",
@@ -41,6 +40,7 @@
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^15.15.0",
+    "serve": "^14.2.4",
     "vite": "^6.2.0"
   }
 }
