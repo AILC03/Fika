@@ -4,10 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-  "start": "serve -s build",
-  "dev": "react-scripts start",
-  "build": "react-scripts build"
-},
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "serve -s dist"
+  },
   "dependencies": {
     "@date-io/date-fns": "^3.2.1",
     "@date-io/dayjs": "^3.2.0",
