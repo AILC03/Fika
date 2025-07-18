@@ -6,7 +6,7 @@ const logout = async () => {
     credentials: "include",
   });
   if (out.ok) {
-    window.location.href= ("/")
+    window.location.href = "/";
   }
 };
 
@@ -17,4 +17,17 @@ export const setSession = (user) => {
 export const clearSession = () => {
   localStorage.removeItem("user");
   logout();
+};
+
+export const validationToken = async () => {
+  const tok = await fetch(`${API}/users/galleta`, {
+    method: "GET",
+    credentials: "include",
+  });
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+  if (!tok.ok || !user || !user.rol) {
+    localStorage.removeItem("user");
+    window.location.href = "/";
+  }
 };

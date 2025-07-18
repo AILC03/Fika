@@ -5,6 +5,8 @@ import {
   Navigate,
   Outlet,
 } from "react-router-dom";
+import { useEffect } from "react";
+import { validationToken } from "../context/setUser";
 import Login from "../views/auth/Login";
 import Sidebar from "../components/sidebar";
 import Home from "../views/home/General";
@@ -12,6 +14,21 @@ import Admin from "../views/home/Admin";
 import Report from "../views/home/Reports";
 
 const AppRouter = () => {
+  useEffect(() => {
+    const handleInteraction = () => {
+      if (window.location.pathname !== "/") {
+        validationToken();
+      }
+    };
+
+    window.addEventListener("click", handleInteraction);
+    window.addEventListener("keydown", handleInteraction);
+
+    return () => {
+      window.removeEventListener("click", handleInteraction);
+      window.removeEventListener("keydown", handleInteraction);
+    };
+  }, []);
   return (
     <BrowserRouter>
       <Routes>
@@ -35,7 +52,7 @@ const ProtectedRoute = () => {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   if (!user || !user.rol) {
-    return <Navigate to="/" />;
+    window.location.href = "/";
   }
 
   const allowedRoutes = {
@@ -53,10 +70,6 @@ const ProtectedRoute = () => {
   const currentPath = window.location.pathname;
 
   if (!isAllowed(currentPath) && currentPath !== "/") {
-    return <Navigate to="/home" />;
-  }
-
-  if (currentPath !== "/" && !isAllowed(currentPath)) {
     return <Navigate to="/home" />;
   }
 
