@@ -1,44 +1,57 @@
 import { useState, useEffect } from "react";
 
-const CantidadesDiarias = ({ selectedDate }) => {
-  const [cantidades, setCantidades] = useState([]);
+const CantidadesDiarias = ({ cakes }) => {
+  const [groupedCakes, setGroupedCakes] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch cantidades cuando cambia la fecha seleccionada
   useEffect(() => {
-    if (selectedDate) {
-      const fetchCantidades = async () => {
-        setLoading(true);
-        try {
-          const response = await fetch(`/api/cantidades?fecha=${selectedDate}`);
-          const data = await response.json();
-          setCantidades(data);
-        } catch (error) {
-          console.error("Error fetching cantidades:", error);
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchCantidades();
+    if (cakes) {
+      setLoading(true);
+      try {
+        // Procesamos los cakes para agruparlos
+        const processed = processCakes(cakes);
+        setGroupedCakes(processed);
+      } catch (error) {
+        console.error("Error processing cakes:", error);
+      } finally {
+        setLoading(false);
+      }
     }
-  }, [selectedDate]);
+  }, [cakes]);
 
-  // Agrupar datos por tipo, línea, sabor y tamaño
-  const groupedData = cantidades.reduce((acc, item) => {
-    item.items.forEach((cakeItem) => {
-      const type = cakeItem.type;
-      const line = cakeItem.line.name;
-      const flavor = cakeItem.flavor?.name || "Sin sabor";
-      const size = cakeItem.size?.name || "N/A";
+  const processCakes = (cakesData) => {
+    const counts = {};
 
-      if (!acc[type]) acc[type] = {};
-      if (!acc[type][line]) acc[type][line] = {};
-      if (!acc[type][line][flavor]) acc[type][line][flavor] = {};
-
-      acc[type][line][flavor][size] = (acc[type][line][flavor][size] || 0) + 1;
+    cakesData.forEach((cake) => {
+      // Manejar pasteles multifloor (pisos)
+      if (cake.itemType === "MULTIFLOOR" && cake.floors?.length > 0) {
+        cake.floors.forEach((floor) => {
+          const key = `MULTIFLOOR-${cake.line.line}-${floor.flavor.flavor}-${floor.size.size}`;
+          counts[key] = (counts[key] || 0) + 1;
+        });
+      }
+      // Manejar cupcakes
+      else if (cake.itemType === "CUPCAKE") {
+        const key = `CUPCAKE-${cake.line.line}-${
+          cake.flavor?.flavor || "Sin sabor"
+        }-${cake.cupcakeQty || 0}`;
+        counts[key] = (counts[key] || 0) + (cake.cupcakeQty || 1);
+      }
+      // Manejar pasteles regulares
+      else {
+        const key = `${cake.itemType}-${cake.line.line}-${
+          cake.flavor?.flavor || "Sin sabor"
+        }-${cake.size?.size || "N/A"}`;
+        counts[key] = (counts[key] || 0) + 1;
+      }
     });
-    return acc;
-  }, {});
+
+    // Convertir el objeto de conteo a un array para renderizar
+    return Object.entries(counts).map(([key, count]) => {
+      const [type, line, flavor, size] = key.split("-");
+      return { type, line, flavor, size, count };
+    });
+  };
 
   return (
     <div className="w-full overflow-x-auto">
@@ -48,8 +61,8 @@ const CantidadesDiarias = ({ selectedDate }) => {
             <th className="py-2 px-4 text-left">Tipo</th>
             <th className="py-2 px-4 text-left">Línea</th>
             <th className="py-2 px-4 text-left">Sabor</th>
-            <th className="py-2 px-4 text-left">Tamaño</th>
-            <th className="py-2 px-4 text-left">Cantidad</th>
+            <th className="py-2 px-4 text-left">Tamaño/Cant</th>
+            <th className="py-2 px-4 text-left">Total</th>
           </tr>
         </thead>
         <tbody>
@@ -59,25 +72,27 @@ const CantidadesDiarias = ({ selectedDate }) => {
                 Cargando...
               </td>
             </tr>
+          ) : groupedCakes.length === 0 ? (
+            <tr>
+              <td colSpan="5" className="text-center py-4">
+                No hay datos disponibles
+              </td>
+            </tr>
           ) : (
-            Object.entries(groupedData).map(([type, lines]) =>
-              Object.entries(lines).map(([line, flavors]) =>
-                Object.entries(flavors).map(([flavor, sizes]) =>
-                  Object.entries(sizes).map(([size, count], idx) => (
-                    <tr
-                      key={`${type}-${line}-${flavor}-${size}`}
-                      className={idx % 2 === 0 ? "bg-yellow-100" : "bg-white"}
-                    >
-                      <td className="py-2 px-4">{type}</td>
-                      <td className="py-2 px-4">{line}</td>
-                      <td className="py-2 px-4">{flavor}</td>
-                      <td className="py-2 px-4">{size}</td>
-                      <td className="py-2 px-4">{count}</td>
-                    </tr>
-                  ))
-                )
-              )
-            )
+            groupedCakes.map((cake, idx) => (
+              <tr
+                key={`${cake.type}-${cake.line}-${cake.flavor}-${cake.size}-${idx}`}
+                className={idx % 2 === 0 ? "bg-yellow-100" : "bg-white"}
+              >
+                <td className="py-2 px-4 capitalize">
+                  {cake.type.toLowerCase()}
+                </td>
+                <td className="py-2 px-4">{cake.line}</td>
+                <td className="py-2 px-4">{cake.flavor}</td>
+                <td className="py-2 px-4">{cake.size}</td>
+                <td className="py-2 px-4 font-bold">{cake.count}</td>
+              </tr>
+            ))
           )}
         </tbody>
       </table>
