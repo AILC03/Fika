@@ -23,24 +23,21 @@ import {
   TextField,
   InputAdornment,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
 } from "@mui/material";
 import {
   Edit,
   Search,
   Person,
   Refresh,
-  Close,
   Cake,
   Layers,
   LooksOne,
+  CalendarToday,
 } from "@mui/icons-material";
-import { LocalizationProvider } from "@mui/x-date-pickers";
+import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import OrderForm from "../OrderManager/OrderForm"; // Asegúrate de tener la ruta correcta
+import { format } from "date-fns";
+import OrderForm from "../OrderManager/OrderForm";
 
 const OrdersTable = () => {
   const API = import.meta.env.VITE_URI;
@@ -49,19 +46,54 @@ const OrdersTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
+  // Función para transformar cakes a items para el formulario
+  const transformCakesToItems = (cakes) => {
+    return (
+      cakes?.map((cake) => {
+        const baseItem = {
+          itemType: cake.itemType,
+          lineId: cake.lineId,
+          flavorId: cake.flavorId,
+          sizeId: cake.sizeId,
+          ingredientsIds: cake.ingredients?.map((ing) => ing.id) || [],
+        };
+
+        // Campos específicos por tipo
+        if (cake.itemType === "NUMERIC") {
+          baseItem.numberShape = cake.numberShape;
+        } else if (cake.itemType === "CUPCAKE") {
+          baseItem.cupcakeQty = cake.cupcakeQty;
+        } else if (cake.itemType === "MULTIFLOOR") {
+          baseItem.floors =
+            cake.floors?.map((floor) => ({
+              flavorId: floor.flavorId,
+              sizeId: floor.sizeId,
+              ingredientsIds: floor.ingredients?.map((ing) => ing.id) || [],
+            })) || [];
+        }
+
+        return baseItem;
+      }) || []
+    );
+  };
+
   // Función para obtener las órdenes
-  const getAllOrders = async () => {
+  const getAllOrdersPickup = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API}/orders/order/getAllorders`, {
-        method: "GET",
+      const response = await fetch(`${API}/orders/order/getOrderPickUp`, {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
+        body: JSON.stringify({
+          pickupDate: selectedDate.toISOString(),
+        }),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -76,12 +108,22 @@ const OrdersTable = () => {
   };
 
   useEffect(() => {
-    getAllOrders();
-  }, []);
+    getAllOrdersPickup();
+  }, [selectedDate]);
+
+  // Manejar cambio de fecha
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+  };
 
   // Manejar apertura del modal de edición
   const handleEditOrder = (order) => {
-    setSelectedOrder(order);
+    const orderForForm = {
+      ...order,
+      items: transformCakesToItems(order.cakes),
+      userId: order.orderUser?.[0]?.userId,
+    };
+    setSelectedOrder(orderForForm);
     setIsModalOpen(true);
   };
 
@@ -89,7 +131,7 @@ const OrdersTable = () => {
   const handleCloseModal = (success) => {
     setIsModalOpen(false);
     if (success) {
-      getAllOrders(); // Recargar órdenes si hubo cambios
+      getAllOrdersPickup(); // Recargar órdenes si hubo cambios
     }
   };
 
@@ -161,7 +203,7 @@ const OrdersTable = () => {
             <ListItemAvatar sx={{ minWidth: 30 }}>
               {item.itemType === "MULTIFLOOR" && <Layers color="primary" />}
               {item.itemType === "NUMERIC" && <LooksOne color="secondary" />}
-              {item.itemType === "CUPCAKE" && <Cake color="error" />}{" "}
+              {item.itemType === "CUPCAKE" && <Cake color="error" />}
               {item.itemType === "REGULAR" && <Cake color="warning" />}
             </ListItemAvatar>
 
@@ -224,8 +266,38 @@ const OrdersTable = () => {
           </Typography>
 
           <Box
-            sx={{ display: "flex", gap: 2, width: isMobile ? "100%" : "auto" }}
+            sx={{
+              display: "flex",
+              gap: 2,
+              width: isMobile ? "100%" : "auto",
+              flexDirection: isMobile ? "column" : "row",
+            }}
           >
+            <DatePicker
+              label="Fecha de recolección"
+              value={selectedDate}
+              onChange={handleDateChange}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  size="small"
+                  sx={{
+                    backgroundColor: "#FFF2C9",
+                    borderRadius: 1,
+                    minWidth: isMobile ? "100%" : 200,
+                  }}
+                  InputProps={{
+                    ...params.InputProps,
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <CalendarToday sx={{ color: "#7E4300" }} />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              )}
+            />
+
             <TextField
               size="small"
               placeholder="Buscar órdenes..."
@@ -247,7 +319,7 @@ const OrdersTable = () => {
 
             <Button
               variant="contained"
-              onClick={getAllOrders}
+              onClick={getAllOrdersPickup}
               startIcon={<Refresh />}
               sx={{
                 backgroundColor: "#FFD538",
@@ -255,11 +327,18 @@ const OrdersTable = () => {
                 "&:hover": {
                   backgroundColor: "#FFC107",
                 },
+                width: isMobile ? "100%" : "auto",
               }}
             >
               Actualizar
             </Button>
           </Box>
+        </Box>
+
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="subtitle1" sx={{ color: "#7E4300" }}>
+            Mostrando órdenes para: {format(selectedDate, "PPPP")}
+          </Typography>
         </Box>
 
         {loading ? (
@@ -329,16 +408,16 @@ const OrdersTable = () => {
                       </TableCell>
                       <TableCell>
                         <Tooltip
-                          title={<ItemsTooltipContent items={order.items} />}
+                          title={<ItemsTooltipContent items={order.cakes} />}
                           arrow
                           placement="top"
                         >
                           <Box>
                             <Typography variant="body2">
-                              {renderOrderItemsSummary(order.items)}
+                              {renderOrderItemsSummary(order.cakes)}
                             </Typography>
                             <Typography variant="caption" color="textSecondary">
-                              {order.items?.length || 0} items
+                              {order.cakes?.length || 0} items
                             </Typography>
                           </Box>
                         </Tooltip>
@@ -412,7 +491,7 @@ const OrdersTable = () => {
                   <TableRow>
                     <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
                       <Typography variant="body1" color="textSecondary">
-                        No se encontraron órdenes
+                        No se encontraron órdenes para esta fecha
                       </Typography>
                     </TableCell>
                   </TableRow>
