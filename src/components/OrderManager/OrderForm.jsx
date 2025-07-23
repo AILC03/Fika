@@ -39,83 +39,149 @@ const OrderForm = ({
   // Función para transformar items al formato de creación (POST)
   const transformItemForCreation = (item) => {
     const baseItem = {
-      lineId: item.lineId,
       itemType: item.itemType,
+      lineId: item.lineId,
+      description: item.description || "",
     };
 
-    // Campos específicos por tipo de item
-    if (item.itemType === "REGULAR") {
-      baseItem.flavorId = item.flavorId;
-      baseItem.sizeId = item.sizeId;
-      if (item.ingredients?.length > 0) {
-        baseItem.ingredients = item.ingredients.map((ing) => ing.id || ing.Id);
-      }
-    } else if (item.itemType === "NUMERIC") {
-      baseItem.flavorId = item.flavorId;
-      baseItem.sizeId = item.sizeId;
-      baseItem.numberShape = item.numberShape;
-    } else if (item.itemType === "CUPCAKE") {
-      baseItem.flavorId = item.flavorId;
-      baseItem.cupcakeQty = item.cupcakeQty;
-      if (item.ingredients?.length > 0) {
-        baseItem.ingredients = item.ingredients.map((ing) => ing.id || ing.Id);
-      }
-    } else if (item.itemType === "MULTIFLOOR") {
-      baseItem.floors = item.floors.map((floor) => ({
-        floorNumber: floor.floorNumber,
-        flavorId: floor.flavorId,
-        sizeId: floor.sizeId,
-        ingredients: floor.ingredients?.map((ing) => ing.id || ing.Id) || [],
-      }));
-    }
+    switch (item.itemType) {
+      case "REGULAR":
+        return {
+          ...baseItem,
+          flavorId: item.flavorId,
+          sizeId: item.sizeId,
+          ingredientsIds:
+            item.ingredients?.map((ing) => ing.id || ing.Id || ing) || [],
+        };
 
-    return baseItem;
+      case "NUMERIC":
+        return {
+          ...baseItem,
+          flavorId: item.flavorId,
+          sizeId: item.sizeId,
+          numberShape: item.numberShape,
+          ingredientsIds:
+            item.ingredients?.map((ing) => ing.id || ing.Id || ing) || [],
+        };
+
+      case "CUPCAKE":
+        return {
+          ...baseItem,
+          flavorId: item.flavorId,
+          cupcakeQty: item.cupcakeQty,
+          ingredientsIds:
+            item.ingredients?.map((ing) => ing.id || ing.Id || ing) || [],
+        };
+
+      case "MULTIFLOOR":
+        return {
+          ...baseItem,
+          floors: item.floors.map((floor) => ({
+            floorNumber: floor.floorNumber,
+            flavorId: floor.flavorId,
+            sizeId: floor.sizeId,
+            ingredientsIds:
+              floor.ingredients?.map((ing) => ing.id || ing.Id || ing) || [],
+          })),
+        };
+
+      default:
+        return baseItem;
+    }
   };
 
   // Función para transformar items al formato de actualización (PUT)
   const transformItemForUpdate = (item) => {
     const baseItem = {
-      lineId: item.lineId,
       itemType: item.itemType,
+      lineId: item.lineId,
     };
 
-    // Campos específicos por tipo de item
-    if (item.itemType === "REGULAR") {
-      baseItem.flavorId = item.flavorId;
-      baseItem.sizeId = item.sizeId;
-      baseItem.ingredients =
-        item.ingredients?.map((ing) => ing.id || ing.Id) || [];
-    } else if (item.itemType === "NUMERIC") {
-      baseItem.flavorId = item.flavorId;
-      baseItem.sizeId = item.sizeId;
-      baseItem.numberShape = item.numberShape;
-    } else if (item.itemType === "CUPCAKE") {
-      baseItem.flavorId = item.flavorId;
-      baseItem.cupcakeQty = item.cupcakeQty;
-      baseItem.ingredients =
-        item.ingredients?.map((ing) => ing.id || ing.Id) || [];
-    } else if (item.itemType === "MULTIFLOOR") {
-      baseItem.floors = item.floors.map((floor) => ({
-        floorNumber: floor.floorNumber,
-        flavorId: floor.flavorId,
-        sizeId: floor.sizeId,
-      }));
-    }
+    switch (item.itemType) {
+      case "REGULAR":
+        return {
+          ...baseItem,
+          flavorId: item.flavorId,
+          sizeId: item.sizeId,
+          ingredientsIds:
+            item.ingredients?.map((ing) => ing.id || ing.Id || ing) || [],
+        };
 
-    return baseItem;
+      case "NUMERIC":
+        return {
+          ...baseItem,
+          flavorId: item.flavorId,
+          sizeId: item.sizeId,
+          numberShape: item.numberShape,
+          ingredientsIds:
+            item.ingredients?.map((ing) => ing.id || ing.Id || ing) || [],
+        };
+
+      case "CUPCAKE":
+        return {
+          ...baseItem,
+          flavorId: item.flavorId,
+          cupcakeQty: item.cupcakeQty,
+          ingredientsIds:
+            item.ingredients?.map((ing) => ing.id || ing.Id || ing) || [],
+        };
+
+      case "MULTIFLOOR":
+        return {
+          ...baseItem,
+          floors: item.floors.map((floor) => ({
+            flavorId: floor.flavorId,
+            sizeId: floor.sizeId,
+            ingredientsIds:
+              floor.ingredients?.map((ing) => ing.id || ing.Id || ing) || [],
+          })),
+        };
+
+      default:
+        return baseItem;
+    }
   };
 
-  // Función para transformar items para edición (cuando se carga un pedido existente)
   const transformItemForEdit = (item) => {
-    return {
-      ...item,
-      ingredients: item.ingredients || [],
-      floors:
-        item.floors?.map((floor) => ({
-          ...floor,
-          ingredients: floor.ingredients || [],
-        })) || [],
+    const transformIngredients = (ingredients) => {
+      if (!ingredients) return [];
+      return ingredients.map((ing) => {
+        // Si el ingrediente es solo un ID (número)
+        if (typeof ing === "number" || typeof ing === "string") {
+          return { id: Number(ing) };
+        }
+        // Si el ingrediente es un objeto
+        return {
+          id: ing.id || ing.Id || ing,
+        };
+      });
     };
+
+    switch (item.itemType) {
+      case "REGULAR":
+      case "NUMERIC":
+      case "CUPCAKE":
+        return {
+          ...item,
+          ingredients: transformIngredients(
+            item.ingredients || item.ingredientsIds || []
+          ),
+        };
+
+      case "MULTIFLOOR":
+        return {
+          ...item,
+          floors: item.floors.map((floor) => ({
+            ...floor,
+            ingredients: transformIngredients(
+              floor.ingredients || floor.ingredientsIds || []
+            ),
+          })),
+        };
+
+      default:
+        return item;
+    }
   };
 
   // Estado del pedido
@@ -222,10 +288,8 @@ const OrderForm = ({
         notes: order.notes,
         status: order.status,
         pickupDate: order.pickupDate,
-        items: order.items.map(transformItemForCreation),
+        items: order.items.map((item) => transformItemForUpdate(item)),
       };
-
-      console.log("Payload a enviar:", payload); // Para depuración
 
       const url = orderToEdit
         ? `${API}/orders/order/updateOrder/${orderToEdit.id}`
@@ -250,7 +314,7 @@ const OrderForm = ({
       setTimeout(() => {
         onOrderSubmit?.(result);
         onClose(true);
-      }, 1500);
+      }, 1000);
     } catch (err) {
       setError(err.message || "Error al guardar el pedido");
     } finally {
@@ -363,7 +427,7 @@ const OrderForm = ({
               <Typography variant="h6" gutterBottom>
                 Resumen del Pedido
               </Typography>
-              <OrderSummary order={order} lines={lines} />
+              <OrderSummary order={order} lines={lines} clients={clients} />
             </Box>
           </>
         )}

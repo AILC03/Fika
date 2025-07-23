@@ -4,7 +4,6 @@ import {
   Box,
   Typography,
   Button,
-  Divider,
   MenuItem,
   Select,
   FormControl,
@@ -25,7 +24,7 @@ const CakesStep = ({ lines, items, onAddItem, onRemoveItem }) => {
   const [cakeType, setCakeType] = useState("REGULAR");
   const [showForm, setShowForm] = useState(false);
 
-  const handleAddCake = (cakeData) => {
+  const handleAddCake = (cakeData) => { // Por aqui pasan todos los pasteles
     onAddItem(cakeData);
     setShowForm(false);
   };

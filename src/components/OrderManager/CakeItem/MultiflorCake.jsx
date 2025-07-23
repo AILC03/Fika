@@ -40,24 +40,24 @@ const MultiflorCake = ({ lines, onSave, onCancel }) => {
   const flavor = availableFlavors.find((f) => f.Id === currentFloor.flavorId);
   const availableIngredients = flavor?.ingredients || [];
 
-  const handleAddFloor = () => {
-    if (!currentFloor.flavorId || !currentFloor.sizeId) return;
+const handleAddFloor = () => {
+  if (!currentFloor.flavorId || !currentFloor.sizeId) return;
 
-    const newFloor = {
-      floorNumber: floors.length + 1,
-      flavorId: currentFloor.flavorId,
-      sizeId: currentFloor.sizeId,
-      ingredients: currentFloor.ingredients,
-    };
-
-    setFloors([...floors, newFloor]);
-    setCurrentFloor({
-      floorNumber: floors.length + 2,
-      flavorId: "",
-      sizeId: "",
-      ingredients: [],
-    });
+  const newFloor = {
+    floorNumber: floors.length + 1,
+    flavorId: currentFloor.flavorId,
+    sizeId: currentFloor.sizeId,
+    ingredients: currentFloor.ingredients, // Asegúrate de que esto se esté llenando
   };
+
+  setFloors([...floors, newFloor]);
+  setCurrentFloor({
+    floorNumber: floors.length + 2,
+    flavorId: "",
+    sizeId: "",
+    ingredients: [],
+  });
+};
 
   const handleRemoveFloor = (index) => {
     const newFloors = floors

@@ -22,12 +22,6 @@ const AppRouter = () => {
     };
 
     window.addEventListener("click", handleInteraction);
-    window.addEventListener("keydown", handleInteraction);
-
-    return () => {
-      window.removeEventListener("click", handleInteraction);
-      window.removeEventListener("keydown", handleInteraction);
-    };
   }, []);
   return (
     <BrowserRouter>

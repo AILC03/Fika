@@ -19,22 +19,29 @@ const RegularCake = ({ lines, onSave, onCancel }) => {
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedIngredients, setSelectedIngredients] = useState([]);
 
-  const line = lines.find((l) => l.Id === selectedLine);
-  const flavor = line?.flavors.find((f) => f.Id === selectedFlavor);
+  // Filtrar líneas disponibles, omitir "CUPCAKES"
+  const availableLines = lines.filter(
+    (line) => line.line.toUpperCase() !== "CUPCAKES" && line.avilable
+  );
 
-  const availableSizes = line?.sizes || [];
-  const availableFlavors = line?.flavors || [];
+  const line = availableLines.find((l) => l.Id === selectedLine);
+  const availableFlavors = (line?.flavors || []).filter((f) => f.avilable);
+  const availableSizes = (line?.sizes || []).filter((s) => s.avilable);
+
+  const flavor = availableFlavors.find((f) => f.Id === selectedFlavor);
   const availableIngredients = flavor?.ingredients || [];
 
   const handleSubmit = () => {
     if (!selectedLine || !selectedFlavor || !selectedSize) return;
+
+    console.log("Ingredientes seleccionados:", selectedIngredients);
 
     onSave({
       lineId: selectedLine,
       itemType: "REGULAR",
       flavorId: selectedFlavor,
       sizeId: selectedSize,
-      ingredients: selectedIngredients,
+      ingredients: selectedIngredients, // IDs enviados correctamente
     });
   };
 
@@ -58,7 +65,7 @@ const RegularCake = ({ lines, onSave, onCancel }) => {
               }}
               label="Línea"
             >
-              {lines.map((line) => (
+              {availableLines.map((line) => (
                 <MenuItem key={line.Id} value={line.Id}>
                   {line.line}
                 </MenuItem>

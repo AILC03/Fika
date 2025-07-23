@@ -1,6 +1,8 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import Logo from "../../Assets/logo1.png";
+import { format } from "date-fns";
+import es from "date-fns/locale/es";
 
 const ReporteDetallado = ({ pedidosSeleccionados }) => {
   const generarPDF = () => {
@@ -13,7 +15,9 @@ const ReporteDetallado = ({ pedidosSeleccionados }) => {
 
     // Configuración inicial
     doc.setProperties({
-      title: `Reporte Detallado de Pedidos - ${new Date().toLocaleDateString()}`,
+      title: `Reporte Detallado de Pedidos - ${format(new Date(), "PPPP", {
+        locale: es,
+      })}`,
       subject: "Reporte de pedidos",
       author: "Pastelería",
       keywords: "pedidos, reporte, pasteles",
@@ -33,9 +37,14 @@ const ReporteDetallado = ({ pedidosSeleccionados }) => {
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(100);
-    doc.text(`Generado el: ${new Date().toLocaleString()}`, 105, 30, {
-      align: "center",
-    });
+    doc.text(
+      `Generado el: ${format(new Date(), "PPPPp", { locale: es })}`,
+      105,
+      30,
+      {
+        align: "center",
+      }
+    );
 
     let yPos = 50;
 
@@ -44,23 +53,27 @@ const ReporteDetallado = ({ pedidosSeleccionados }) => {
       doc.setFontSize(14);
       doc.setTextColor(40);
       doc.setFont("helvetica", "bold");
-      doc.text(`Pedido #${index + 1}`, 14, yPos);
+      doc.text(`Pedido #${pedido.id}`, 14, yPos);
 
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
       yPos += 7;
-      doc.text(`Cliente: ${pedido.customerId}`, 14, yPos);
+      doc.text(`Cliente: ${pedido.client?.fullName || "N/A"}`, 14, yPos);
+      yPos += 7;
+      doc.text(`Teléfono: ${pedido.client?.phone || "N/A"}`, 14, yPos);
       yPos += 7;
       doc.text(
-        `Fecha de creación: ${new Date(pedido.createdat).toLocaleString()}`,
+        `Fecha de creación: ${format(new Date(pedido.createdAt), "PPPPp", {
+          locale: es,
+        })}`,
         14,
         yPos
       );
       yPos += 7;
       doc.text(
-        `Fecha de recolección: ${new Date(
-          pedido.pickupDateTime
-        ).toLocaleString()}`,
+        `Fecha de recolección: ${format(new Date(pedido.pickupDate), "PPPPp", {
+          locale: es,
+        })}`,
         14,
         yPos
       );
@@ -88,51 +101,60 @@ const ReporteDetallado = ({ pedidosSeleccionados }) => {
 
       const rows = [];
 
-      pedido.items.forEach((item) => {
-        if (item.type === "numeric") {
-          item.digits.forEach((digit) => {
+      pedido.cakes.forEach((item) => {
+        const baseRow = {
+          tipo: "",
+          linea: item.line?.line || "N/A",
+          sabor: item.flavor?.flavor || "N/A",
+          tamaño: item.size?.size ? `${item.size.size} pulgadas` : "N/A",
+          ingredientes:
+            item.ingredients?.map((i) => i.name).join(", ") || "N/A",
+          cantidad: "1",
+        };
+
+        switch (item.itemType) {
+          case "NUMERIC":
             rows.push({
-              tipo: "Número " + digit.digit,
-              linea: item.line.name,
-              sabor: digit.flavor.name,
-              tamaño: digit.size.name,
-              ingredientes: digit.flavor.ingredients
-                .map((i) => i.name)
-                .join(", "),
-              cantidad: "1",
+              ...baseRow,
+              tipo: `Número ${item.numberShape}`,
             });
-          });
-        } else if (item.type === "regular") {
-          rows.push({
-            tipo: "Regular",
-            linea: item.line.name,
-            sabor: item.flavor.name,
-            tamaño: item.size.name,
-            ingredientes: item.flavor.ingredients.map((i) => i.name).join(", "),
-            cantidad: "1",
-          });
-        } else if (item.type === "tiered") {
-          item.tiers.forEach((tier, i) => {
+            break;
+          case "REGULAR":
             rows.push({
-              tipo: `Piso ${i + 1}`,
-              linea: item.line.name,
-              sabor: tier.flavor.name,
-              tamaño: tier.size.name,
-              ingredientes: tier.flavor.ingredients
-                .map((i) => i.name)
-                .join(", "),
-              cantidad: "1",
+              ...baseRow,
+              tipo: "Regular",
             });
-          });
-        } else if (item.type === "cupcakes") {
-          rows.push({
-            tipo: "Cupcakes",
-            linea: item.line.id,
-            sabor: item.flavor.name,
-            tamaño: "N/A",
-            ingredientes: item.flavor.ingredients.map((i) => i.name).join(", "),
-            cantidad: item.quantity,
-          });
+            break;
+          case "MULTIFLOOR":
+          case "TIERED":
+          case "PISO":
+          case "PISOS":
+            item.floors?.forEach((floor, i) => {
+              rows.push({
+                linea: item.line?.line || "N/A",
+                sabor: floor.flavor?.name || "N/A",
+                tamaño: floor.size?.name
+                  ? `${floor.size.name} pulgadas`
+                  : "N/A",
+                ingredientes:
+                  floor.ingredients?.map((i) => i.name).join(", ") || "N/A",
+                tipo: `Piso ${i + 1}`,
+                cantidad: "1",
+              });
+            });
+            break;
+          case "CUPCAKE":
+            rows.push({
+              ...baseRow,
+              tipo: "Cupcakes",
+              cantidad: item.cupcakeQty || "1",
+            });
+            break;
+          default:
+            rows.push({
+              ...baseRow,
+              tipo: "Otro",
+            });
         }
       });
 
@@ -159,7 +181,25 @@ const ReporteDetallado = ({ pedidosSeleccionados }) => {
         },
       });
 
+      // Responsables del pedido
       yPos = doc.lastAutoTable.finalY + 10;
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text("Responsables:", 14, yPos);
+      yPos += 7;
+
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      pedido.orderUser?.forEach((orderUser) => {
+        doc.text(
+          `• ${orderUser.user?.name || "N/A"} (${
+            orderUser.user?.rol || "N/A"
+          })`,
+          20,
+          yPos
+        );
+        yPos += 7;
+      });
 
       // Salto de página si no es el último pedido
       if (index < pedidosSeleccionados.length - 1) {
@@ -168,7 +208,9 @@ const ReporteDetallado = ({ pedidosSeleccionados }) => {
       }
     });
 
-    doc.save(`reporte_pedidos_${new Date().toISOString().slice(0, 10)}.pdf`);
+    doc.save(
+      `reporte_pedidos_${format(new Date(), "yyyy-MM-dd", { locale: es })}.pdf`
+    );
   };
 
   return (

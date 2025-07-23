@@ -1,4 +1,5 @@
 import Banner from "../../Assets/Banner1.jpg";
+import Logo from "../../Assets/logo1.png"
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -44,7 +45,7 @@ const Login = () => {
       {/* Sección izquierda */}
       <div className="w-full lg:w-1/2 h-1/2 lg:h-full flex items-center justify-center">
         <img
-          src="/src/Assets/logo1.png"
+          src={Logo}
           alt="Bienvenida"
           className="w-72 h-72 object-contain"
         />

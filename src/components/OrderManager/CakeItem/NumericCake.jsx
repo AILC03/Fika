@@ -1,3 +1,4 @@
+// NumericCake.jsx - Versión corregida
 import { useState } from "react";
 import {
   Box,
@@ -10,6 +11,8 @@ import {
   InputLabel,
   TextField,
   Grid,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 
 const NumericCake = ({ lines, onSave, onCancel }) => {
@@ -17,10 +20,13 @@ const NumericCake = ({ lines, onSave, onCancel }) => {
   const [selectedFlavor, setSelectedFlavor] = useState("");
   const [selectedSize, setSelectedSize] = useState("");
   const [numberShape, setNumberShape] = useState("");
+  const [selectedIngredients, setSelectedIngredients] = useState([]);
 
   const line = lines.find((l) => l.Id === selectedLine);
   const availableFlavors = line?.flavors || [];
   const availableSizes = line?.sizes || [];
+  const flavor = availableFlavors.find((f) => f.Id === selectedFlavor);
+  const availableIngredients = flavor?.ingredients || [];
 
   const handleSubmit = () => {
     if (!selectedLine || !selectedFlavor || !selectedSize || !numberShape)
@@ -32,7 +38,7 @@ const NumericCake = ({ lines, onSave, onCancel }) => {
       flavorId: selectedFlavor,
       sizeId: selectedSize,
       numberShape: numberShape,
-      ingredients: [],
+      ingredients: selectedIngredients,
     });
   };
 
@@ -52,6 +58,7 @@ const NumericCake = ({ lines, onSave, onCancel }) => {
                 setSelectedLine(e.target.value);
                 setSelectedFlavor("");
                 setSelectedSize("");
+                setSelectedIngredients([]);
               }}
               label="Línea"
             >
@@ -69,7 +76,10 @@ const NumericCake = ({ lines, onSave, onCancel }) => {
             <InputLabel>Sabor</InputLabel>
             <Select
               value={selectedFlavor}
-              onChange={(e) => setSelectedFlavor(e.target.value)}
+              onChange={(e) => {
+                setSelectedFlavor(e.target.value);
+                setSelectedIngredients([]);
+              }}
               label="Sabor"
               disabled={!selectedLine}
             >
@@ -109,6 +119,41 @@ const NumericCake = ({ lines, onSave, onCancel }) => {
             required
           />
         </Grid>
+
+        {availableIngredients.length > 0 && (
+          <Grid item xs={12}>
+            <Typography variant="subtitle1" gutterBottom>
+              Ingredientes
+            </Typography>
+            <Box display="flex" flexWrap="wrap" gap={2}>
+              {availableIngredients.map((ingredient) => (
+                <FormControlLabel
+                  key={ingredient.Id}
+                  control={
+                    <Checkbox
+                      checked={selectedIngredients.includes(ingredient.Id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedIngredients([
+                            ...selectedIngredients,
+                            ingredient.Id,
+                          ]);
+                        } else {
+                          setSelectedIngredients(
+                            selectedIngredients.filter(
+                              (id) => id !== ingredient.Id
+                            )
+                          );
+                        }
+                      }}
+                    />
+                  }
+                  label={ingredient.ingredient}
+                />
+              ))}
+            </Box>
+          </Grid>
+        )}
       </Grid>
 
       <Box mt={4} display="flex" justifyContent="flex-end" gap={2}>

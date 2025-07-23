@@ -1,7 +1,10 @@
 import jsPDF from "jspdf";
 import Logo from "../../Assets/logo1.png";
+import { format } from "date-fns";
+import es from "date-fns/locale/es";
 
 const EtiquetasPedidos = ({ pedidosSeleccionados }) => {
+
   const generarEtiquetas = () => {
     if (pedidosSeleccionados.length === 0) {
       alert("Por favor selecciona al menos un pedido");
@@ -15,7 +18,9 @@ const EtiquetasPedidos = ({ pedidosSeleccionados }) => {
 
     // Configuración del documento
     doc.setProperties({
-      title: `Etiquetas de Pasteles - ${new Date().toLocaleDateString()}`,
+      title: `Etiquetas de Pasteles - ${format(new Date(), "PPPP", {
+        locale: es,
+      })}`,
       subject: "Etiquetas para pasteles",
       author: "Pastelería",
       keywords: "etiquetas, pasteles, pedidos",
@@ -35,22 +40,44 @@ const EtiquetasPedidos = ({ pedidosSeleccionados }) => {
     let itemCounter = 0;
 
     pedidosSeleccionados.forEach((pedido) => {
-      // Procesar cada item del pedido
-      pedido.items.forEach((item) => {
+      // Procesar cada cake del pedido
+      pedido.cakes.forEach((cake) => {
         // Para items numéricos, generar una etiqueta por cada dígito
-        if (item.type === "numeric") {
-          item.digits.forEach((digit) => {
+        if (cake.itemType === "NUMERIC") {
+          if (itemCounter > 0 && itemCounter % 4 === 0) {
+            doc.addPage();
+            currentRow = 0;
+            currentCol = 0;
+          }
+
+          generarEtiquetaIndividual(
+            doc,
+            pedido,
+            cake,
+            currentCol * (labelWidth + gap) + margin,
+            currentRow * labelHeight + margin,
+            labelWidth,
+            labelHeight,
+            itemCounter + 1
+          );
+
+          actualizarPosicion();
+        }
+        // Para pasteles multinivel, generar una etiqueta por piso
+        else if (cake.itemType === "MULTIFLOOR") {
+          cake.floors?.forEach((floor, index) => {
             if (itemCounter > 0 && itemCounter % 4 === 0) {
               doc.addPage();
               currentRow = 0;
               currentCol = 0;
             }
 
-            generarEtiquetaIndividual(
+            generarEtiquetaPiso(
               doc,
               pedido,
-              item,
-              digit,
+              cake,
+              floor,
+              index + 1,
               currentCol * (labelWidth + gap) + margin,
               currentRow * labelHeight + margin,
               labelWidth,
@@ -61,7 +88,7 @@ const EtiquetasPedidos = ({ pedidosSeleccionados }) => {
             actualizarPosicion();
           });
         }
-        // Para otros tipos de items, generar una etiqueta por item
+        // Para otros tipos de cakes, generar una etiqueta por item
         else {
           if (itemCounter > 0 && itemCounter % 4 === 0) {
             doc.addPage();
@@ -72,8 +99,7 @@ const EtiquetasPedidos = ({ pedidosSeleccionados }) => {
           generarEtiquetaIndividual(
             doc,
             pedido,
-            item,
-            null,
+            cake,
             currentCol * (labelWidth + gap) + margin,
             currentRow * labelHeight + margin,
             labelWidth,
@@ -89,8 +115,7 @@ const EtiquetasPedidos = ({ pedidosSeleccionados }) => {
     function generarEtiquetaIndividual(
       doc,
       pedido,
-      item,
-      digit,
+      cake,
       x,
       y,
       width,
@@ -111,11 +136,14 @@ const EtiquetasPedidos = ({ pedidosSeleccionados }) => {
       doc.text(`Etiqueta #${counter}`, x + 25, y + 10);
 
       doc.setFont("helvetica", "normal");
-      doc.text(`Cliente: ${pedido.customerId}`, x + 25, y + 15);
+      doc.text(`Pedido: #${pedido.id}`, x + 25, y + 15);
+      doc.text(`Cliente: ${pedido.client?.fullName || "N/A"}`, x + 25, y + 20);
       doc.text(
-        `Recolección: ${new Date(pedido.pickupDateTime).toLocaleString()}`,
+        `Recolección: ${format(new Date(pedido.pickupDate), "PPpp", {
+          locale: es,
+        })}`,
         x + 25,
-        y + 20
+        y + 25
       );
 
       // Alergias
@@ -128,76 +156,55 @@ const EtiquetasPedidos = ({ pedidosSeleccionados }) => {
       doc.text(
         `Alergias: ${pedido.caution ? "SÍ - PRECAUCIÓN" : "NO"}`,
         x + 25,
-        y + 25
+        y + 30
       );
       doc.setTextColor(40);
 
       // Información específica del pastel
       doc.setFontSize(9);
-      let textY = y + 32;
+      let textY = y + 37;
 
       // Línea
-      doc.text(`Línea: ${item.line.name}`, x + 5, textY);
+      doc.text(`Línea: ${cake.line?.line || "N/A"}`, x + 5, textY);
       textY += 5;
 
       // Tipo de pastel
       let tipoPastel = "";
-      if (item.type === "numeric") {
-        tipoPastel = `Número: ${digit.digit}`;
-      } else if (item.type === "regular") {
-        tipoPastel = "Pastel Regular";
-      } else if (item.type === "tiered") {
-        tipoPastel = `Pastel de ${item.tiers.length} pisos`;
-      } else if (item.type === "cupcakes") {
-        tipoPastel = `Cupcakes (${item.quantity} pzs)`;
+      switch (cake.itemType) {
+        case "NUMERIC":
+          tipoPastel = `Número: ${cake.numberShape}`;
+          break;
+        case "REGULAR":
+          tipoPastel = "Pastel Regular";
+          break;
+        case "MULTIFLOOR":
+          tipoPastel = `Pastel de ${cake.floors?.length || 0} pisos`;
+          break;
+        case "CUPCAKE":
+          tipoPastel = `Cupcakes (${cake.cupcakeQty || 1} pzs)`;
+          break;
+        default:
+          tipoPastel = "Pastel";
       }
       doc.text(tipoPastel, x + 5, textY);
       textY += 5;
 
       // Sabor
-      let sabor = "";
-      if (item.type === "numeric") {
-        sabor = `Sabor: ${digit.flavor.name}`;
-      } else if (item.type === "regular") {
-        sabor = `Sabor: ${item.flavor.name}`;
-      } else if (item.type === "tiered") {
-        sabor =
-          "Sabores: " + item.tiers.map((tier) => tier.flavor.name).join(", ");
-      } else if (item.type === "cupcakes") {
-        sabor = `Sabor: ${item.flavor.name}`;
-      }
-      doc.text(sabor, x + 5, textY);
+      doc.text(`Sabor: ${cake.flavor?.flavor || "N/A"}`, x + 5, textY);
       textY += 5;
 
       // Tamaño
-      let tamano = "";
-      if (item.type === "numeric") {
-        tamano = `Tamaño: ${digit.size.name}"`;
-      } else if (item.type === "regular") {
-        tamano = `Tamaño: ${item.size.name}`;
-      } else if (item.type === "tiered") {
-        tamano =
-          "Tamaños: " + item.tiers.map((tier) => tier.size.name).join(", ");
-      } else if (item.type === "cupcakes") {
-        tamano = "Tamaño: Cupcake";
-      }
-      doc.text(tamano, x + 5, textY);
+      doc.text(
+        `Tamaño: ${cake.size?.size ? `${cake.size.size} pulgadas` : "N/A"}`,
+        x + 5,
+        textY
+      );
       textY += 5;
 
       // Ingredientes
-      let ingredientes = "Ingredientes: ";
-      if (item.type === "numeric") {
-        ingredientes += digit.flavor.ingredients.map((i) => i.name).join(", ");
-      } else if (item.type === "regular") {
-        ingredientes += item.flavor.ingredients.map((i) => i.name).join(", ");
-      } else if (item.type === "tiered") {
-        ingredientes += item.tiers
-          .flatMap((tier) => tier.flavor.ingredients.map((i) => i.name))
-          .filter((v, i, a) => a.indexOf(v) === i) // Eliminar duplicados
-          .join(", ");
-      } else if (item.type === "cupcakes") {
-        ingredientes += item.flavor.ingredients.map((i) => i.name).join(", ");
-      }
+      const ingredientes = `Ingredientes: ${
+        cake.ingredients?.map((i) => i.name).join(", ") || "N/A"
+      }`;
 
       if (ingredientes.length > 30) {
         // Dividir ingredientes largos en múltiples líneas
@@ -211,7 +218,104 @@ const EtiquetasPedidos = ({ pedidosSeleccionados }) => {
       doc.setFontSize(6);
       doc.setTextColor(100);
       doc.text(
-        `Impreso: ${new Date().toLocaleString()}`,
+        `Impreso: ${format(new Date(), "PPpp", { locale: es })}`,
+        x + 5,
+        y + height - 5
+      );
+    }
+
+    function generarEtiquetaPiso(
+      doc,
+      pedido,
+      cake,
+      floor,
+      pisoNum,
+      x,
+      y,
+      width,
+      height,
+      counter
+    ) {
+      // Marco de la etiqueta
+      doc.setDrawColor(200);
+      doc.rect(x, y, width, height);
+
+      // Logo
+      doc.addImage(Logo, "PNG", x + 5, y + 5, 15, 15);
+
+      // Información del pedido
+      doc.setFontSize(10);
+      doc.setTextColor(40);
+      doc.setFont("helvetica", "bold");
+      doc.text(`Etiqueta #${counter}`, x + 25, y + 10);
+
+      doc.setFont("helvetica", "normal");
+      doc.text(`Pedido: #${pedido.id}`, x + 25, y + 15);
+      doc.text(`Cliente: ${pedido.client?.fullName || "N/A"}`, x + 25, y + 20);
+      doc.text(
+        `Recolección: ${format(new Date(pedido.pickupDate), "PPpp", {
+          locale: es,
+        })}`,
+        x + 25,
+        y + 25
+      );
+
+      // Alergias
+      if (pedido.caution) {
+        doc.setTextColor(231, 76, 60);
+      } else {
+        doc.setTextColor(40, 40, 40);
+      }
+
+      doc.text(
+        `Alergias: ${pedido.caution ? "SÍ - PRECAUCIÓN" : "NO"}`,
+        x + 25,
+        y + 30
+      );
+      doc.setTextColor(40);
+
+      // Información específica del piso
+      doc.setFontSize(9);
+      let textY = y + 37;
+
+      // Línea
+      doc.text(`Línea: ${cake.line?.line || "N/A"}`, x + 5, textY);
+      textY += 5;
+
+      // Tipo de pastel
+      doc.text(`Pastel Multinivel - Piso ${pisoNum}`, x + 5, textY);
+      textY += 5;
+
+      // Sabor
+      doc.text(`Sabor: ${floor.flavor?.name || "N/A"}`, x + 5, textY);
+      textY += 5;
+
+      // Tamaño
+      doc.text(
+        `Tamaño: ${floor.size?.name ? `${floor.size.name} pulgadas` : "N/A"}`,
+        x + 5,
+        textY
+      );
+      textY += 5;
+
+      // Ingredientes
+      const ingredientes = `Ingredientes: ${
+        floor.ingredients?.map((i) => i.name).join(", ") || "N/A"
+      }`;
+
+      if (ingredientes.length > 30) {
+        // Dividir ingredientes largos en múltiples líneas
+        const lines = doc.splitTextToSize(ingredientes, width - 10);
+        doc.text(lines, x + 5, textY);
+      } else {
+        doc.text(ingredientes, x + 5, textY);
+      }
+
+      // Fecha de impresión
+      doc.setFontSize(6);
+      doc.setTextColor(100);
+      doc.text(
+        `Impreso: ${format(new Date(), "PPpp", { locale: es })}`,
         x + 5,
         y + height - 5
       );
@@ -226,7 +330,11 @@ const EtiquetasPedidos = ({ pedidosSeleccionados }) => {
       }
     }
 
-    doc.save(`etiquetas_pasteles_${new Date().toISOString().slice(0, 10)}.pdf`);
+    doc.save(
+      `etiquetas_pasteles_${format(new Date(), "yyyy-MM-dd", {
+        locale: es,
+      })}.pdf`
+    );
   };
 
   return (

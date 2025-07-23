@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -8,14 +8,7 @@ const Calendar = ({ onDateSelect }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
   const pressTimer = useRef(null);
-
-  // Obtener usuario del localStorage
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    user && setCurrentUser(user);
-  }, []);
 
   // Navegación entre meses
   const handlePrevMonth = () => {

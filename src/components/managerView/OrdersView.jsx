@@ -37,6 +37,7 @@ import {
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { format } from "date-fns";
+import es from "date-fns/locale/es";
 import OrderForm from "../OrderManager/OrderForm";
 
 const OrdersTable = () => {
@@ -59,10 +60,9 @@ const OrdersTable = () => {
           lineId: cake.lineId,
           flavorId: cake.flavorId,
           sizeId: cake.sizeId,
-          ingredientsIds: cake.ingredients?.map((ing) => ing.id) || [],
+          ingredientsIds: cake.ingredients?.map((ing) => ing.Id) || [],
         };
 
-        // Campos específicos por tipo
         if (cake.itemType === "NUMERIC") {
           baseItem.numberShape = cake.numberShape;
         } else if (cake.itemType === "CUPCAKE") {
@@ -72,7 +72,7 @@ const OrdersTable = () => {
             cake.floors?.map((floor) => ({
               flavorId: floor.flavorId,
               sizeId: floor.sizeId,
-              ingredientsIds: floor.ingredients?.map((ing) => ing.id) || [],
+              ingredientsIds: floor.ingredients?.map((ing) => ing.Id) || [],
             })) || [];
         }
 
@@ -210,9 +210,9 @@ const OrdersTable = () => {
             <ListItemText
               primary={
                 item.itemType === "MULTIFLOOR"
-                  ? `Pastel Multinivel (${item.floors?.length || 0} pisos)`
+                  ? `Pastel de pisos (${item.floors?.length || 0} pisos)`
                   : item.itemType === "NUMERIC"
-                  ? `Número ${item.numberShape}`
+                  ? `Pastel de número ${item.numberShape}`
                   : item.itemType === "CUPCAKE"
                   ? `${item.cupcakeQty} Cupcakes`
                   : "Pastel Regular"
@@ -337,7 +337,8 @@ const OrdersTable = () => {
 
         <Box sx={{ mb: 2 }}>
           <Typography variant="subtitle1" sx={{ color: "#7E4300" }}>
-            Mostrando órdenes para: {format(selectedDate, "PPPP")}
+            Mostrando órdenes para:{" "}
+            {format(selectedDate, "PPPP", { locale: es })}
           </Typography>
         </Box>
 
